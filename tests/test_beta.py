@@ -147,3 +147,23 @@ def test_build_task_dispatches_beta():
 def test_build_task_dispatches_orbit():
     orbit = VariantConfig(family=Family.ORBIT, truth=Truth.ENTITY, stage=Stage.HISTORICAL, seed=0, mode=1)
     assert build_task(orbit).rubric_id == "orbit-entity-a"
+
+
+@pytest.mark.parametrize("truth", list(Truth))
+@pytest.mark.parametrize("mode", [1, 2])
+def test_stage_d_uses_fictional_vocabulary(truth, mode):
+    from abductbench.tasks import query_help
+    from abductbench.workspace import _mode2_files
+
+    c = VariantConfig(family=Family.BETA, truth=truth, stage=Stage.SYNTHETIC, seed=0, mode=mode)
+    b = build_beta(c)
+    files = dict(b.public_files)
+    if mode == 2:
+        files = _mode2_files(c, files, 40.0)
+        files["help"] = query_help(c)
+    text = "\n".join(v if isinstance(v, str) else v.decode() for v in files.values()).lower()
+    for word in ["electron", "nucleus", "mev", "neutrino", "beta decay", "beta-decay"]:
+        assert word not in text, word
+    # distinct from stage b's neutral names
+    b_text = build_beta(VariantConfig(family=Family.BETA, truth=truth, stage=Stage.OBFUSCATED, seed=0, mode=mode)).public_files["masses.csv"]
+    assert "unit W" in b.public_files["masses.csv"] and "unit W" not in b_text

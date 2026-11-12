@@ -1,7 +1,8 @@
 """Beta-decay task generator.
 
 All physics is computed internally in MeV. Public files and the truth law use
-public units (MeV for stages a, c, d; "unit U" = 0.5 MeV for stage b).
+public units (MeV for stages a and c; "unit U" = 0.5 MeV for stage b; "unit W" = 1 MeV for the
+fictional stage d).
 """
 
 from __future__ import annotations
@@ -47,6 +48,8 @@ class _Setup:
     def names(self) -> dict[str, str]:
         if self.renamed:
             return {"parent": "source S", "daughter": "product D", "light": "particle A", "unit": "unit U"}
+        if self.stage is Stage.SYNTHETIC:  # fictional vocabulary, distinct from stage b's names
+            return {"parent": "emitter V", "daughter": "remnant R", "light": "quantum Y", "unit": "unit W"}
         return {"parent": "parent nucleus", "daughter": "daughter nucleus", "light": "electron", "unit": "MeV"}
 
 
@@ -108,6 +111,10 @@ def _raw_entity(T: np.ndarray, s: _Setup) -> np.ndarray:
 
 
 def _raw_no_entity(T: np.ndarray, s: _Setup, thickness: float = 1.0) -> np.ndarray:
+    # Degeneracy by design: the artifact line shape depends only on Q, sigma and the thickness. The
+    # stage-specific constants (m_X in stage c, k in stage d) enter only the entity truth, so the
+    # no_entity physics of beta stages a, c and d is the same artifact (only the vocabulary, the
+    # light-particle mass and Q/sigma of the pair differ). Not redesigned in this wave.
     # thickness scales the energy-loss tail (length and weight); 1.0 is the generator's nominal target.
     Q, sig = s.Q, s.sigma
     lam = 0.1 * Q * thickness
@@ -260,7 +267,8 @@ def _masses_csv(s: _Setup) -> str:
 def _task_md(s: _Setup) -> str:
     n = s.names
     Q = s.Q / s.scale
-    return f"""# Task: beta-decay energy spectrum
+    title = "energy spectrum of a decay" if s.stage is Stage.SYNTHETIC else "beta-decay energy spectrum"
+    return f"""# Task: {title}
 
 A {n["parent"]} at rest decays into a {n["daughter"]} and an {n["light"]}.
 For a two-body decay with energy and momentum conservation, the prediction is that the
@@ -366,12 +374,13 @@ def row_count(query_type: str, args: dict) -> int | None:
 
 def query_help(cfg: VariantConfig) -> str:
     """Lines for task.md describing the beta query types (no truth-revealing content)."""
+    light = _setup(cfg).names["light"]
     return "\n".join(
         [
             "- `events` (cost 1 per 50 rows, rounded up), optional `n` (integer 1 to 500, default 100): "
             f"new events from the same measurement, columns {', '.join(EVENT_COLUMNS)} in the units of `events.csv`.",
             "- `recoil_correlation` (cost 5), optional `n` (integer 1 to 500, default 200): statistics "
-            "comparing electron and recoil momenta for `n` new events, plus a sample of 10 rows.",
+            f"comparing {light} and recoil momenta for `n` new events, plus a sample of 10 rows.",
             "- `target_thickness_scan` (cost 8), no arguments: energy spectrum summaries at three "
             "target thicknesses.",
             "Pricing: `events` costs 1 unit per block of 50 events, or part of a block. 50 or fewer events "
