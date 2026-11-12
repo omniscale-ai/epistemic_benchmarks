@@ -118,7 +118,7 @@ def test_missing_outputs_recorded_not_raised(tmp_path):
     assert rec.transcript_path.is_file()
 
 
-def test_helper_modules_copied_but_public_files_not(tmp_path):
+def test_helper_modules_copied_and_public_py_modules_too_but_not_listed(tmp_path):
     c = cfg()
     ws = tmp_path / "ws"
     ws.mkdir()
@@ -130,7 +130,8 @@ def test_helper_modules_copied_but_public_files_not(tmp_path):
     assert (dest / "law.py").is_file()
     assert (dest / "helper_mod.py").is_file()
     assert (dest / "changed.py").is_file()
-    assert not (dest / "public.py").exists()
+    # an unchanged public module is copied (law.py may import it) but is not the agent's helper
+    assert (dest / "public.py").is_file()
     assert not (dest / "task.md").exists()
     assert sorted(p.name for p in rec.helper_paths) == ["changed.py", "helper_mod.py"]
 

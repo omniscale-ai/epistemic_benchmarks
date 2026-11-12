@@ -331,10 +331,12 @@ def run_agent(
     for src in sorted(workspace.glob("*.py")):
         if src.name == LAW_NAME or src.is_symlink() or not src.is_file():
             continue
-        if before.get(src.name) == _digest(src):
-            continue  # public file, untouched by the agent
         copied = _collect(src, dest / src.name)
-        if copied is not None:
+        if copied is None:
+            continue
+        # Public modules the task ships (e.g. t0_model.py) are copied too: law.py may import them
+        # at evaluation time. Only new or changed files count as the agent's own helpers.
+        if before.get(src.name) != _digest(src):
             helper_paths.append(copied)
 
     return RunRecord(
