@@ -408,7 +408,7 @@ def _true_mechanism(u: _Universe, truth: Truth) -> dict:
     """Ground-truth mechanism in public units (GM as in known_bodies.csv; k, n as in task.md)."""
     if truth is Truth.ENTITY:
         return {"kind": "hidden_body", "a": float(u.elements[PERT - 1, 0]), "mass": float(u.mu_base[PERT]),
-                "tolerance": {"a_factor": 1.3}}
+                "tolerance": {"q_rel": 0.75}}
     return {"kind": "force_law", "n": float(u.n), "k": float(u.k), "tolerance": {"n_abs": 0.25, "k_rel": 0.3}}
 
 
@@ -449,7 +449,8 @@ Write a Python module `law.py` that defines:
 - `MECHANISM`: a module-level dict with your hypothesis about the cause of the deviation. Its `kind`
   must be exactly one of:
   - `"hidden_body"`, with keys `a` (semi-major axis, in {dunit}; a circular coplanar orbit is fine)
-    and `mass` (GM, expressed as in the GM column of `known_bodies.csv`);
+    and `mass` (GM, expressed as in the GM column of `known_bodies.csv`); this hypothesis is judged
+    by the strength of the pull it exerts, `mass / a^2`;
   - `"force_law"`, with keys `n` and `k`: an additional radial acceleration of k / r^n directed toward
     the central star ({star}), with r the distance from the star in {dunit} and the acceleration in
     {dunit} per {tunit}^2;

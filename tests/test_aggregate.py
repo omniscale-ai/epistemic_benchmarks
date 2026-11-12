@@ -583,7 +583,8 @@ def test_mechanism_fields_end_to_end(tmp_path):
     assert s.law_status == "ok" and s.mech_status == "bad" and s.mech_kind_ok is False
     crash = "MECHANISM = {'kind': 'hidden_carriers', 'n_carriers': 1, 'mass': 0.0}\ndef law(t):\n    raise ValueError\n"
     s = evaluate_run(cfg, record_for(cfg, law_path=write_law(tmp_path / "c", crash)), oracle_cache={}, use_judge=False)
-    assert s.law_status == "crash" and s.mech_status == "missing" and s.mech_kind_ok is False
+    # law crashes inside law(): the mechanism axis is scored independently of the prediction axis.
+    assert s.law_status == "crash" and s.mech_status == "ok" and s.mech_kind_ok is True and s.mech_params_ok is True
     s = evaluate_run(cfg, record_for(cfg), oracle_cache={}, use_judge=False)
     assert s.mech_status == "missing" and s.mech_kind_ok is False
     json.dumps(dataclasses.asdict(s))

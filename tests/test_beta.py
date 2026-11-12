@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 
 import numpy as np
 import pytest
@@ -240,3 +241,39 @@ def test_stage_d_uses_fictional_vocabulary(truth, mode):
     # distinct from stage b's neutral names
     b_text = build_beta(VariantConfig(family=Family.BETA, truth=truth, stage=Stage.OBFUSCATED, seed=0, mode=mode)).public_files["masses.csv"]
     assert "unit W" in b.public_files["masses.csv"] and "unit W" not in b_text
+
+
+@pytest.mark.parametrize("truth", list(Truth))
+def test_thickness_scan_refers_only_to_public_window(truth):
+    from abductbench.tasks.beta import SCAN_BINS, SCAN_EVENTS, WINDOW, query
+
+    c = cfg(truth)
+    Q = q_of(build_beta(c))
+    r = query(c, "target_thickness_scan", {"_n": 0})
+    assert set(r) == {"units", "bin_edges", "summaries"}
+    edges = r["bin_edges"]
+    assert len(edges) == SCAN_BINS + 1
+    assert (edges[0], edges[-1]) == pytest.approx((WINDOW[0] * Q, WINDOW[1] * Q), rel=1e-6)
+    keys = {"thickness", "n_events", "mean", "std", "line_fraction", "tail_fraction", "histogram"}
+    for sm in r["summaries"]:
+        assert set(sm) == keys  # same shape for both truths; no n_in_window
+        assert sm["n_events"] == SCAN_EVENTS
+        assert sum(sm["histogram"]) == SCAN_EVENTS  # every counted event is inside the window
+        assert edges[0] <= sm["mean"] <= edges[-1]
+        assert 0.0 <= sm["line_fraction"] <= 1.0 and 0.0 <= sm["tail_fraction"] <= 1.0
+        assert sm["line_fraction"] + sm["tail_fraction"] <= 1.0
+
+
+@pytest.mark.parametrize("truth", list(Truth))
+def test_thickness_scan_exposes_nothing_of_held_out_bands(truth):
+    from abductbench.tasks.beta import WINDOW, query
+
+    c = cfg(truth)
+    Q = q_of(build_beta(c))
+    r = query(c, "target_thickness_scan", {"_n": 0})
+    floats = list(r["bin_edges"]) + [sm[k] for sm in r["summaries"] for k in ("mean", "std")]
+    assert all(WINDOW[0] * Q - 1e-9 <= x <= WINDOW[1] * Q + 1e-9 for x in floats if x > 0.2 * Q)
+    assert min(r["bin_edges"]) >= WINDOW[0] * Q - 1e-9
+    text = json.dumps(r).lower()
+    for word in ("entity", "neutrino", "truth", "hidden", "n_in_window", "held"):
+        assert word not in text

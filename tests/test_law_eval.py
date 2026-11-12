@@ -347,8 +347,44 @@ def test_mechanism_missing_is_none_and_law_still_ok(tmp_path):
     assert r.status == "ok" and r.mechanism is None and r.nrmse_in is not None
 
 
-@pytest.mark.parametrize("bad", ["[1, 2]", "'hidden_body'", "{'kind': object()}", "{1: 2}", "{'a': float('nan')}"])
+@pytest.mark.parametrize("bad", ["[1, 2]", "'hidden_body'", "{'kind': object()}", "{1: 2}", "{'kind': 'hidden_body', 'x': object()}"])
 def test_mechanism_malformed_keeps_law_ok(tmp_path, bad):
     r = evaluate_law(bundle_for(Family.ORBIT), write_law(tmp_path, zeros_source(f"MECHANISM = {bad}")))
     assert r.status == "ok" and r.nrmse_in is not None
     assert r.mechanism == {"__malformed__": True}
+
+
+def test_mechanism_nan_in_extra_key_is_mapped_to_none_not_malformed(tmp_path):
+    r = evaluate_law(bundle_for(Family.ORBIT), write_law(
+        tmp_path, zeros_source("MECHANISM = {'kind': 'hidden_body', 'a': 9.0, 'mass': 1.0, 'x': float('nan')}")))
+    assert r.status == "ok"
+    assert r.mechanism == {"kind": "hidden_body", "a": 9.0, "mass": 1.0, "x": None}
+
+
+MECH_SRC = "MECHANISM = {'kind': 'hidden_body', 'a': 9.0, 'mass': 1.0}\n"
+
+
+def test_mechanism_kept_when_law_nonfinite(tmp_path):
+    src = ("import numpy as np\n" + MECH_SRC + "def law(t):\n    t = np.asarray(t, dtype=float)\n"
+           "    return np.where(t > 11, np.nan, 0.0)\n")
+    r = evaluate_law(bundle_for(Family.ORBIT), write_law(tmp_path, src))
+    assert r.status == "nonfinite" and r.mechanism == {"kind": "hidden_body", "a": 9.0, "mass": 1.0}
+
+
+def test_mechanism_kept_when_law_raises_inside_law(tmp_path):
+    src = "import numpy as np\n" + MECH_SRC + "def law(t):\n    raise RuntimeError('boom')\n"
+    r = evaluate_law(bundle_for(Family.ORBIT), write_law(tmp_path, src))
+    assert r.status == "crash" and r.mechanism == {"kind": "hidden_body", "a": 9.0, "mass": 1.0}
+
+
+def test_mechanism_kept_when_law_bad_shape(tmp_path):
+    src = "import numpy as np\n" + MECH_SRC + "def law(t):\n    return np.zeros(3)\n"
+    r = evaluate_law(bundle_for(Family.ORBIT), write_law(tmp_path, src))
+    assert r.status == "bad_shape" and r.mechanism == {"kind": "hidden_body", "a": 9.0, "mass": 1.0}
+
+
+@pytest.mark.parametrize("src", ["MECHANISM = {'kind': 'hidden_body'}\nraise RuntimeError('import boom')\n",
+                                 "MECHANISM = {\ndef law(t): pass\n"])
+def test_mechanism_missing_when_module_cannot_be_imported(tmp_path, src):
+    r = evaluate_law(bundle_for(Family.ORBIT), write_law(tmp_path, src))
+    assert r.status == "crash" and r.mechanism is None

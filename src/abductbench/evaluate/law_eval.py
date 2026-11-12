@@ -62,8 +62,9 @@ def _plain(v):
     if v is None or isinstance(v, (bool, int, str)):
         return v
     if isinstance(v, float):
+        # NaN/inf (e.g. in an unscored extra key) must not make the whole MECHANISM malformed.
         if v != v or v in (float("inf"), float("-inf")):
-            raise ValueError("nonfinite")
+            return None
         return v
     raise TypeError(type(v).__name__)
 
@@ -116,7 +117,7 @@ def main():
         write("crash", traceback.format_exc())
         return
     domain = read_domain(mod)
-    mechanism = read_mechanism(mod)
+    mechanism = read_mechanism(mod)  # read BEFORE law() is called, so every later failure keeps it
     fn = getattr(mod, "law", None)
     if not callable(fn):
         write("crash", "law.py does not define a callable `law`", domain, mechanism)
@@ -180,8 +181,8 @@ def _trim(text: str) -> str:
     return marker + text[-(DETAIL_LIMIT - len(marker)):]
 
 
-def _fail(status: Status, detail: str) -> LawResult:
-    return LawResult(status=status, detail=_trim(detail))
+def _fail(status: Status, detail: str, mechanism: dict | None = None) -> LawResult:
+    return LawResult(status=status, detail=_trim(detail), mechanism=mechanism)
 
 
 def _kill_group(proc: subprocess.Popen) -> None:
@@ -337,7 +338,9 @@ def evaluate_law(bundle: TaskBundle, law_path: Path, timeout_s: float = 20.0) ->
             if forced == "crash":
                 return _fail("crash", detail)
             if result["status"] != "ok":
-                return _fail(result["status"], result["detail"])
+                # The child reads MECHANISM before calling law(), so the mechanism axis is kept
+                # whenever the child got that far (it is None for import-time failures).
+                return _fail(result["status"], result["detail"], result.get("mechanism"))
             pred_in = np.load(out_dir / "pred_in_range.npy", allow_pickle=False)
             pred_ex = np.load(out_dir / "pred_extrapolation.npy", allow_pickle=False)
             nrmse_in, nrmse_ex = score_predictions(bundle, pred_in, pred_ex)

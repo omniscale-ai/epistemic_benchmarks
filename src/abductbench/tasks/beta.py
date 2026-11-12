@@ -453,23 +453,28 @@ def _thickness_scan(cfg: VariantConfig, s: _Setup, call: int) -> dict:
     for th in THICKNESS_LEVELS:
         # Independent measurement noise per thickness; the underlying shape is shared.
         rng = _query_rng(cfg, _QUERY_TAG["target_thickness_scan"], call, sub=int(round(th * 10)))
-        T_true = _sample_truth_mev(cfg.truth, s, rng, SCAN_EVENTS, thickness=th)
-        if cfg.truth is Truth.ENTITY:
-            T_obs = T_true + rng.normal(0.0, s.sigma, size=T_true.shape)
-        else:
-            T_obs = T_true  # resolution is already part of the line shape
-        inside = (T_obs >= lo) & (T_obs <= hi)
-        kept = T_obs[inside]
+        # Same windowing as `_events`: sample, smear, truncate to the public window. Nothing
+        # outside [lo, hi] is counted or returned, for either truth.
+        parts, got = [], 0
+        while got < SCAN_EVENTS:
+            T_true = _sample_truth_mev(cfg.truth, s, rng, 2 * SCAN_EVENTS, thickness=th)
+            if cfg.truth is Truth.ENTITY:
+                T_obs = T_true + rng.normal(0.0, s.sigma, size=T_true.shape)
+            else:
+                T_obs = T_true  # resolution is already part of the line shape
+            keep = T_obs[(T_obs >= lo) & (T_obs <= hi)]
+            parts.append(keep)
+            got += keep.size
+        kept = np.concatenate(parts)[:SCAN_EVENTS]
         counts, _ = np.histogram(kept, bins=edges_mev)
         summaries.append(
             {
                 "thickness": float(th),
                 "n_events": int(SCAN_EVENTS),
-                "n_in_window": int(inside.sum()),
-                "mean": float(np.mean(kept) / scale) if kept.size else None,
-                "std": float(np.std(kept) / scale) if kept.size else None,
-                "line_fraction": float(np.mean(np.abs(T_obs - s.Q) <= 3 * s.sigma)),
-                "tail_fraction": float(np.mean(T_obs < s.Q - 3 * s.sigma)),
+                "mean": float(np.mean(kept) / scale),
+                "std": float(np.std(kept) / scale),
+                "line_fraction": float(np.mean(np.abs(kept - s.Q) <= 3 * s.sigma)),
+                "tail_fraction": float(np.mean(kept < s.Q - 3 * s.sigma)),
                 "histogram": [int(c) for c in counts],
             }
         )

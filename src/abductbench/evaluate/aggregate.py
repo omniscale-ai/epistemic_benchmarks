@@ -176,10 +176,9 @@ def evaluate_run(
             except (OSError, ValueError, KeyError, TypeError):
                 disc = 0.0
 
-    if law.status == "ok":
-        mech = score_mechanism(bundle.true_mechanism, law.mechanism)
-    else:
-        mech = score_mechanism(bundle.true_mechanism, None)
+    # The mechanism axis is scored independently of the prediction axis: law.mechanism is None
+    # (-> "missing") when law.py could not be imported or timed out.
+    mech = score_mechanism(bundle.true_mechanism, law.mechanism)
     mech_errors = json.dumps(mech.param_errors, sort_keys=True) if mech.param_errors else None
 
     return RunScores(

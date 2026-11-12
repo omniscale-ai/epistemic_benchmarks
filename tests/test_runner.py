@@ -314,3 +314,11 @@ def test_launch_uses_agent_env_on_path(tmp_path):
     assert rc == 0 and not timed_out
     first, pp = (ws / "probe.txt").read_text().split("|")
     assert first == str(venv / "bin") and pp == "none"
+
+
+def test_prompt_says_law_is_called_across_and_beyond_data_window():
+    text = build_agent_prompt(cfg())
+    assert "once on points inside DOMAIN" not in text
+    assert "across the data window" in text and "beyond it" in text
+    assert "finite values everywhere in the data window" in text
+    assert "DOMAIN is your own statement of where the law applies" in text

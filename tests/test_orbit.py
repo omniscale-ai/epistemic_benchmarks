@@ -146,7 +146,7 @@ def test_true_mechanism_per_truth_and_stage():
         u = _universe(cfg(Truth.ENTITY, stage))
         m = _bundle(Truth.ENTITY, stage).true_mechanism
         assert m == {"kind": "hidden_body", "a": pytest.approx(u.elements[4, 0]), "mass": pytest.approx(u.mu_base[5]),
-                     "tolerance": {"a_factor": 1.3}}
+                     "tolerance": {"q_rel": 0.75}}
         mn = _bundle(Truth.NO_ENTITY, stage).true_mechanism
         assert mn["kind"] == "force_law" and mn["n"] == _SPECS[stage].n_corr and mn["k"] > 0
         assert mn["tolerance"] == {"n_abs": 0.25, "k_rel": 0.3}
