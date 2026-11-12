@@ -1,0 +1,153 @@
+name,kind,path,year,age_months,citations_s2,github_stars,arxiv,doi,repo
+SWE-bench,card,benchmarks_general.md,2023,37,4885,6180,2310.06770,,SWE-bench/SWE-bench
+GPQA,card,benchmarks_general.md,2023,36,3949,549,2311.12022,,idavidrein/gpqa
+Coscientist (Nature),card,benchmarks_general.md,2023,,1591,214,,10.1038/s41586-023-06792-0,gomesgroup/coscientist
+ChemCrow,card,benchmarks_general.md,2023,43,1490,971,2304.05376,,ur-whitelab/chemcrow-public
+AI Feynman / Feynman Symbolic Regression Database (FSReD),info,ai-feynman/info.md,2019,90,1489,785,1905.11481,,SJ001/AI-Feynman
+MLE-bench,card,benchmarks_general.md,2024,25,578,1798,2410.07095,,openai/mle-bench
+The AI Scientist-v2,card,benchmarks_general.md,2025,19,515,7501,2504.08066,,SakanaAI/AI-Scientist-v2
+MLAgentBench,card,benchmarks_general.md,2023,37,461,360,2310.03302,,snap-stanford/MLAgentBench
+ScienceWorld,card,benchmarks_general.md,2022,56,439,409,2203.07540,,allenai/ScienceWorld
+PaperBench,card,benchmarks_general.md,2025,19,393,1340,2504.01848,,openai/frontier-evals
+LiveBench,card,benchmarks_general.md,2024,29,313,1355,2406.19314,,LiveBench/LiveBench
+ScienceAgentBench,info,scienceagentbench/info.md,2024,25,312,184,2410.05080,,OSU-NLP-Group/ScienceAgentBench
+RE-Bench,card,benchmarks_general.md,2024,24,221,171,2411.15114,,METR/RE-Bench
+SciCode,card,benchmarks_general.md,2024,28,220,246,2407.13168,,scicode-bench/SciCode
+Coscientist (препринт),card,benchmarks_general.md,2023,43,198,,2304.05332,,
+CORE-Bench,card,benchmarks_general.md,2024,26,158,80,2409.11363,,siegelz/core-bench
+Rediscovering orbital mechanics,card,benchmarks_general.md,2022,57,152,,2202.02306,,
+DSBench,card,benchmarks_general.md,2024,26,147,131,2409.07703,,LiqiangJing/DSBench
+BixBench,card,benchmarks_general.md,2025,20,137,153,2503.00096,,Future-House/BixBench
+DiscoveryWorld,info,discoveryworld/info.md,2024,29,136,229,2406.06769,,allenai/discoveryworld
+MLGym / MLGym-Bench,card,benchmarks_general.md,2025,21,129,625,2502.14499,,facebookresearch/MLGym
+DiscoveryBench,info,discoverybench/info.md,2024,28,124,167,2407.01725,,allenai/discoverybench
+QRData,card,benchmarks_general.md,2024,33,105,49,2402.17644,,xxxiaol/QRData
+BLADE,info,blade/info.md,2024,27,105,40,2408.09667,,behavioral-data/BLADE
+LLM-SRBench,info,llm-srbench/info.md,2025,19,98,132,2504.10415,,deep-symbolic-mathematics/llm-srbench
+OMNI-EPIC,card,benchmarks_general.md,2024,30,89,83,2405.15568,,maxencefaldor/omni-epic
+ResearchBench,card,benchmarks_general.md,2025,20,72,,2503.21248,,
+SRSD (SRSD-Feynman),info,srsd/info.md,2022,53,65,44,2206.10540,,omron-sinicx/srsd-benchmark
+PHYBench,card,benchmarks_general.md,2025,19,60,,2504.16074,,
+EXP-Bench,card,benchmarks_general.md,2025,18,48,373,2505.24785,,Just-Curieous/Curie
+HypoBench,info,hypobench/info.md,2025,19,47,9,2504.11524,,ChicagoHAI/HypoBench-code
+SDE (Scientific Discovery Evaluation),info,sde-benchmark/info.md,2025,11,46,65,2512.15567,,HowieHwong/sde-harness
+NewtonBench,info,newtonbench/info.md,2025,13,40,164,2510.07172,,HKUST-KnowComp/NewtonBench
+MLRC-Bench,card,benchmarks_general.md,2025,19,34,12,2504.09702,,yunx-z/MLRC-Bench
+BoxingGym,info,boxinggym/info.md,2025,22,28,13,2501.01540,,kanishkg/boxing-gym
+AI scientists produce results without reasoning scientifically (Corral),info,ai-scientists-without-reasoning/info.md,2026,7,24,21,2604.18805,10.5281/zenodo.19659851,lamalab-org/corral
+PhysGym,info,physgym/info.md,2025,16,21,103,2507.15550,,principia-ai/PhysGym
+CodeARC,info,codearc/info.md,2025,20,21,28,2503.23145,,Anjiang-Wei/CodeARC
+Collider-Bench,card,benchmarks_general.md,2026,6,20,10,2605.13950,,dfaroughy/Collider-Bench
+PaperArena,card,benchmarks_general.md,2025,13,19,18,2510.10909,,ustc-ai4science/PaperArena
+FIRE-Bench,info,fire-bench/info.md,2026,9,18,16,2602.02905,,maitrix-org/FIRE-Bench
+Gravity-Bench-v1,info,gravity-bench/info.md,2025,22,18,6,2501.18411,,NolanKoblischke/GravityBench
+Auto-Discovery-Bench (ранее Auto-Bench),info,auto-discovery-bench/info.md,2025,21,18,,2502.15224,,
+Causal narratives,card,benchmarks_general.md,2024,25,18,,2410.23884,,
+"How Far Are AI Scientists from Changing the World? (обзор, не бенчмарк)",card,benchmarks_general.md,2025,16,17,317,2507.23276,,ResearAI/Awesome-AI-Scientist
+SciAgentGym / SciAgentBench,card,benchmarks_general.md,2026,9,17,,2602.12984,,
+LABBench2,card,benchmarks_general.md,2026,7,15,67,2604.09554,,EdisonScientific/labbench2
+DiscoverPhysics,info,discoverphysics/info.md,2026,6,15,32,2605.26087,,SampsonML/DiscoverPhysics
+OneLife (One Life to Learn),info,onelife/info.md,2025,13,15,8,2510.12088,,codezakh/onelife
+HeurekaBench,card,benchmarks_general.md,2026,10,14,23,2601.01678,,mlbio-epfl/HeurekaBench
+AstroVisBench,card,benchmarks_general.md,2025,18,14,14,2505.20538,,NSF-Simons-CosmicAI-Institute/AstroVisBench
+SLDBench / SLDAgent (Can Language Models Discover Scaling Laws?),info,scaling-law-discovery/info.md,2025,16,13,37,2507.21184,,linhaowei1/SLD
+BioDSA-1K,card,benchmarks_general.md,2025,18,12,106,2505.16100,,RyanWangZf/BioDSA
+FEM-Bench,card,benchmarks_general.md,2025,11,12,10,2512.20732,10.1007/s00366-026-02397-z,elejeune11/FEM-bench
+SUPERChem,card,benchmarks_general.md,2025,11,12,,2512.01274,,
+AutumnBench (WorldTest),info,autumnbench/info.md,2025,13,11,2,2510.19788,10.5281/zenodo.19498269,BasisResearch/MARAProtocol
+CausaLab,info,causalab/info.md,2026,6,10,,2605.26029,,DylanZSZ/CausaLab-Benchmark
+ASI-Bench,card,benchmarks_general.md,2026,3,9,303,2608.17271,,apexin-ai/ASI-Bench
+ReplicationBench,card,benchmarks_general.md,2025,13,9,11,2510.24591,,Christine8888/replicationbench-release
+Feature World + текстовый Alchemy (Can foundation models actively gather information… / Exploring exploration with foundation agents),info,active-hypothesis-testing/info.md,2024,23,9,,2412.06438,,
+Replica / Faraday,card,benchmarks_general.md,2026,3,9,,2608.13331,,
+Feature World + Alchemy,card,benchmarks_general.md,2024,23,9,,2412.06438,,
+HypoSpace,info,hypospace/info.md,2025,13,8,17,2510.15614,,CTT-Pavilion/_HypoSpace
+gwBenchmarks,card,benchmarks_general.md,2026,6,8,3,2605.11269,,tousifislam/gwBenchmarks
+ScienceIDE,info,scienceide/info.md,2026,2,7,104,2609.19134,,aitofound/ScienceIDE
+DatasetResearch,card,benchmarks_general.md,2025,15,7,23,2508.06960,,GAIR-NLP/DatasetResearch
+BixBench3,card,benchmarks_general.md,2026,3,7,15,2608.25286,,EdisonScientific/BixBench3
+BenchEvolver / LiveCodeBench-Plus,card,benchmarks_general.md,2026,5,7,14,2606.01286,,thu-wyz/BenchEvolver
+PatchWorld,card,benchmarks_general.md,2026,6,7,10,2605.30880,,HKBU-KnowComp/PatchWorld
+Science-Gym,info,science-gym/info.md,2026,,7,3,,10.1007/s10994-025-06914-x,Pibborn/Science-gym
+MineExplorer,card,benchmarks_general.md,2026,6,6,30,2605.30931,,meituan-longcat/MineExplorer
+Абстрактное рассуждение через переназначение символов (Γ / Δ),card,benchmarks_general.md,2025,18,6,8,2505.23833,,MAC-AutoML/abstract-reason-benchmark
+"Correct Answer, Wrong Mechanism (CAWM)",info,correct-answer-wrong-mechanism/info.md,2026,5,6,2,2606.23175,,seulig/g4_agent_icml_2026
+CFDLLMBench (CFD-LLMBench),card,benchmarks_general.md,2025,14,5,50,2509.20374,,NLR-Theseus/cfdllmbench
+CoDA-Bench,card,benchmarks_general.md,2026,5,5,45,2606.15300,,ruc-datalab/CoDA-Bench
+ReX-MLE,card,benchmarks_general.md,2025,11,5,10,2512.17838,,rajpurkarlab/ReX-MLE
+EviGraph,card,benchmarks_general.md,2026,3,5,,2608.04738,,
+DiG-bench,info,dig-bench/info.md,2026,3,4,30,2608.12593,,discos-research/dig-bench
+D3-Gym,info,d3-gym/info.md,2026,7,4,13,2604.27977,,OSU-NLP-Group/D3-Gym
+Stargazer,info,stargazer/info.md,2026,7,4,12,2604.15664,,AIPS-UofT/Stargazer
+ClosureBench (и метод SCOPE),info,closurebench/info.md,2026,1,4,,2610.18938,,
+SciDisco / SciThèque,card,benchmarks_general.md,2026,4,4,,2607.28990,,
+TruthInsightBench,info,truthinsightbench/info.md,2026,2,3,3,2609.05079,,TruthInsight-stack/TruthInsightBench
+Solution Injection,card,benchmarks_general.md,2026,7,3,,2604.17609,,
+K-Bench 01,card,benchmarks_general.md,2026,3,3,,2608.21601,,
+EurekaBench,info,eurekabench/info.md,2026,1,2,37,2610.00492,,EurekaBench/EurekaBench
+Autonomous Science Bench (AS-Bench),info,autonomous-science-bench/info.md,2026,1,2,11,2610.18449,,Yibo-Wen/as-bench
+SciLaws-Bench,info,scilaws-bench/info.md,2026,2,2,10,2609.01552,,yiyihum/SciLaws-Bench
+PACE-Bench,card,benchmarks_general.md,2026,3,2,8,2608.14441,,thunlp/PACE-Bench
+SurfaceBench,info,surfacebench/info.md,2025,12,2,6,2511.10833,,deep-symbolic-mathematics/surfacebench
+VisualPatchWorld,card,benchmarks_general.md,2026,4,2,4,2607.25236,,HKBU-KnowComp/VisualPatchWorld
+LatentGym,info,latentgym/info.md,2026,5,2,2,2606.15306,,namkoong-lab/LatentGym
+HypoArena (HypoData + HypoEval),info,hypoarena/info.md,2026,4,2,1,2607.15766,,SKYLENAGE-AI/HypoArena
+DataGovBench,card,benchmarks_general.md,2026,4,2,0,2607.06482,,SoHasegawa/datagovbench
+Evidence-grounded accuracy (EGA),info,evidence-grounded-accuracy/info.md,2026,1,2,,2610.04915,,
+Sheaf-Theoretic Transport and Obstruction (transition cards),info,sheaf-theory-shift/info.md,2026,6,2,,2605.14033,,
+CascadeBench,card,benchmarks_general.md,2026,6,2,,2605.12178,,
+UTQA,card,benchmarks_general.md,2025,15,2,,2508.21452,,
+SciTableQA,card,benchmarks_general.md,2025,,2,,,10.1007/978-3-032-05409-8_7,
+ChemWorld,card,benchmarks_general.md,2026,3,1,50,2608.10792,,sunyrain/ChemWorld-Public
+ExplorationBench,info,explorationbench/info.md,2026,2,1,28,2609.30199,,Tencent-Hunyuan/ExplorationBench
+EmbodiedLab,card,benchmarks_general.md,2026,1,1,20,2610.35385,,HexaFuture/EmbodiedLab
+CompMat-Bench,card,benchmarks_general.md,2026,1,1,10,2610.00636,,cz2014/CompMat-Bench
+"LUCA (+ «Treating the Symptom, Missing the Cause»)",info,luca/info.md,2026,0,1,5,2611.03100,,RelationRx/luca
+Open-Endedness Bench (OEB),info,open-endedness-bench/info.md,2026,1,1,3,2610.02588,,ARA-Labs/oeb
+WhatWorkedBench,info,whatworkedbench/info.md,2026,2,1,3,2609.27490,,EthanNing/WhatWorkedBench
+InfiniteScienceGym,info,infinitesciencegym/info.md,2026,7,1,2,2604.13201,,utahnlp/infinite-science-gym
+MechBench,info,mechbench/info.md,2026,2,1,2,2609.35515,,tsinghua-fib-lab/MechBench
+DataSense-Bench,card,benchmarks_general.md,2026,1,1,0,2610.12190,,DataSense-Bench/DataSense-Bench
+DPDisc / DPForge,card,benchmarks_general.md,2025,13,1,0,2510.21737,,ibm/data-product-benchmark
+SDABench («Are LLMs Ready for Scientific Discovery?»),info,capability-benchmark-ai-scientists/info.md,2026,4,1,,2607.11079,,
+MUSES,card,benchmarks_general.md,2026,2,1,,2609.00313,,
+SciCodePile,card,benchmarks_general.md,2026,4,1,,2607.19104,,
+SABench-agent (Gen2Bench),card,benchmarks_general.md,2026,,1,,,10.64898/2026.07.05.736638,yiqunchen/Gen2Bench
+Matter to Mechanism,card,benchmarks_general.md,2026,5,1,,2606.02258,,
+PaperBenchX,card,benchmarks_general.md,2026,1,0,46,2610.39744,,UniPat-AI/PaperBenchX
+LongChang,info,longchang/info.md,2026,1,0,13,2610.37649,,EnVision-Research/LongChang
+EarthVerse,card,benchmarks_general.md,2026,3,0,13,2608.23525,,CuiZHIQ/Earth-Verse
+SciR,info,scir/info.md,2026,5,0,10,2606.13020,,idiap/scir
+AdaExploreBench,info,adaexplorebench/info.md,2026,1,0,6,2610.25950,,HKUST-KnowComp/AdaExploreBench
+SciExam for ENSO,info,sciexam-enso/info.md,2026,1,0,4,2610.10513,,ylzhang2447/SciExam-ENSO-code
+Parallel Physical Worlds (PhysLit),info,parallel-physical-worlds/info.md,2026,4,0,2,2607.00276,,dongzhang84/physlit
+SciGame,info,scigame/info.md,2026,1,0,2,2610.37919,,yushengzh/scigame
+Witness (WitnessBench / WitnessGym),info,witness/info.md,2026,2,0,2,2609.32208,,fleet-ai/witnessbench
+SCI-AGENT-EXAM,card,benchmarks_general.md,2026,1,0,2,2610.32441,,SKYLENAGE-AI/Sci-Agent-Exam
+ACED-Bench,info,aced-bench/info.md,2026,1,0,0,2610.14381,,Rose-STL-Lab/ACED-Bench
+Alien Abduction (active-abduction-probe),info,active-abduction-probe/info.md,2026,3,0,0,2608.03388,,mohiuddinshahrukh/Alien-Abduction
+ChemArgus,card,benchmarks_general.md,2026,1,0,0,2610.20012,,YunQi572/ChemArgus
+Paper2Bench (spatial alignment),card,benchmarks_general.md,2026,0,0,0,2611.11796,,Y-Chen-LAB/spatial-alignment-agent
+F1 / MTG,card,benchmarks_general.md,2026,3,0,0,2608.03569,,WilliamBolton/f1-ai-scientist-paper
+BioStudyBench,info,biostudybench/info.md,2026,1,0,,2610.07614,,
+CME-SpectrumBench,info,cme-spectrumbench/info.md,2026,1,0,,2610.24304,,
+ERBench,info,erbench/info.md,2026,5,0,,2606.09276,,
+MechHypoBench (From Scientific Observations to Mechanisms),info,obs-to-mechanisms/info.md,2026,1,0,,2610.05197,,
+Learning to Outgrow a Theory (Joint Edit–Experiment),info,outgrow-a-theory/info.md,2026,1,0,,2610.07627,,
+Synthetic Universes,info,synthetic-universes/info.md,2026,2,0,,2609.36726,,
+UltraDiscovery,info,ultradiscovery/info.md,2026,1,0,,2610.03092,,
+Unsatz,info,unsatz/info.md,2026,0,0,,2611.03713,,
+ArtifactArena,card,benchmarks_general.md,2026,1,0,,2610.06511,,
+LEGION,card,benchmarks_general.md,2026,0,0,,2611.11896,,legion-security/legion-bench
+Selecting LLM-Generated Hypotheses…,card,benchmarks_general.md,2026,0,0,,2611.00643,,
+CrashGym,card,benchmarks_general.md,2026,1,0,,2610.29245,,
+EvoBelief,card,benchmarks_general.md,2026,1,0,,2610.12789,,
+EnterpriseWorldShift,card,benchmarks_general.md,2026,2,0,,2609.19551,,
+CASSANDRA,card,benchmarks_general.md,2026,10,0,,2601.18620,,
+PersonaScienceBench,card,benchmarks_general.md,2026,1,0,,2610.32106,,
+POSEIDON / PEARL,card,benchmarks_general.md,2026,1,0,,2610.32448,,
+ST-Bench,card,benchmarks_general.md,2026,1,0,,2610.07763,,
+ClinLens,card,benchmarks_general.md,2026,4,0,,2607.26155,,
+NanoGPT-speedrun env,card,benchmarks_general.md,2025,11,0,,2512.11183,,
+Model-aware benchmark generation (MDPI MAKE),card,benchmarks_general.md,2025,,0,,,10.3390/make7040148,
+CausalVerify,card,benchmarks_general.md,2026,2,0,,2609.07944,,

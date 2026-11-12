@@ -1,5 +1,8 @@
 # CodeARC
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **21** · ★ GitHub — **28** ([Anjiang-Wei/CodeARC](https://github.com/Anjiang-Wei/CodeARC)) · возраст ≈20 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2503.23145v2 (PDF, 8 Aug 2025, «Published as a conference paper at COLM 2025», 20 стр. с приложением A.1–A.3). Полный текст прочитан, включая приложение. Репозиторий склонирован (коммит `32f2a1e`, 2025-09-29) и прочитан без запуска: `src/evaluate.py`, `src/invocators.py`, `src/utils.py`, `src/compute_metrics.py`, `differential_testing/*`, `prompts.yaml`. Ссылки на разделы и таблицы ниже даны по v2.
 
 - **Статья:** «CodeARC: Benchmarking Reasoning Capabilities of LLM Agents for Inductive Program Synthesis». Anjiang Wei, Tarun Suresh, Jiannan Cao, Naveen Kannan, Yuheng Wu, Kai Yan, Thiago S. F. X. Teixeira, Ke Wang, Alex Aiken (Stanford, UIUC, MIT, Intel, Nanjing University). COLM 2025 (OpenReview `Q5pVZCrrKr`). arXiv: https://arxiv.org/abs/2503.23145 (прочитана v2).

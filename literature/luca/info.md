@@ -1,5 +1,8 @@
 # LUCA (+ «Treating the Symptom, Missing the Cause»)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1** · ★ GitHub — **5** ([RelationRx/luca](https://github.com/RelationRx/luca)) · возраст ≈0 мес.
+
+
 Источники (проверено 2026-11-12): две парные статьи одной группы об одной и той же среде LUCA. Обе прочитаны полностью по PDF v2 (5 Nov 2026), включая приложения. (1) arXiv 2611.03100v2 «LUCA: A Synthetic World for Experimental Reasoning», 20 стр. с приложениями A–E. (2) arXiv 2611.04473v2 «Treating the Symptom, Missing the Cause: Anatomy of a Scientific Reasoning Failure», 18 стр. с приложениями A–B. Вторая статья — **компаньон**: прямо ссылается на первую как на [15] («the LUCA environment»), использует те же 60 disease-организмов (N=20, medium-конфигурация по размеру) и те же 420 сессий семи LLM, а потом добавляет оракульный анализ траекторий и пробы. Ниже «L» означает статью LUCA, «T» — статью Treating the Symptom. Репозиторий склонирован (HEAD 9725b5b, 2026-11-12), код не запускался.
 
 - **Статья (L):** Anna Gogleva (lead, corresponding), Thomas Charman, Martin Balla, Karl Gemayel; Relation Therapeutics. NeurIPS 2026 Workshop «Evaluation of Interactive Agents». https://arxiv.org/abs/2611.03100 (v2).

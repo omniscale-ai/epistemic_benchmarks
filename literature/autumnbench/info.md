@@ -1,5 +1,8 @@
 # AutumnBench (WorldTest)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **11** · ★ GitHub — **2** ([BasisResearch/MARAProtocol](https://github.com/BasisResearch/MARAProtocol)) · возраст ≈13 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2510.19788v4 (PDF, 7 May 2026, 34 стр. с приложениями A–F; версии v1 от 22.10.2025, v2, v3, v4). Полный текст v4 прочитан, включая приложения C (формальные определения задач), D (интерфейсы и промпты), E (оракул и случайный агент), F (доп. результаты). Склонирован и просмотрен репозиторий BasisResearch/MARAProtocol (код не запускался). Ссылки на разделы ниже даны по v4.
 
 - **Статья:** «Benchmarking World-Model Learning with Environment-Level Queries». Archana Warrier, Thanh Dat Nguyen, Michelangelo Naim, Moksh Jain, Yichao Liang, Karen Schroeder, Cambridge Yang, Joshua B. Tenenbaum, Sebastian Vollmer, Kevin Ellis, Zenna Tavares. Аффилиации: Basis Research Institute (все, кроме трёх), DFKI, Harvard, Université de Montréal / Mila, Cambridge, MIT, Cornell. Препринт, оформлен по шаблону ICML (Impact Statement), площадка в статье не указана. arXiv: https://arxiv.org/abs/2510.19788 (прочитана v4).

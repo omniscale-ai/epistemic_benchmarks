@@ -1,5 +1,8 @@
 # SciGame
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **2** ([yushengzh/scigame](https://github.com/yushengzh/scigame)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.37919v1 (PDF и HTML, 27 Oct 2026, 22 стр. с приложениями A–D, Tables 1–9). Полный текст прочитан, включая приложения. Репозиторий склонирован (коммит e673733 от 2026-11-03) и просмотрен без запуска: карточки задач, мутации, оценщик, фиксированный дизайн, бэкенд Codex. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «SciGame: Let Agents Play the Scientific Discovery Games in the Real and Counterfactual World». Yusheng Zhao, Bowei He, Xue Liu (MBZUAI; Liu также McGill), Mingxiao Li (Shanghai AI Lab). Препринт, площадка не указана (формат ACL-подобный, есть раздел Limitations). arXiv: https://arxiv.org/abs/2610.37919 (v1).

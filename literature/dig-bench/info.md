@@ -1,5 +1,8 @@
 # DiG-bench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **4** · ★ GitHub — **30** ([discos-research/dig-bench](https://github.com/discos-research/dig-bench)) · возраст ≈3 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2608.12593v2 (PDF, 27 Oct 2026, 18 стр. с приложениями A–D; v1 от 12 Aug 2026, различия v1→v2 не сверялись). Полный текст прочитан целиком, включая приложения. Дополнительно просмотрены репозиторий `discos-research/dig-bench` (коммит d88405f от 2026-08-12) и сайт digbench.ai, включая данные лидерборда, встроенные в JS-бандл сайта. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «DiG-bench: Discovery in Games». Ruairidh M. Battleday, Kai Sandbrink, Jimi Cullen-Drohan, Zihan Yan, Timothy Muller, Clare Maguire, Ales Kubicek, Fraser Greenlee-Scott, Sukrit Sumant, Tri Dao, Jürgen Schmidhuber, Michal Valko, Joshua Tenenbaum, Thomas L. Griffiths, Zeb Kurth-Nelson, James C.R. Whittington. Аффилиации: Prefrontal (prefrontal.ai, основная команда), Oxford, Princeton, KAUST, Swiss AI Lab (IDSIA), Inria, MIT. Технический отчёт, площадка не указана. arXiv: https://arxiv.org/abs/2608.12593 (лицензия arXiv nonexclusive-distrib).

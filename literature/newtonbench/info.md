@@ -1,5 +1,8 @@
 # NewtonBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **40** · ★ GitHub — **164** ([HKUST-KnowComp/NewtonBench](https://github.com/HKUST-KnowComp/NewtonBench)) · возраст ≈13 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2510.07172v3 (PDF, 24 Feb 2026, «Published as a conference paper at ICLR 2026»), клон репозитория `HKUST-KnowComp/NewtonBench` (HEAD `912a4ba`, 2026-02-27), GitHub API. Ссылки на разделы ниже — на v3.
 
 - **Статья:** «NewtonBench: Benchmarking Generalizable Scientific Law Discovery in LLM Agents». Tianshi Zheng*, Kelvin Kiu-Wai Tam*, Newt Hue-Nam K. Nguyen*, Baixuan Xu, Zhaowei Wang, Jiayang Cheng, Hong Ting Tsang, Weiqi Wang, Jiaxin Bai, Tianqing Fang, Yangqiu Song† (HKUST), Ginny Y. Wong, Simon See (NVIDIA). ICLR 2026 (poster). arXiv: https://arxiv.org/abs/2510.07172 (v1 08.10.2025, v2 09.12.2025, v3 24.02.2026).

@@ -1,5 +1,8 @@
 # Synthetic Universes
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.36726v1 (PDF, 19 страниц, 29 Sep 2026; HTML-версия тоже доступна и совпадает с v1). Других версий на arXiv нет. Полный текст прочитан, включая приложения A–H; рисунки 2, 7, 8 просмотрены как изображения. Ссылки на разделы ниже — на v1.
 
 - **Статья:** «Can AI Scientists Change Their Minds? Prior–Evidence Conflict in Synthetic Universes». Kargi Chauhan (единственный автор), University of California, Santa Cruz. Сноска на с. 1: «Submitted to the AI for Science workshop (NeurIPS 2026)», то есть это подача на воркшоп, о принятии данных нет. arXiv: https://arxiv.org/abs/2609.36726 (v1, 29.09.2026, cs.AI).

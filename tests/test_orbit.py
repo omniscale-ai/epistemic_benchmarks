@@ -9,6 +9,9 @@ from abductbench.config import Family, Stage, Truth, VariantConfig
 from abductbench.tasks import build_task
 from abductbench.tasks.orbit import (
     DT_YR,
+    EXT_YR,
+    _SPECS,
+    _accel,
     _energy,
     _initial_state,
     _longitudes,
@@ -72,6 +75,91 @@ def test_task_md_states_signature_and_domain_keys():
     assert b.rubric_id == "orbit-entity-a"
     assert b.discriminating_queries == frozenset({"search_region", "other_body_residuals"})
     assert _bundle(Truth.NO_ENTITY, Stage.SYNTHETIC).rubric_id == "orbit-no_entity-d"
+
+
+KINDS = ['"hidden_body"', '"force_law"', '"other"']
+
+
+def _mech_section(md):
+    i = md.index("`MECHANISM`")
+    return md[i:]
+
+
+def test_task_md_mechanism_section_identical_kinds():
+    for stage in Stage:
+        e = _bundle(Truth.ENTITY, stage).public_files["task.md"]
+        n = _bundle(Truth.NO_ENTITY, stage).public_files["task.md"]
+        assert _mech_section(e) == _mech_section(n)
+        sec = _mech_section(e)
+        for kind in KINDS:
+            assert kind in sec
+        assert "k / r^n" in sec and "checked automatically" in sec and "GM column" in sec
+
+
+def test_eval_points_extent_40_years():
+    assert EXT_YR == 40.0
+    for stage in Stage:
+        for truth in Truth:
+            b = _bundle(truth, stage)
+            ep = b.eval_points()
+            tick = _SPECS[stage].tick_yr
+            assert ep.in_range[-1] * tick == pytest.approx(10.0)
+            assert ep.extrapolation[0] * tick > 10.0
+            assert ep.extrapolation[-1] * tick == pytest.approx(40.0)
+            assert np.all(np.isfinite(b.truth_law(ep.extrapolation)))
+
+
+def test_truth_law_accurate_over_40_years():
+    # compare the spline against a run with half the step on the truth row
+    for truth in Truth:
+        c = cfg(truth)
+        u = _universe(c)
+        b = _bundle(truth)
+        mu = np.stack([u.mu_base.copy(), u.mu_base.copy()])
+        mu[0, 5] = 0.0
+        k = np.zeros(2)
+        if truth is Truth.NO_ENTITY:
+            mu[1, 5] = 0.0
+            k[1] = u.k
+        x0, v0 = _initial_state(u.mu_base, u.elements)
+        X, _ = _run(mu, np.stack([x0, x0]), np.stack([v0, v0]), k, u.n, u.dt / 2, 2 * u.n_steps(EXT_YR))
+        res = _residuals(_longitudes(X))[:, 0, u.target_planet]
+        t = np.arange(len(res)) * u.dt / 2
+        sel = slice(0, None, 37)
+        assert np.max(np.abs(res[sel] - b.truth_law(t[sel]))) < 0.01 * max(1.0, np.max(np.abs(res)))
+
+
+def test_energy_conserved_40_years():
+    for truth in Truth:
+        u = _universe(cfg(truth))
+        mu = u.mu_base.copy()[None, :]
+        mu[0, 5] = 0.0
+        x0, v0 = _initial_state(u.mu_base, u.elements)
+        k = np.array([u.k if truth is Truth.NO_ENTITY else 0.0])
+        X, V = _run(mu, x0[None], v0[None], k, u.n, u.dt, u.n_steps(EXT_YR))
+        E = _energy(mu, k, u.n, X, V)[:, 0]
+        assert np.max(np.abs(E - E[0])) / abs(E[0]) < 1e-6
+
+
+def test_true_mechanism_per_truth_and_stage():
+    for stage in Stage:
+        u = _universe(cfg(Truth.ENTITY, stage))
+        m = _bundle(Truth.ENTITY, stage).true_mechanism
+        assert m == {"kind": "hidden_body", "a": pytest.approx(u.elements[4, 0]), "mass": pytest.approx(u.mu_base[5])}
+        mn = _bundle(Truth.NO_ENTITY, stage).true_mechanism
+        assert mn["kind"] == "force_law" and mn["n"] == _SPECS[stage].n_corr and mn["k"] > 0
+
+
+def test_force_law_declaration_matches_generator_term():
+    for stage in Stage:
+        u = _universe(cfg(Truth.NO_ENTITY, stage))
+        mech = _bundle(Truth.NO_ENTITY, stage).true_mechanism
+        for r in (0.5 * u.elements[0, 0], 2.0 * u.elements[3, 0]):
+            # star at the origin, one massless test body on the x axis at distance r
+            X = np.array([[[0.0, 0.0], [r, 0.0]]])
+            mu = np.array([[1e-30, 0.0]])  # gravity negligible
+            ext = _accel(X, mu, np.array([u.k]), u.n)[0, 1, 0]
+            assert ext == pytest.approx(-mech["k"] / r ** mech["n"], rel=1e-12)
 
 
 def test_build_task_dispatches_to_orbit():

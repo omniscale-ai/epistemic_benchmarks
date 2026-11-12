@@ -1,5 +1,8 @@
 # Evidence-grounded accuracy (EGA)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **нет репо** · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): полный текст arXiv 2610.04915v1 (PDF, 4 Oct 2026, 22 стр. с приложениями A–I; HTML-версия на arxiv.org тоже v1, других версий нет). Прочитано целиком, включая приложения. Это не бенчмарк, а методическая работа: протокол аудита существующих бенчмарков. Поэтому разделы ниже адаптированы («Устройство задач» описывает протокол и переоценённые задачи). Ссылки на разделы, таблицы и приложения даны по v1.
 
 - **Статья:** «Are We Measuring Scientific Intelligence? Rethinking the Evaluation of AI Scientists». Kate Zhang\*, Yuante Li\* (School of Computer Science, Carnegie Mellon University). \*Равный вклад, других авторов нет. Площадка: NeurIPS 2026, Workshop «Agentic AI for Biological Discovery» (сноска на стр. 1). arXiv: https://arxiv.org/abs/2610.04915 (v1, лицензия статьи CC BY 4.0).

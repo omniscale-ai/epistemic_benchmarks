@@ -1,5 +1,8 @@
 # Unsatz
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈0 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2611.03713v1 (PDF, 31 Oct 2026, «Preprint», 35 стр. с приложениями A–M; HTML-версия на arxiv.org тоже v1, других версий нет). Полный текст прочитан, включая приложения. Кода нет: в статье сказано, что генератор, оценщик, seed оценённых миров, промпты и записи всех 896 эпизодов «will be released» (Reproducibility Statement). Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Unsatz: Evaluating Scientific Discovery Without a Given Ansatz». Ethan Ji, Wei Wang, Yizhou Sun (Department of Computer Science, UCLA). Других авторов нет, «et al.» в запросе лишнее. Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2611.03713 (v1 от 31.10.2026, лицензия статьи CC BY 4.0).

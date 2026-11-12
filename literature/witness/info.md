@@ -1,5 +1,8 @@
 # Witness (WitnessBench / WitnessGym)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **2** ([fleet-ai/witnessbench](https://github.com/fleet-ai/witnessbench)) · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.32208v1 (PDF, 26 Sep 2026, 25 стр. с приложениями A.1–A.8; HTML-версия на arxiv.org та же v1, других версий нет). Полный текст прочитан, включая приложения. Дополнительно просмотрены сайт https://witnessbench.ai (лидерборд v2.0 и changelog) и репозиторий `fleet-ai/witnessbench` (коммит 678d557 от 28.10.2026: README, `docs/`, `data/`). Код не запускался. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Witness: Discovery, Deciphering, and Epiphany in Interactive Puzzle Environments». Guanghan Ning (руководитель проекта), Ping Liu, Linyi Li, Huangjie Zheng, Arjun Neervannan, Huu Nguyen, Michael Sklar, Deniz Zorlu, Nicolai Ouporov. Аффилиации: Fleet AI (большинство авторов), University of Nevada, Reno, Simon Fraser University, независимый автор. Препринт, площадка не указана (оформление в стиле ICLR). arXiv: https://arxiv.org/abs/2609.32208 (v1).

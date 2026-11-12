@@ -1,5 +1,8 @@
 # SurfaceBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **6** ([deep-symbolic-mathematics/surfacebench](https://github.com/deep-symbolic-mathematics/surfacebench)) · возраст ≈12 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2511.10833v2 (PDF, 2 Mar 2026, 26 стр. с приложениями A.1–A.7). Полный текст прочитан, включая приложения. v1 от 13 Nov 2025 называлась «SURFACEBENCH: Can Self-Evolving LLMs Find the Equations of 3D Scientific Surfaces?» (страница arXiv, README репозитория). Код склонирован (коммит 619bcb0 от 23.03.2026) и прочитан, не запускался. Публичный HF-датасет v1 скачан и проверен через h5py. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «SURFACEBENCH: A Geometry-Aware Benchmark for Symbolic Surface Discovery». Sanchit Kabra, Shobhnik Kriplani, Parshin Shojaee, Chandan K. Reddy (Department of Computer Science, Virginia Tech). Опубликована в Transactions on Machine Learning Research (03/2026), OpenReview id sHLTzkczSi. arXiv: https://arxiv.org/abs/2511.10833 (прочитана v2). Это та же группа, что сделала LLM-SR и LLM-SRBench.

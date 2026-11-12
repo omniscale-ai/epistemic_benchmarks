@@ -1,5 +1,8 @@
 # AI Feynman / Feynman Symbolic Regression Database (FSReD)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1489** · ★ GitHub — **785** ([SJ001/AI-Feynman](https://github.com/SJ001/AI-Feynman)) · возраст ≈90 мес.
+
+
 - **Статья (1.0):** «AI Feynman: a Physics-Inspired Method for Symbolic Regression». S.-M. Udrescu, M. Tegmark (MIT). Science Advances 6:eaay2631, 15.04.2020. arXiv: https://arxiv.org/abs/1905.11481 (v1 27.05.2019, v2 15.04.2020).
 - **Статья (2.0):** «AI Feynman 2.0: Pareto-optimal symbolic regression exploiting graph modularity». S.-M. Udrescu, A. Tan, J. Feng, O. Neto, T. Wu, M. Tegmark. NeurIPS 2020. arXiv: https://arxiv.org/abs/2006.10782.
 - **Связанные работы, прочитанные для этого файла:** SRBench: La Cava et al., «Contemporary Symbolic Regression Methods and their Relative Performance», NeurIPS 2021 Datasets & Benchmarks, https://arxiv.org/abs/2107.14351; SRSD: Matsubara et al., «Rethinking Symbolic Regression Datasets and Benchmarks for Scientific Discovery», https://arxiv.org/abs/2206.10540 (v5, 2024, рецензия на OpenReview; журнал DMLR, не проверено); LLM-SR: Shojaee et al., ICLR 2025, https://arxiv.org/abs/2404.18400; LLM-SRBench: Shojaee, Nguyen et al., ICML 2025, https://arxiv.org/abs/2504.10415.

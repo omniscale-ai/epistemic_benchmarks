@@ -1,5 +1,8 @@
 # SDABench («Are LLMs Ready for Scientific Discovery?»)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1** · ★ GitHub — **нет репо** · возраст ≈4 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2607.11079v1 (PDF, 13 Jul 2026, 9 страниц, других версий нет; HTML-версия тоже v1). Полный текст прочитан. Supplementary material (на него ссылается §4.2, «supplementary material C» с полными результатами на SDA-Real) в arXiv-версию **не входит**, поэтому всё, что там, не проверено. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Are LLMs Ready for Scientific Discovery? A Capability-Oriented Benchmark for AI Scientists». Chuhan Shi, Xiaoquan Ren (Southeast University), Sicheng Song (East China Normal University), Haobo Li, Rui Sheng*, Yushi Sun* (HKUST; * — corresponding). Сам бенчмарк в тексте называется **SDABench** (Scientific Data Analysis). Площадка не указана; оформление по шаблону AAAI (не проверено, что подано туда). arXiv: https://arxiv.org/abs/2607.11079 (v1; лицензия arXiv non-exclusive distribution, не CC).

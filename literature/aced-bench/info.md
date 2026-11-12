@@ -1,5 +1,8 @@
 # ACED-Bench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **0** ([Rose-STL-Lab/ACED-Bench](https://github.com/Rose-STL-Lab/ACED-Bench)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.14381v2 (PDF и HTML, v2 от 8 Nov 2026, v1 от 9 Oct 2026; 31 стр. с приложениями A–G и NeurIPS-чеклистом). Полный текст прочитан, включая приложения. Репозиторий склонирован (коммит 998dc69 от 4 Nov 2026) и просмотрен без запуска: README, docs/, `src/aced_repair/{prompt,oracle,scm}.py`, структура `data/`. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «ACED: Evaluating How LLM Agents Acquire and Act on Causal Evidence» (на странице arXiv заголовок «ACED-Bench: …»). Yiwei Chen, Taylor Berg-Kirkpatrick, Rose Yu (UC San Diego); Amila Weerasinghe, Siddharth Biswal, Utkrisht Rajkumar, Olcay Boz (Amazon). NeurIPS 2026 (40th Conference, так указано в колонтитуле; трек — «не проверено»). arXiv: https://arxiv.org/abs/2610.14381.

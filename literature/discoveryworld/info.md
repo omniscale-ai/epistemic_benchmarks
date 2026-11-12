@@ -1,5 +1,8 @@
 # DiscoveryWorld
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **136** · ★ GitHub — **229** ([allenai/discoveryworld](https://github.com/allenai/discoveryworld)) · возраст ≈29 мес.
+
+
 - **Статья:** «DiscoveryWorld: A Virtual Environment for Developing and Evaluating Automated Scientific Discovery Agents». Peter Jansen, Marc-Alexandre Côté, Tushar Khot, Erin Bransom, Bhavana Dalvi Mishra, Bodhisattwa Prasad Majumder, Oyvind Tafjord, Peter Clark (AI2; Côté из Microsoft Research; Jansen также University of Arizona). NeurIPS 2024 Datasets & Benchmarks Track (Spotlight, по README). arXiv: https://arxiv.org/abs/2406.06769 (v1 10.06.2024, v2 07.10.2024). OpenReview: https://openreview.net/forum?id=cDYqckEt6d
 - **Код/данные:** https://github.com/allenai/discoveryworld. Лицензия кода Apache-2.0; графика (CuteRPG от PixyMoon) под отдельной коммерческой лицензией (нельзя перепродавать). Репозиторий создан 2023-11-27, последний push 2025-03-10 (правки README), до этого 2025-01-21; 229 звёзд, 24 форка, 4 открытых issue (GitHub API, 2026-11-12). Пакет `version.py` = 0.0.2, ~38k строк Python в репо (симулятор по статье ~20k строк, pygame). Логи агентов и людей лежат на Google Drive (ссылки в `data/README.md`). Оценка зрелости: исследовательский код, после публикации фактически не развивается; в `data/README.md` остались `TODO`.
 

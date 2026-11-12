@@ -1,5 +1,8 @@
 # BoxingGym
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **28** · ★ GitHub — **13** ([kanishkg/boxing-gym](https://github.com/kanishkg/boxing-gym)) · возраст ≈22 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2501.01540v2 (PDF, 14 Oct 2025, 34 стр. с NeurIPS-чеклистом и приложениями A–E), прочитан полностью. Для сравнения просмотрен v1 (2 Jan 2025, 31 стр.): там оценивался только GPT-4o, а в v2 добавлены Claude-3.7, Qwen-2.5 и OpenThinker. Код склонирован (`github.com/kanishkg/boxing-gym`, последний коммит 2025-07-30) и прочитан, но не запускался. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «BoxingGym: Benchmarking Progress in Automated Experimental Design and Model Discovery». Kanishk Gandhi*, Michael Y. Li*, Lyle Goodyear, Agam Bhatia, Louise Li, Aditi Bhaskar, Mohammed Zaman, Noah D. Goodman (Stanford University). v2 — NeurIPS 2025 Workshop «Scaling Environments for Agents (SEA)». arXiv: https://arxiv.org/abs/2501.01540.

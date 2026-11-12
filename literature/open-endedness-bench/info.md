@@ -1,5 +1,8 @@
 # Open-Endedness Bench (OEB)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1** · ★ GitHub — **3** ([ARA-Labs/oeb](https://github.com/ARA-Labs/oeb)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.02588v1 (PDF и HTML, 1 Oct 2026, 18 стр. с приложениями A–D; других версий нет). Полный текст прочитан целиком. Репозиторий склонирован (`--depth 1`, коммит от 2026-10-02) и просмотрен без запуска: README, `oeb/measure/`, `oeb/record/`, `benches/`. Ссылки на разделы даны по v1.
 
 - **Статья:** «Open-Endedness Bench: Measuring Epistemic Process from Agent Records». Chengyang Shi (U. Michigan), Xianglin Ji (MIT), Jintao Huang (Ohio State), Jicheng Wang, Yifeng He (UC Davis), Jiachen Liu; все также ARA Lab. Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2610.02588 (v1).

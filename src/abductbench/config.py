@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable
 
@@ -98,3 +98,4 @@ class TaskBundle:
     rubric_id: str
     discriminating_queries: frozenset[str]
     oracle_family: Callable | None = None
+    true_mechanism: dict = field(default_factory=dict)

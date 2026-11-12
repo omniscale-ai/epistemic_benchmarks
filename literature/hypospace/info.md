@@ -1,5 +1,8 @@
 # HypoSpace
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **8** · ★ GitHub — **17** ([CTT-Pavilion/_HypoSpace](https://github.com/CTT-Pavilion/_HypoSpace)) · возраст ≈13 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2510.15614v3 (PDF, 29 May 2026, camera-ready ICML 2026, 15 стр. с приложениями A–G). Полный текст прочитан, включая приложения. Официальный репозиторий клонирован (коммит c69e931 от 2026-05-04) и прочитан код генераторов и раннеров всех трёх доменов. Код не запускался. Ссылки на разделы ниже даны по v3. Ранние версии назывались «HypoSpace: Evaluating LLM Creativity as Set-Valued Hypothesis Generators under Underdetermination». В v3 к названию добавлено «…and Sublinear Coverage Bounds».
 
 - **Статья:** «HypoSpace: A Diagnostic Benchmark for Set-Valued Hypothesis Generation under Underdetermination and Sublinear Coverage Bounds». Tingting Chen, Beibei Lin, Zifeng Yuan, Qiran Zou, Hongyu He, Anirudh Goyal, Yew-Soon Ong, Dianbo Liu. Аффилиации: National University of Singapore; Meta Superintelligence Labs (Goyal); NTU Singapore и A*STAR CFAR (Ong). ICML 2026, PMLR 306 (README: spotlight). arXiv: https://arxiv.org/abs/2510.15614 (прочитана v3).

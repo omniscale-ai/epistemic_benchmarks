@@ -1,5 +1,8 @@
 # SciR
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **10** ([idiap/scir](https://github.com/idiap/scir)) · возраст ≈5 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2606.13020v3 (PDF, 25 Sep 2026, 32 стр. с приложениями A–J). Полный текст прочитан, приложения по причинному треку (A.3, B.3, D, F, H.3, I) — построчно. Склонирован репозиторий `idiap/scir` (коммит d698514 от 2026-09-25), прочитаны генератор и решатель причинного трека. С Hugging Face скачаны обе основные задачи причинного трека (2 × 200 задач), на них сделана своя проверка утечки через варианты ответа (см. «Ограничения»). Код не запускался.
 
 - **Статья:** «SciR: A Controllable Benchmark for Scientific Reasoning in LLMs». Pierre Beckmann (Idiap Research Institute; EPFL), Marco Valentino (University of Sheffield), André Freitas (Idiap; University of Manchester; CRUK Manchester Institute). NeurIPS 2026, Track on Evaluations and Datasets (так в колонтитуле PDF). arXiv: https://arxiv.org/abs/2606.13020 (v1 — июнь 2026, прочитана v3).

@@ -1,5 +1,8 @@
 # CME-SpectrumBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.24304v1 (HTML-версия, 16 Oct 2026, единственная версия; оформлена по шаблону NeurIPS, с NeurIPS Paper Checklist). Полный текст прочитан, включая приложения A–G и чек-лист. Дополнительно просмотрены карточка и файлы датасета на Hugging Face: `README.md`, `readme_verbose.md`, `client/eval.py`, `client/ask.py`, `client/Evaluation/Leaderboards.csv`. Код не запускался. Числа рисунков Fig. 2/3 в тексте статьи даны частично, поэтому полный лидерборд ниже взят из `Leaderboards.csv`.
 
 - **Статья:** «CME-SpectrumBench: Can LLMs Analyze Condensed Matter Spectral Data?». Jin Gene Wong (Physics Dept. и Stanford Laboratory for Intelligent Matter, Stanford), Anjney Midha (Applied Physics, Stanford), Joseph Mathew Tennyson, Wei-Lin Chiang, Ion Stoica (EECS, UC Berkeley; Chiang и Stoica — авторы Chatbot Arena), Zhi-Xun Shen (Stanford; группа ARPES). Препринт в формате NeurIPS (принят ли он, не указано, «не проверено»). arXiv: https://arxiv.org/abs/2610.24304 (v1, лицензия статьи CC BY 4.0).

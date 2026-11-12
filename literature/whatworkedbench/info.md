@@ -1,5 +1,8 @@
 # WhatWorkedBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1** · ★ GitHub — **3** ([EthanNing/WhatWorkedBench](https://github.com/EthanNing/WhatWorkedBench)) · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.27490v2 (PDF, 28 Sep 2026; v1 от 23 Sep 2026), «Preprint», 32 стр. с приложениями A–L. Полный текст прочитан, включая приложения. Репозиторий склонирован (коммит ddb68ea от 22.09.2026); просмотрены README, guides/evaluation.md, промпты и структура публичных задач. Код не запускался. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «WhatWorkedBench: Benchmarking Experimental Understanding in AI Agents». Jingjie Ning (corresponding), Xueqi Li, Yibo Kong (Carnegie Mellon University), Dongting Li (Tsinghua University). Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2609.27490 (v2). Та же группа (Ning et al. 2026a–d) пишет про auto research и «Discovery Certification Protocol».

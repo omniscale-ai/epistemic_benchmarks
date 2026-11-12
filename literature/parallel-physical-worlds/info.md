@@ -1,5 +1,8 @@
 # Parallel Physical Worlds (PhysLit)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **2** ([dongzhang84/physlit](https://github.com/dongzhang84/physlit)) · возраст ≈4 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2607.00276v1 (PDF, 30 Jun 2026, 37 стр. с приложениями A–E; HTML-версия на arxiv.org тоже v1, других версий нет). Полный текст прочитан, включая приложения. Репозиторий склонирован (HEAD a212d36, 22.08.2026) и просмотрен без запуска кода: промпты, критерии, отчёты по раундам, записи аудита. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Testing Frontier Large Language Models' Physics Literacy in Parallel Physical Worlds». Dong Zhang, один автор, аффилиация не указана (только gmail-адрес). Препринт, cs.LG, площадка не указана. arXiv: https://arxiv.org/abs/2607.00276 (v1).

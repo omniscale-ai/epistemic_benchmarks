@@ -1,5 +1,8 @@
 # AdaExploreBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **6** ([HKUST-KnowComp/AdaExploreBench](https://github.com/HKUST-KnowComp/AdaExploreBench)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.25950v1 (19 Oct 2026, cs.CL), HTML-версия и PDF, обе v1, других версий нет. Полный текст прочитан, включая приложения A–L. Формулы и Table 16 сверены по PDF: в HTML math-блоки при извлечении теряются. Репозиторий склонирован (`git clone --depth 1`, коммит 7ac28a3 от 2026-10-20) и просмотрен. Код не запускался. Ссылки на разделы даны по v1.
 
 - **Статья:** «AdaExploreBench: Benchmarking LLM Agents for Proactive Exploration and Test-time Adaptation in Evolving Environments». Rui Wang*, Zishen Lai*, Jiayu Liu* (* равный вклад), Cheng Qian, Jeonghwan Kim, Heng Wang, Xuejun Zhang, Jiateng Liu, Bingxuan Li, Shujin Wu, Qing Zong, Tianshi Zheng, Chunyang Li, Qihan Lin, Chen Li, Dadi Guo, Xiusi Chen, Yangqiu Song. HKUST, HKUST(GZ), HKUST-UGAIL, UIUC, CUHK, CMU. Это группа HKUST-KnowComp (Song), та же, что у NewtonBench (Tianshi Zheng — соавтор). Препринт, площадка не указана (формат ACL). https://arxiv.org/abs/2610.25950

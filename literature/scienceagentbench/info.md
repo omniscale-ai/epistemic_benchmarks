@@ -1,5 +1,8 @@
 # ScienceAgentBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **312** · ★ GitHub — **184** ([OSU-NLP-Group/ScienceAgentBench](https://github.com/OSU-NLP-Group/ScienceAgentBench)) · возраст ≈25 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2410.05080v3 (PDF, 31 Mar 2025, «Published as a conference paper at ICLR 2025», приложения A–J). Полный текст прочитан, включая приложения A, D, E, F, G и H. Репозиторий OSU-NLP-Group/ScienceAgentBench склонирован (последний коммит c26e151 от 17.07.2026), README и карточка датасета на HF прочитаны. Ссылки на разделы и таблицы ниже даны по v3.
 
 - **Статья:** «ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery». Ziru Chen*, Shijie Chen*, Yuting Ning, Qianheng Zhang, Boshi Wang, Botao Yu, Yifei Li, Zeyi Liao, Chen Wei, Zitong Lu, Vishal Dey, Mingyi Xue, Frazier N. Baker, Benjamin Burns, Daniel Adu-Ampratwum, Xuhui Huang, Xia Ning, Song Gao, Yu Su, Huan Sun* (Ohio State University: CSE, College of Pharmacy, Psychology, Biomedical Informatics; UW–Madison: Geography, Chemistry). ICLR 2025. arXiv: https://arxiv.org/abs/2410.05080 (прочитана v3). Сайт: https://osu-nlp-group.github.io/ScienceAgentBench/

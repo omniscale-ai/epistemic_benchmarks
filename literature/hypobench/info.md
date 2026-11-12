@@ -1,5 +1,8 @@
 # HypoBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **47** · ★ GitHub — **9** ([ChicagoHAI/HypoBench-code](https://github.com/ChicagoHAI/HypoBench-code)) · возраст ≈19 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2504.11524v2 (PDF, 10 Feb 2026, 32 стр. с приложениями A–D; v1 от 15 Apr 2025). Полный текст прочитан, включая приложения с промптами (A), описанием датасетов (B), доп. результатами (C) и деталями реализации (D). Просмотрены репозитории кода и данных (клон, код не запускался). Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «HypoBench: Towards Systematic and Principled Benchmarking for Hypothesis Generation». Haokun Liu, Yangqiaoyu Zhou, Chenhao Tan (University of Chicago), Sicong Huang, Jingyu Hu (University of Toronto, Vector Institute). Площадка в PDF и на странице arXiv не указана (на arXiv только «32 pages, 6 figures»); формат вёрстки похож на TMLR, но это «не проверено». arXiv: https://arxiv.org/abs/2504.11524. Сайт с лидербордами: https://chicagohai.github.io/HypoBench/.

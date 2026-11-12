@@ -1,5 +1,8 @@
 # Auto-Discovery-Bench (ранее Auto-Bench)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **18** · ★ GitHub — **нет репо** · возраст ≈21 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2502.15224v2 (PDF и HTML, 29 May 2026, 13 стр.: 8 стр. основного текста, Limitations, библиография, приложение A с одним промптом). Полный текст v2 прочитан целиком. Для сравнения просмотрена v1 (21 Feb 2025, 12 стр., под названием «Auto-Bench: An Automated Benchmark for Scientific Discovery in LLMs»). Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «Auto-Discovery-Bench: Diagnosing Structured State Tracking in Oracle-Guided Discovery». Tingting Chen, Beibei Lin, Srinivas Anumasa, Zifeng Yuan, Qiran Zou, Dianbo Liu (National University of Singapore); Vedant Shah (Mila); Anirudh Goyal (Meta Superintelligence Labs). Площадка в статье не указана. Формат (ACL-шаблон, обязательный раздел Limitations) похож на подачу в ACL ARR, но это «не проверено». arXiv: https://arxiv.org/abs/2502.15224 (v2; лицензия статьи CC BY 4.0).

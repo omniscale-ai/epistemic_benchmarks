@@ -1,5 +1,8 @@
 # Correct Answer, Wrong Mechanism (CAWM)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **6** · ★ GitHub — **2** ([seulig/g4_agent_icml_2026](https://github.com/seulig/g4_agent_icml_2026)) · возраст ≈5 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2606.23175v1 (PDF, 22 Jun 2026, 20 стр. с приложениями A–F; HTML-версия тоже v1). Полный текст прочитан, включая все приложения и дословные промпты (App. F). Репозиторий клонирован (tag `v1.0-camera-ready`, коммит 22f03d8 от 12.06.2026) и просмотрен без запуска. Это **position paper с небольшим экспериментом**, не бенчмарк: заголовки ниже адаптированы.
 
 - **Статья:** «Position: Correct Answer, Wrong Mechanism — When AI Scientists Defend General Claims Their Own Data Contradicts». Steven Young Eulig (единственный автор; Department of Physics и LPPC, Harvard University). Spotlight на AI for Science workshop, ICML 2026 (по README — «Workshop on AI Scientists: Tools, Co-authors, or Founders?»). arXiv: https://arxiv.org/abs/2606.23175 (v1).

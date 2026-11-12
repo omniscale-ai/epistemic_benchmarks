@@ -1,5 +1,8 @@
 # SciLaws-Bench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **10** ([yiyihum/SciLaws-Bench](https://github.com/yiyihum/SciLaws-Bench)) · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.01552v2 (PDF, 4 Oct 2026, 42 стр. с приложениями A–G; v1 от 1 Sep 2026). Полный текст прочитан, включая приложения A (построение Parallel-миров), B (протокол), C (дословные промпты судей), D (проверка судей людьми), E (аудит запоминания), F (промпты агента), G (разборы траекторий). Дополнительно просмотрены репозиторий (коммит 8174c7b от 8 Nov 2026) и файлы двух задач с HF (Keeling, Beer–Lambert). Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «Can LLMs Discover Scientific Laws in Real and Parallel Worlds?». Yiming Huang*, Ziche Liu*, Junxia Cui, Zhuohang Wu, Yiqian Wang, Xinkai Zou, Lingjun Mao, Nan Huang, Naicheng Yu, Kaijie Zhu, Yue Ma, Kun Zhou, Letian Peng†, Jingbo Shang† (UC San Diego; UC Irvine; Cushing Academy; UC Santa Barbara). Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2609.01552. Страница проекта: https://yiyihum.github.io/SciLaws-Bench.

@@ -31,7 +31,7 @@ from abductbench.evaluate.oracle import orbit_oracle
 ARCSEC_PER_RAD = 180.0 * 3600.0 / math.pi
 DT_YR = 0.002  # Yoshida-4 step in years; relative energy error < 1e-6 over the window
 TIME_YR = 10.0  # public data window in years
-EXT_YR = 15.0  # integration horizon (extrapolation) in years
+EXT_YR = 40.0  # integration horizon (extrapolation) in years
 N_OBS = 40
 PERT = 5  # state index of the optional outer body
 _TARGET_PLANET = {Truth.ENTITY: 3, Truth.NO_ENTITY: 0}  # target planet, index 0..3
@@ -323,7 +323,7 @@ def _fmt_deg(x: float) -> str:
     return f"{x:.9f}"
 
 
-def _truth_splines(cfg: VariantConfig):
+def _truth_splines(cfg: VariantConfig, horizon_yr: float = EXT_YR):
     """One batched integration over the horizon: row 0 is T0, row 1 is the truth.
 
     Returns the universe, residual and unwrapped-longitude splines for the four
@@ -333,7 +333,7 @@ def _truth_splines(cfg: VariantConfig):
     u = _universe(cfg)
     mu, k = _truth_batch(u, cfg.truth)
     x0, v0 = _initial_state(u.mu_base, u.elements)
-    n_steps = u.n_steps(EXT_YR)
+    n_steps = u.n_steps(horizon_yr)
     X, _ = _run(mu, np.stack([x0, x0]), np.stack([v0, v0]), k, u.n, u.dt, n_steps)
     lam = _longitudes(X)  # (S, 2, 4)
     res = _residuals(lam)[:, 0, :]  # (S, 4) arcsec
@@ -400,7 +400,15 @@ def build_orbit(cfg: VariantConfig) -> TaskBundle:
         rubric_id=f"orbit-{truth.value}-{cfg.stage.value}",
         discriminating_queries=frozenset({"search_region", "other_body_residuals"}),
         oracle_family=partial(orbit_oracle, truth=truth),
+        true_mechanism=_true_mechanism(u, truth),
     )
+
+
+def _true_mechanism(u: _Universe, truth: Truth) -> dict:
+    """Ground-truth mechanism in public units (GM as in known_bodies.csv; k, n as in task.md)."""
+    if truth is Truth.ENTITY:
+        return {"kind": "hidden_body", "a": float(u.elements[PERT - 1, 0]), "mass": float(u.mu_base[PERT])}
+    return {"kind": "force_law", "n": float(u.n), "k": float(u.k)}
 
 
 def _task_md(u: _Universe, target: str, t_window, radius_range) -> str:
@@ -437,6 +445,17 @@ Write a Python module `law.py` that defines:
 - `law(t: np.ndarray) -> np.ndarray`: the longitude residual of {target} relative to T0, in
   arcseconds, at times `t` (in {tunit}). It accepts an array of any shape and returns an array
   of the same shape.
+- `MECHANISM`: a module-level dict with your hypothesis about the cause of the deviation. Its `kind`
+  must be exactly one of:
+  - `"hidden_body"`, with keys `a` (semi-major axis, in {dunit}; a circular coplanar orbit is fine)
+    and `mass` (GM, expressed as in the GM column of `known_bodies.csv`);
+  - `"force_law"`, with keys `n` and `k`: an additional radial acceleration of k / r^n directed toward
+    the central star ({star}), with r the distance from the star in {dunit} and the acceleration in
+    {dunit} per {tunit}^2;
+  - `"other"`, with key `description` (free text).
+
+`MECHANISM` is checked automatically. The points at which `law` is scored extend far beyond the time
+window of the data (well past the last observation time), and the prediction of `law` is also scored there.
 """
 
 
@@ -503,7 +522,7 @@ def query(cfg: VariantConfig, query_type: str, args: dict) -> dict:
     from abductbench.tasks._query_util import call_index, float_arg, times_arg
 
     call = call_index(args)
-    u, res_spl, _, X_truth, grid = _truth_splines(cfg)
+    u, res_spl, _, X_truth, grid = _truth_splines(cfg, TIME_YR)  # queries stop at the public window
     horizon = _public_horizon(cfg)
     names = u.names[1:]
     tgt = u.target_planet

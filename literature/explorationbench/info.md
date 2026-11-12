@@ -1,5 +1,8 @@
 # ExplorationBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1** · ★ GitHub — **28** ([Tencent-Hunyuan/ExplorationBench](https://github.com/Tencent-Hunyuan/ExplorationBench)) · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.30199v2 (PDF, 8 Oct 2026, 29 стр. с приложениями A–C; HTML-версия на arxiv.org тоже прочитана для ссылок). Полный текст прочитан, включая приложения A (протокол, бюджет, метрики) и C (кейсы). Репозиторий склонирован (commit 8892fd0, 28.10.2026) и прочитан без запуска: построение мира, движки, скоринг, рубрика отчёта о правилах. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «ExplorationBench: Measuring AI Systems' Exploration in Verifiable Alien Worlds». Ming Zhang*, Zhenghao Xiang*, Peizhong Gao* и ещё 17 авторов; corresponding: Tao Gui, Qi Zhang, Suncong Zheng, Maxm Pan. Fudan University, Hunyuan Team (Tencent), Tsinghua University. Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2609.30199 (v1 от 24.09.2026 по README; прочитана v2). Третья работа серии той же группы после EvaLearn (NeurIPS 2025) и CL-bench.

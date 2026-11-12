@@ -1,5 +1,8 @@
 # MechBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1** · ★ GitHub — **2** ([tsinghua-fib-lab/MechBench](https://github.com/tsinghua-fib-lab/MechBench)) · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.35515v1 (PDF, 28 Sep 2026, 25 стр. с приложениями A–C; HTML-версия на arxiv.org тоже v1). Полный текст прочитан целиком, включая приложения. Дополнительно просмотрен репозиторий (коммит f133fd1 от 27.09.2026): `proposal.md`, `src/evaluate.py`, `src/scoring.py`, `src/algorithms/codex.py`, YAML-задачи и сырые результаты в `results/`. Код не запускался. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «MechBench: Can AI Scientific Agents Discover Mechanisms Beyond Phenomenal Laws?». Zihan Yu*, Jiadong Zhang*, Jialin Cheng*, Jingtao Ding†, Yong Li† (Tsinghua EE/BNRist; Institute of Automation CAS; Beijing Zhongguancun Academy; Xi'an Jiaotong; Tsinghua Earth System Science). Препринт, площадка не указана (оформлен по шаблону, похожему на ICLR; «не проверено»). arXiv: https://arxiv.org/abs/2609.35515 (v1).

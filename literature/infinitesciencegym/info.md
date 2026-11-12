@@ -1,5 +1,8 @@
 # InfiniteScienceGym
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **1** · ★ GitHub — **2** ([utahnlp/infinite-science-gym](https://github.com/utahnlp/infinite-science-gym)) · возраст ≈7 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2604.13201v2 (PDF, 10 Aug 2026, «Published as a conference paper at COLM 2026», 31 стр. с приложениями A–L). Полный текст прочитан, включая приложения C–L (генерация, шаблоны вопросов, оценка, аудит парафраз). Код просмотрен (не запускался): github.com/utahnlp/infinite-science-gym, commit 2006f69 от 3 Aug 2026. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «InfiniteScienceGym: An Unbounded, Procedurally-Generated Benchmark for Scientific Analysis». Oliver Bentham, Vivek Srikumar (Kahlert School of Computing, University of Utah). COLM 2026. arXiv: https://arxiv.org/abs/2604.13201 (прочитана v2). Страница проекта: https://infinitesciencegym.github.io/.

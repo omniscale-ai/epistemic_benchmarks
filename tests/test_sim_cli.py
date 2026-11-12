@@ -345,7 +345,7 @@ def test_task_md_counts_simulations_not_prices(tmp_path, family):
 
 
 def test_orbit_queries_capped_at_public_window(tmp_path, capsys):
-    # Public window is TIME_YR = 10 years; 10..15 years is held out for extrapolation scoring.
+    # Public window is TIME_YR = 10 years; 10..40 years is held out for extrapolation scoring.
     c = cfg(Family.ORBIT, Truth.ENTITY, Stage.HISTORICAL)
     assert answer_query(c, "residuals", {"body": "Uranus", "time": [10.0], "_n": 0})
     for query_type, args in [

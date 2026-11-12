@@ -1,5 +1,8 @@
 # SDE (Scientific Discovery Evaluation)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **46** · ★ GitHub — **65** ([HowieHwong/sde-harness](https://github.com/HowieHwong/sde-harness)) · возраст ≈11 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2512.15567v2 (PDF, 8 May 2026, 63 стр. вместе с Supplementary Information; v1 от 17 Dec 2025). Полный текст прочитан: основная часть, Methods, приложения о сборе вопросов (Suppl. §1) и о проектах (Suppl. §3, особенно 3.7 symbolic regression и 3.8 Ising). Код `sde-harness` склонирован и просмотрен (без запуска), физический датасет с HF скачан и пересчитан. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «Evaluating Large Language Models in Scientific Discovery». Zhangde Song, Jieyu Lu, Yuanqi Du, Botao Yu, Thomas M. Pruyn, Yue Huang, Kehan Guo, Xiuzhe Luo, Yuanhao Qu и ещё около 50 соавторов; корреспонденты Haojun Jia (Deep Principle), Huan Sun (Ohio State), Seyed Mohamad Moosavi (U Toronto), Chenru Duan (Deep Principle). 36 аффилиаций, в том числе Deep Principle (Ханчжоу), Cornell, OSU, Toronto, Notre Dame, Stanford, EPFL, MIT, Princeton, Tsinghua. Препринт, площадка не указана (формат похож на журнальную подачу, «не проверено»). arXiv: https://arxiv.org/abs/2512.15567 (прочитана v2).

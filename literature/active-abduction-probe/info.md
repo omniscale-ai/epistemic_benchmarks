@@ -1,5 +1,8 @@
 # Alien Abduction (active-abduction-probe)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **0** ([mohiuddinshahrukh/Alien-Abduction](https://github.com/mohiuddinshahrukh/Alien-Abduction)) · возраст ≈3 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2608.03388v1 (PDF и HTML, 4 Aug 2026, 16+ стр. с приложениями A–E). Полный текст прочитан, включая приложения: список функций (Table 3), промпты (Fig. 13), Table 4–5. Репозиторий склонирован и прочитан (код не запускался). Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Don't Let Me Ask for It: LLMs Show Deficiencies in Active Multi-Turn Information Acquisition for Abductive Inference». Shahrukh Mohiuddin*, Chalamalasetti Kranti* (равный вклад), Sherzod Hakimov, David Schlangen (Computational Linguistics, University of Potsdam; Schlangen также DFKI Berlin). Препринт, площадка не указана. Это группа clembench. arXiv: https://arxiv.org/abs/2608.03388 (v1).

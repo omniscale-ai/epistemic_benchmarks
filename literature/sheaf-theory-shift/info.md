@@ -1,5 +1,8 @@
 # Sheaf-Theoretic Transport and Obstruction (transition cards)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **нет репо** · возраст ≈6 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2605.14033v1 (PDF, 13 May 2026, 43 стр. вместе с приложениями A–D; на странице arXiv есть только v1). Полный текст прочитан, включая приложения. Ссылки на разделы и таблицы даны по v1.
 
 - **Статья:** «Sheaf-Theoretic Transport and Obstruction for Detecting Scientific Theory Shift in AI Agents». David N. Olivieri, Roque J. Hernández (Universidade de Vigo, Department of Computer Science (LSI), Spain; второй автор указал почту casagrande.edu.ec, Эквадор). Препринт, площадка не указана, лицензия статьи CC BY 4.0. arXiv: https://arxiv.org/abs/2605.14033

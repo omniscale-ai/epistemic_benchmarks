@@ -1,5 +1,8 @@
 # DiscoverPhysics
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **15** · ★ GitHub — **32** ([SampsonML/DiscoverPhysics](https://github.com/SampsonML/DiscoverPhysics)) · возраст ≈6 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2605.26087v2 (PDF, 31 Aug 2026), страница abs, клон репозитория `SampsonML/DiscoverPhysics` (HEAD `33b7fa9`, 2026-05-31), GitHub API, HF API. Ссылки на разделы ниже — на v2.
 
 - **Статья:** «DiscoverPhysics: Benchmarking LLMs for Out-of-the-Box Scientific Thinking». Matt L. Wiemann*, Lindsay M. Smith* (Princeton / Polymathic AI), Peter Melchior (Princeton), Siddharth Mishra-Sharma (Boston U.), Andrew Gordon Wilson, Pavel Izmailov (NYU), Carolina Cuesta-Lázaro (Flatiron / IAS). Препринт (в PDF «Preprint.», venue не указан), stat.ML / cs.LG. arXiv: https://arxiv.org/abs/2605.26087 (v1 25.05.2026, v2 31.08.2026).

@@ -1,5 +1,8 @@
 # D3-Gym
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **4** · ★ GitHub — **13** ([OSU-NLP-Group/D3-Gym](https://github.com/OSU-NLP-Group/D3-Gym)) · возраст ≈7 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2604.27977v4 (PDF, 1 Sep 2026, 14 стр. с приложениями A–G). История версий: v1 30.04.2026, v2 01.05.2026, v3 28.08.2026, v4 01.09.2026. Полный текст v4 прочитан, включая все приложения. Репозиторий склонирован и просмотрен (код не запускался). Ссылки на разделы ниже даны по v4.
 
 - **Статья:** «D3-Gym: Constructing Real-World Verifiable Environments for Data-Driven Discovery». Hanane Nour Moussa*, Yifei Li*, Zhuoyang Li, Yankai Yang, Cheng Tang, Tianshu Zhang, Nesreen K. Ahmed, Ali Payani, Ziru Chen, Huan Sun (* равный вклад). The Ohio State University (OSU NLP Group, группа ScienceAgentBench и AutoSDT), University of Wisconsin–Madison, Cisco Research. Площадка не указана: на странице arXiv нет поля Comments, в README bibtex `@article ... arXiv preprint` (не проверено, подана ли статья куда-либо; формат и раздел Limitations похожи на ACL/ARR). arXiv: https://arxiv.org/abs/2604.27977

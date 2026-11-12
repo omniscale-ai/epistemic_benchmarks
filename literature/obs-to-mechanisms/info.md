@@ -1,5 +1,8 @@
 # MechHypoBench (From Scientific Observations to Mechanisms)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.05197v2 (PDF, 2 Nov 2026, «Preprint. Under review.», 12 стр.). v1 от 4 Oct 2026 того же размера (1 333 KB); различия между версиями не проверены. Полный текст прочитан. **Приложений нет**: промптов интерпретатора, точных функций механизмов, уровня шума, числа сравнений на задачу и деталей человеческой оценки в статье нет. HTML-версия на arxiv.org не отдаёт текст, читался PDF. Ссылки ниже даны по v2.
 
 - **Статья:** «From Scientific Observations to Mechanisms: Benchmarking Hypothesis Generation by AI Scientists». Xiaxun Xie, Qingqing Long†, Meng Xiao, Wei Ju, Yuanchun Zhou, Hengshu Zhu, Xuezhi Wang† (Computer Network Information Center, Chinese Academy of Sciences; National University of Singapore; Sichuan University; † — corresponding). Препринт, на рецензии, площадка не указана. arXiv: https://arxiv.org/abs/2610.05197 (лицензия статьи CC BY 4.0).

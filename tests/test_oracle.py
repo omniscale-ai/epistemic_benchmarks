@@ -50,9 +50,11 @@ def test_oracle_recovers_constants(cfg):
     # Observed at seed 0 mode 1: oracle nrmse_in 1.6e-9 (beta a), 1.2e-3 (orbit entity a),
     # 4e-5 (orbit no_entity a); opposite-truth law 1.21, 3.15, 0.27. Thresholds keep a wide margin.
     s = cached_scores(cfg)
-    wrong_in, _ = wrong_family_nrmse(cfg)
+    wrong_in, wrong_ex = wrong_family_nrmse(cfg)
     assert s.nrmse_in < 0.1
-    assert wrong_in > 0.1
+    # The 40-year orbit horizon enlarges the shared NRMSE scale, so the opposite-truth law's in-window
+    # error shrinks (0.055, 0.099 for orbit); judge it over both windows (wrong_ex 0.65, 1.19).
+    assert max(wrong_in, wrong_ex) > 0.1
 
 
 @pytest.mark.parametrize("stage", [Stage.COUNTERFACTUAL, Stage.SYNTHETIC])

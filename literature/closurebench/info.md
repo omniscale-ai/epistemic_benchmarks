@@ -1,5 +1,8 @@
 # ClosureBench (и метод SCOPE)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **4** · ★ GitHub — **нет репо** · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.18938v3 (PDF и HTML, 5 Nov 2026; v1 от 13 Oct 2026, есть также v2), «Preprint», 9 стр. основного текста плюс приложения A–J. Полный текст прочитан, включая приложения. Ссылки на разделы ниже даны по v3. Статья в первую очередь про **метод** (SCOPE), бенчмарк (ClosureBench) идёт вторым вкладом.
 
 - **Статья:** «Beyond Equation Search: Conjecture-Guided Discovery with SCOPE and ClosureBench». Yuxiao Hu*, Qian Li*, Ding Wang, Siheng Chen, Linfeng Zhang, Jinyue Yan, Yuntian Chen† (The Hong Kong Polytechnic University; Eastern Institute of Technology, Ningbo; Shanghai Jiao Tong University; DP Technology). Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2610.18938

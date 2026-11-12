@@ -1,5 +1,8 @@
 # LatentGym
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **2** ([namkoong-lab/LatentGym](https://github.com/namkoong-lab/LatentGym)) · возраст ≈5 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2606.15306v2 (PDF, 4 Nov 2026, 61 стр. с приложениями A–D), полный текст прочитан, включая приложения A (среды), B (детали экспериментов), C (доп. результаты); приложение D (транскрипты) просмотрено выборочно. Репозиторий склонирован (`--depth 1`, коммит ed499f8 от 25.09.2026) и просмотрен без запуска. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «LatentGym: A Testbed For Cross-Task Experiential Learning With Controllable Latent Structure» (в PDF v2 в заголовке «Latent Structure», в метаданных arXiv «Latent State»). Daksh Mittal*, Tommaso Castellani*, Thomson Yen* (равный вклад), Naimeng Ye, Minghui Chen, Tiffany Cai, Fangyu Wu, Hongseok Namkoong (Columbia University); William Zeng, Emmanouil Koukoumidis (Oumi). Препринт cs.LG, площадка не указана. arXiv: https://arxiv.org/abs/2606.15306 (v2 от 4.11.2026; README репо говорит о релизе 08.06.2026, т.е. v1 — июнь 2026).

@@ -1,5 +1,8 @@
 # ERBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈5 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2606.09276v1 (PDF, 8 Jun 2026, 36 стр. с приложением A; HTML-версия на arxiv.org тоже v1). Полный текст прочитан, включая приложение A (A.1–A.3). Публичный код и данные скачаны с Hugging Face и просмотрены (код не запускался). Сайт соревнования https://equation-discovery.ti2.fmi.uni-jena.de/ на 2026-11-12 не ответил (таймаут, 2 попытки), поэтому лидерборд не проверен. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «ERBench: A Benchmark and Testsuite for Equation Discovery Algorithms». Paul Kahlmeyer, Henrik Voigt, Michael Habeck, Joachim Giesen (равный вклад; Department of Computer Science, University of Jena). Шапка: Journal of Data-centric Machine Learning Research (DMLR), «Submitted 12/25; Revised 6/26; Published –/–», то есть на рецензии, не опубликовано. arXiv: https://arxiv.org/abs/2606.09276 (v1, cs.LG).

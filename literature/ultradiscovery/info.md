@@ -1,5 +1,8 @@
 # UltraDiscovery
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): полный текст arXiv 2610.03092v3 (PDF, 46 стр., 15 Oct 2026; HTML-версия тоже доступна), страница abs (история версий, лицензия). Ссылки на разделы, таблицы и приложения ниже даны по v3. Официального репозитория не нашёл. Проверены: поиск GitHub API («ultradiscovery», «Halse Drift»), репозитории организации `HKUST-KnowComp` (последние push до 2026-11-09), аккаунты авторов, поиск по HF datasets/models и веб-поиск. Статья только обещает релиз (раздел Limitations).
 
 - **Статья:** «UltraDiscovery: Abductive Exploration in an Interconnected, Epistemically Open Universe». Weihan Li* (Dept. of Mechanical Engineering, University of Tokyo), Tianshi Zheng* (HKUST CSE), Yangqiu Song (HKUST), Ginny Y. Wong, Simon See (NVIDIA AI Technology Center). *Равный вклад. Группа та же, что у NewtonBench (Zheng, Song, Wong, See). Venue не указан, препринт cs.LG 2026. arXiv: https://arxiv.org/abs/2610.03092 (v1 02.10.2026, v2 13.10.2026, v3 15.10.2026; прочитана v3). Лицензия текста CC BY 4.0.

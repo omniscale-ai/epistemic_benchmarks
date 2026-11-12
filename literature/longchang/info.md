@@ -1,5 +1,8 @@
 # LongChang
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **13** ([EnVision-Research/LongChang](https://github.com/EnVision-Research/LongChang)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.37649v1 (PDF и HTML, 27 Oct 2026, 14 стр. с приложением A.1–A.3; других версий нет). Полный текст прочитан, включая приложение (законы сцен Table 7–8, интерфейс действий Table 9, промпты A.3). Дополнительно просмотрены страница проекта и опубликованные записи экспериментов (`longchang-main-study-json.zip`, 1083 файла; `longchang-judge-summaries-en.json`, 540 прогонов). Код не открыт (см. ниже). Ссылки на разделы и таблицы даны по v1.
 
 - **Статья:** «Can LLMs Uncover Hidden Physical Laws through Free Exploration?». Zhen Yang (HKUST(GZ)), Wen Wang (ZJU), Xander Xu (Alibaba Group)*, Ying-Cong Chen (HKUST(GZ), HKUST)*; * — co-corresponding. Препринт, cs.CL, площадка не указана (формат и разделы Limitations / Ethical Considerations / Potential Risks — как у ACL-подачи, «не проверено»). arXiv: https://arxiv.org/abs/2610.37649 (v1).

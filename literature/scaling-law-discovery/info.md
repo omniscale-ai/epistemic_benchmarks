@@ -1,5 +1,8 @@
 # SLDBench / SLDAgent (Can Language Models Discover Scaling Laws?)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **13** · ★ GitHub — **37** ([linhaowei1/SLD](https://github.com/linhaowei1/SLD)) · возраст ≈16 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2507.21184v5 (PDF, 22 Jan 2026, «Preprint», 46 стр. с приложениями A–D). Полный текст прочитан, включая приложения: сплиты (A.2), человеческие законы (A.3–A.4), контаминация (A.5), метрики и STD (B.1–B.2), абляции (B.6), промпты (C), конфиг (D). Репозиторий склонирован (`linhaowei1/SLD`, коммит df9d125 от 2026-01-30), прочитаны `evaluator.py`, `configs/`, `scripts/run.sh`. Ранние версии v1–v4 (с 27.07.2025) не читались. В каталоге работа фигурирует также под старым названием **EvoSLD** (catalog.md, строка 576): это тот же arXiv id, агент позже переименован в SLDAgent.
 
 - **Статья:** «Can Language Models Discover Scaling Laws?». Haowei Lin*, Haotian Ye*, Wenzheng Feng, Quzhe Huang, Yujun Li, Hubert Lim, Zhengrui Li, Xiangyu Wang, Jianzhu Ma, Yitao Liang, James Zou (Peking University, Stanford, Wizard Quant, Tsinghua). По README репозитория принята на **ICLR 2026** (новость от 2026-01-26); в PDF v5 стоит «Preprint». arXiv: https://arxiv.org/abs/2507.21184 (v5).

@@ -1,5 +1,8 @@
 # Gravity-Bench-v1
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **18** · ★ GitHub — **6** ([NolanKoblischke/GravityBench](https://github.com/NolanKoblischke/GravityBench)) · возраст ≈22 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2501.18411v2 (PDF и HTML, 29 May 2025, «Proceedings of the 42nd ICML, PMLR 267»), клон репозитория `NolanKoblischke/GravityBench` (HEAD `39b7111`, 2025-05-30), GitHub API, HF API, сайт gravitybench.github.io. Ссылки на разделы и таблицы ниже даны по v2. Цифры с пометкой «мой подсчёт» я посчитал сам по выложенному `outputs/combined_results.csv`, в статье их нет.
 
 - **Статья:** «Gravity-Bench-v1: A Benchmark on Gravitational Physics Discovery for Agents». Nolan Koblischke, Hyunseok Jang, Kristen Menou (University of Toronto, AI Physics and Safety Lab), Mohamad Ali-Dib (NYU Abu Dhabi). ICML 2025. arXiv: https://arxiv.org/abs/2501.18411 (v1 30.01.2025, v2 29.05.2025; прочитана v2).

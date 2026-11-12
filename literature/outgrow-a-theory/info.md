@@ -1,5 +1,8 @@
 # Learning to Outgrow a Theory (Joint Edit–Experiment)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.07627v1 (PDF, 6 Oct 2026, 30 стр. с приложениями A–G; HTML-версия на arxiv.org та же v1). Полный текст прочитан, включая все приложения. Это **методическая** статья, а не бенчмарк: авторы предлагают алгоритм и сами строят для него контролируемый набор сред. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Learning to Outgrow a Theory: Experimental Discovery Beyond the Initial Hypothesis Space». SiYuan Ma, Qixin Zhang (NTU), Albert Gao (CMU), Chunzheng Zhu (Hunan U.), Xin Yan (BNU), Wenlong Zhang (USTC), Wenxin Zhang (UCAS), Luqi Gong (Zhejiang Lab), Tianlin Li (Beihang). В колонтитуле PDF написано «Published as a conference paper at ICLR 2027». Статья вышла на arXiv в октябре 2026, до решений ICLR 2027, поэтому принятие **не проверено**: это может быть просто шаблон стиля. arXiv: https://arxiv.org/abs/2610.07627, категория cs.AI.

@@ -1,5 +1,8 @@
 # PhysGym
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **21** · ★ GitHub — **103** ([principia-ai/PhysGym](https://github.com/principia-ai/PhysGym)) · возраст ≈16 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2507.15550v2 (PDF, 26 Oct 2025, «39th Conference on Neural Information Processing Systems (NeurIPS 2025)»), клон репозитория `principia-ai/PhysGym` (HEAD `fe68079`, 2026-01-06), GitHub API. Ссылки на разделы и таблицы ниже даны по v2. OpenReview-страница (отзывы рецензентов) недоступна без браузерной проверки, отзывы я не читал.
 
 - **Статья:** «PhysGym: Benchmarking LLMs in Interactive Physics Discovery with Controlled Priors». Yimeng Chen, Piotr Piękos, Mateusz Ostaszewski, Firas Laakom (KAUST, Center of Excellence for Generative AI), Jürgen Schmidhuber (KAUST, IDSIA, NNAISENSE). NeurIPS 2025, Datasets and Benchmarks Track (poster; OpenReview id `w8uII2qAmd`). arXiv: https://arxiv.org/abs/2507.15550 (v1 21.07.2025, v2 26.10.2025).

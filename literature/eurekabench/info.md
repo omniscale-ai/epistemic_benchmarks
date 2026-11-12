@@ -1,5 +1,8 @@
 # EurekaBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **37** ([EurekaBench/EurekaBench](https://github.com/EurekaBench/EurekaBench)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.00492v1 (PDF и HTML, 30 Sep 2026, cs.CL; других версий нет). Полный текст прочитан, включая приложения A–F (шаблон задачи, промпты судей, доп. результаты, разбор провалов, описание сред, список задач). Репозиторий склонирован (коммит 58956ee от 2 Oct 2026) и просмотрен: `rubric.yaml` всех выложенных задач, `eurekabench/verify.py`, `proxy.py`, задача ice-shelf-flow-laws целиком. Код не запускался. Ссылки на разделы даны по v1.
 
 - **Статья:** «EurekaBench: Measuring Agentic Ability to Discover New Scientific Insights». Jiayi Geng, Zhengxuan Wu, Kevin S. Chen, Seungone Kim, Joseph Janssen, Zora Zhiruo Wang, Bhupalee Kalita, Runtian Gao, Aaron Ho, Andrew Oakleigh Nelson, Olexandr Isayev, Francisco Villaescusa-Navarro, Ching-Yao Lai, Howard Chen, Graham Neubig. CMU (LTI, Chemistry), Stanford (CS, Geophysics), Yale, MIT PSFC, Columbia, Princeton, Flatiron, Engram. Препринт, площадка не указана. https://arxiv.org/abs/2610.00492

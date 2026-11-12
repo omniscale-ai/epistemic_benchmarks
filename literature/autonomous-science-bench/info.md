@@ -1,5 +1,8 @@
 # Autonomous Science Bench (AS-Bench)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **11** ([Yibo-Wen/as-bench](https://github.com/Yibo-Wen/as-bench)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.18449v1 (PDF, 13 Oct 2026, 24 стр. с приложениями A–H; других версий нет). Полный текст прочитан, включая приложения (карточки кампаний C, Lab API D, калибровка E, планировщик G). Репозиторий клонирован (коммит b82ee55 от 14.10.2026) и просмотрен: `README.md`, `tasks/dataset.toml`, задача coercivity целиком (`instruction.md`, `task.toml`, `tests/test_outputs.py`, `README.md`), `runtime/asb_lab/server.py`. Код не запускался. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Autonomous Science Bench: Evaluating AI Agents for Autonomous Scientific Discovery». Yibo Wen, Han Liu «on behalf of the Autonomous Science Bench Team» (Northwestern University). Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2610.18449 (v1).

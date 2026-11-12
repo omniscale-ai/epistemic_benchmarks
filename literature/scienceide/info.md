@@ -1,5 +1,8 @@
 # ScienceIDE
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **7** · ★ GitHub — **104** ([aitofound/ScienceIDE](https://github.com/aitofound/ScienceIDE)) · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.19134v2 (PDF, 7 Nov 2026; v1 от 16 Sep 2026, размер обеих версий 883 KB). Технический отчёт AItonomy Foundation, 42 стр. с приложениями S1–S6. Полный текст прочитан, включая приложения S2–S4 (калибровка проверок, протокол оценки, аудит утечек, разбор траекторий) и S5 (SFT/RL). Репозиторий клонирован (коммит 65fb87f от 2026-09-19) и просмотрен. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «ScienceIDE: Turning World's Scientific Codebase into Agent Learnable Environments». Hejia Geng, Zesen Huang (equal contribution) и ещё ~60 авторов; corresponding: Zhenfei Yin, Yingcheng Wu, Ling Yang. Аффилиации: AItonomy Foundation, PhAI-Labs и около 29 организаций (список в App. S1); спонсоры PhAI-Labs и Qwen. Технический отчёт, площадка не указана. arXiv: https://arxiv.org/abs/2609.19134 (cs.CL).

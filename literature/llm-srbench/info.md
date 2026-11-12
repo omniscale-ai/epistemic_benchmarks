@@ -1,5 +1,8 @@
 # LLM-SRBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **98** · ★ GitHub — **132** ([deep-symbolic-mathematics/llm-srbench](https://github.com/deep-symbolic-mathematics/llm-srbench)) · возраст ≈19 мес.
+
+
 - **Статья:** "LLM-SRBench: A New Benchmark for Scientific Equation Discovery with Large Language Models". Parshin Shojaee, Ngoc-Hieu Nguyen, Kazem Meidani, Amir Barati Farimani, Khoa D. Doan, Chandan K. Reddy. ICML 2025 (Oral; PMLR 267, с. 55325–55359). arXiv: https://arxiv.org/abs/2504.10415 (v1 14.04.2025, v2 07.06.2025; ниже всё по PDF v2, 35 стр.).
 - **Код/данные:** GitHub https://github.com/deep-symbolic-mathematics/llm-srbench ; данные на HF: https://huggingface.co/datasets/nnheui/llm-srbench (gated: нужно принять условия; parquet с метаданными + `lsr_bench_data.hdf5` с точками, всего ~239 MB).
   - Лицензия: в README написано «MIT», но файла LICENSE в репозитории нет, и GitHub API лицензию не определяет (`license: null`). У HF-датасета лицензия не указана.

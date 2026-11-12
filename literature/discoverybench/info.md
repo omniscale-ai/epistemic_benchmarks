@@ -1,5 +1,8 @@
 # DiscoveryBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **124** · ★ GitHub — **167** ([allenai/discoverybench](https://github.com/allenai/discoverybench)) · возраст ≈28 мес.
+
+
 - **Статья:** «DiscoveryBench: Towards Data-Driven Discovery with Large Language Models». Авторы: Bodhisattwa Prasad Majumder, Harshit Surana, Dhruv Agarwal, Bhavana Dalvi Mishra, Abhijeetsingh Meena, Aryan Prakhar, Tirth Vora, Tushar Khot, Ashish Sabharwal, Peter Clark (AI2). arXiv:2407.01725, v1 от 1 июля 2024 (других версий на arXiv нет), https://arxiv.org/abs/2407.01725. Принята на **ICLR 2025** (poster, https://iclr.cc/virtual/2025/poster/32050; OpenReview id `vyflgpwfJW`). Camera-ready версию ICLR прочитать не удалось (OpenReview отдаёт капчу), поэтому всё ниже взято из arXiv v1, если не сказано иное. Отличия camera-ready от v1: «не проверено».
 - **Код/данные:** https://github.com/allenai/discoverybench; HF: https://huggingface.co/datasets/allenai/discoverybench (там только DB-REAL: 264 строки, train 25 / test 239, CSV, ~35 MB; 3 326 загрузок за месяц на момент проверки).
 - **Лицензия:** данные ODC-By (файлы `LICENSE`, `discoverybench/license.md`; на HF `odc-by`). Отдельной лицензии на код нет: GitHub API показывает `NOASSERTION`.

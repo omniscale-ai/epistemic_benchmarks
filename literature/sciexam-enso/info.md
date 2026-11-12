@@ -1,5 +1,8 @@
 # SciExam for ENSO
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **4** ([ylzhang2447/SciExam-ENSO-code](https://github.com/ylzhang2447/SciExam-ENSO-code)) · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.10513v2 (PDF, 21 Oct 2026, 28 стр. с приложениями A–H; v1 от 07.10.2026 не сравнивалась). Полный текст прочитан, включая приложения. Код и данные склонированы и просмотрены (commit 8bdf71f от 2026-10-24), код не запускался. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «SciExam for ENSO: Can AI Agents Build Climate Models?». Yinling Zhang (Ohio State), Langchen Liu (Yale), Dongbin Xiu (Ohio State), Xueyan Zou (UCSD), Xu Kuang (Stanford), Mengdi Wang, Shilong Liu (Princeton; corresponding). Препринт, площадка не указана. arXiv: https://arxiv.org/abs/2610.10513. Первый автор — также первый автор опубликованной эталонной модели [35] (Zhang, Chen, Vialard, Fang, J. Climate 2024).

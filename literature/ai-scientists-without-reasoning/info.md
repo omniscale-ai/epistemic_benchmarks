@@ -1,5 +1,8 @@
 # AI scientists produce results without reasoning scientifically (Corral)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **24** · ★ GitHub — **21** ([lamalab-org/corral](https://github.com/lamalab-org/corral)) · возраст ≈7 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2604.18805v1 (20 Apr 2026, единственная версия). Прочитаны HTML-версия основного текста и PDF целиком (109 стр.), включая приложения A–I: таксономия маркеров (F), таблицы результатов (G), промпты аннотатора, шаблоны паттернов и проверка согласия (H), ограничения (I). Посмотрен репозиторий `lamalab-org/corral` (HEAD 33ff0de от 12.11.2026): код детекторов паттернов в `src/corral/epistemic_analysis/patterns.py`. Код не запускался. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «AI scientists produce results without reasoning scientifically». Martiño Ríos-García, Nawaf Alampara (равный вклад, порядок случайный), Chandan Gupta, Indrajeet Mandal, Sajid Mannan, Ali Asghar Aghajani, N. M. Anoop Krishnan, Kevin Maik Jablonka. Группы Jablonka (FSU Jena, lamalab) и Krishnan (IIT Delhi). Препринт (оформлен как статья для журнала Nature-типа), лицензия статьи CC BY 4.0. https://arxiv.org/abs/2604.18805

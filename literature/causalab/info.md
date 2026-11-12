@@ -1,5 +1,8 @@
 # CausaLab
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **10** · ★ GitHub — **н/д** ([DylanZSZ/CausaLab-Benchmark](https://github.com/DylanZSZ/CausaLab-Benchmark)) · возраст ≈6 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2605.26029v2 (PDF, 28 May 2026, 34 стр. с приложением A.1–A.11; v1 от 25 May 2026 того же размера, v2 — последняя). Полный текст прочитан, включая приложения. Код просмотрен в клоне `DylanZSZ/CausaLab-Benchmark` (коммит 42ba47f от 2026-06-21), без запуска. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «CausaLab: A Scalable Environment for Interactive Causal Discovery Toward AI Scientists». Junlin Yang*, Dylan Zhang* (равный вклад), Xiangchen Song, Qirun Dai, Xiao Liu, Yuen Chen, Aniket Vashishtha, Jing Shi, Chenhao Tan, Hao Peng. Tsinghua, UIUC, CMU, University of Chicago, Adobe. Препринт cs.AI, площадка не указана. arXiv: https://arxiv.org/abs/2605.26029 (лицензия статьи CC BY 4.0).

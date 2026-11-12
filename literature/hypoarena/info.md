@@ -1,5 +1,8 @@
 # HypoArena (HypoData + HypoEval)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **2** · ★ GitHub — **1** ([SKYLENAGE-AI/HypoArena](https://github.com/SKYLENAGE-AI/HypoArena)) · возраст ≈4 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2607.15766v1 (PDF и HTML, 17 Jul 2026, 29 стр. с приложениями A–K; других версий на arXiv нет). Полный текст прочитан, включая приложения о сборе данных (B), построении (C), разметке (D), оценке (F), выравнивании с людьми и вторым судьёй (H, I), промпты (J) и навыки (K). Репозиторий склонирован и просмотрен (код не запускался). Файл данных с HF скачан и разобран. Ссылки на разделы ниже даны по v1.
 
 - **Статья:** «Before the Action: Benchmarking LLMs on Prospective Hypothesis Discovery». Tianyun Zhong*, Wangyi Jiang* (UCAS + Institute of Software CAS; стажировка в Alibaba), Wei Wang, Xuanang Chen, Yaojie Lu, Shiwei Ye, Yuzhen Shi, Boyu Yang, Jinghang Wang, Han Li, Weiqi Zhai, Bing Zhao, Hu Wei†, Haiyang Yu, Yongbin Li†, Hongyu Lin, Le Sun, Xianpei Han† (UCAS, ISCAS, Alibaba Group). Препринт cs.CL, площадка не указана (в BibTeX на HF «@inproceedings», author «Anonymous», то есть, вероятно, подача на конференцию, не проверено). arXiv: https://arxiv.org/abs/2607.15766 (v1, лицензия статьи CC BY 4.0).

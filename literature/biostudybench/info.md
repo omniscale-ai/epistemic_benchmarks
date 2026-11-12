@@ -1,5 +1,8 @@
 # BioStudyBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **0** · ★ GitHub — **нет репо** · возраст ≈1 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2610.07614v1 (PDF, 6 Oct 2026, 18 стр., приложения A–F; HTML-версия на arxiv.org тоже v1, других версий нет). Полный текст прочитан, включая все приложения: промпты отбора (App. E) и полный список 25 задач (App. F, Table 5). Ссылки на разделы и таблицы ниже даны по v1.
 
 - **Статья:** «BioStudyBench: Evaluating Agents on Post-Cutoff Biomedical Studies». David Li (University of Waterloo), Shaamil Karim, Christian Gensbigler (Atlas Discovery). NeurIPS 2026 Workshop «Agentic AI for Biological Discovery: Toward Closed-Loop Life-Science Intelligence». arXiv: https://arxiv.org/abs/2610.07614 (v1 от 06.10.2026; лицензия статьи — arXiv non-exclusive distribution).

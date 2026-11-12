@@ -1,5 +1,8 @@
 # Stargazer
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **4** · ★ GitHub — **12** ([AIPS-UofT/Stargazer](https://github.com/AIPS-UofT/Stargazer)) · возраст ≈7 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2604.15664v2 (PDF, 11 May 2026, «Preprint 2026», 30 стр. с приложениями A–E). Полный текст прочитан, включая приложения. Репозиторий склонирован (коммит 7c59e57 от 05.10.2026) и прочитан: evaluator, env, matching, submit-инструмент, генератор реальных задач, все 120 JSON-задач. Код не запускался; ряд проверок сделан собственным скриптом на numpy по данным из JSON (помечено «наша проверка»).
 
 - **Статья:** «Stargazer: A Scalable Model-Fitting Benchmark Environment for AI Agents under Astrophysical Constraints». Xinge Liu*, Terry Jingchen Zhang* (равный вклад), Bernhard Schölkopf, Zhijing Jin, Kristen Menou. University of Toronto, Vector Institute, MPI for Intelligent Systems (Тюбинген), ELLIS Institute Tübingen. Препринт 2026, площадка не указана. arXiv: https://arxiv.org/abs/2604.15664 (прочитана v2). Menou — соавтор Gravity-Bench (`literature/gravity-bench/`), группа та же.

@@ -1,5 +1,8 @@
 # BLADE
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **105** · ★ GitHub — **40** ([behavioral-data/BLADE](https://github.com/behavioral-data/BLADE)) · возраст ≈27 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2408.09667v3 (PDF от 10.11.2025, 36 стр. с приложением A; HTML-версия тоже v3). Полный текст прочитан, включая приложения A.1–A.8 и промпты (Fig. 9–19). Репозиторий склонирован и просмотрен (код оценки, аннотации, MCQ), код не запускался. Ссылки на разделы ниже даны по v3.
 
 - **Статья:** «BLADE: Benchmarking Language Model Agents for Data-Driven Science». Ken Gu, Ruoxi Shang, Ruien Jiang, Keying Kuang, Richard-John Lin, Donghe Lyu, Yue Mao, Youran Pan, Teng Wu, Jiaqian Yu, Yikun Zhang, Tianmai M. Zhang, Lanyi Zhu, Mike A. Merrill, Jeffrey Heer, Tim Althoff. University of Washington (основная группа Althoff/Heer) плюс UC Berkeley, NYU, Stanford, UBC, Microsoft, GWU. Девять авторов со звёздочкой — это эксперты-аннотаторы, приглашённые в соавторы (§3). Findings of EMNLP 2024 (на arXiv в Comments указано «EMNLP 2024»). arXiv: https://arxiv.org/abs/2408.09667 (v3).

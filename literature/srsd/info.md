@@ -1,5 +1,8 @@
 # SRSD (SRSD-Feynman)
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **65** · ★ GitHub — **44** ([omron-sinicx/srsd-benchmark](https://github.com/omron-sinicx/srsd-benchmark)) · возраст ≈53 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2206.10540v5 (PDF, 5 Mar 2024, 38 стр. с приложениями A–G), прочитан полностью, включая таблицы 8–23. Дополнительно прочитан код репозитория `omron-sinicx/srsd-benchmark` (последний коммит 2024-03-04): генерация данных (`datasets/feynman.py`, `datasets/sampling.py`), добавление dummy-столбцов (`dummy_column_mixer.py`), метрика (`eq_comparator.py`, `eq/eval.py`, `eq/conversion.py`). Код не запускался. Места, где вывод сделан нами по коду или нашим расчётом, помечены «(наш расчёт)» / «(по коду)».
 
 - **Статья:** «Rethinking Symbolic Regression Datasets and Benchmarks for Scientific Discovery». Yoshitomo Matsubara (Amazon Alexa; работа сделана как интерн OMRON SINIC X), Naoya Chiba (Tohoku University), Ryo Igarashi, Yoshitaka Ushiku (OMRON SINIC X). Journal of Data-centric Machine Learning Research (DMLR), 2024, рецензия на OpenReview (forum qrUdrXsiXX). arXiv: https://arxiv.org/abs/2206.10540 (прочитана v5).

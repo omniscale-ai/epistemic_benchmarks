@@ -1,5 +1,8 @@
 # TruthInsightBench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **3** · ★ GitHub — **3** ([TruthInsight-stack/TruthInsightBench](https://github.com/TruthInsight-stack/TruthInsightBench)) · возраст ≈2 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2609.05079v2 (PDF, 8 Sep 2026; v1 от 4 Sep 2026), 27 стр. с приложениями A–C. Полный текст прочитан, включая приложения. Репозиторий склонирован (коммит b58f0f1 от 8 Sep 2026) и просмотрен: спецификация 29 пунктов, код оценщика, ассеты одной задачи (Math_01). Код не запускался. Ссылки на разделы даны по v2.
 
 - **Статья:** «TruthInsightBench: An Evidence-Grounded Benchmark for Automated Evaluation of Open-Ended Scientific Discovery Agents». В шапке указан коллективный автор «TruthInsight-AI». В App. A названы core authors: Zhibo Yang, Chen Zhang (Jingdong Group), Yuewei Zhang (Alibaba Cloud), Hao (Henry) Wang (Computer Network Information Center, Chinese Academy of Sciences). Препринт cs.AI, площадка не указана. arXiv: https://arxiv.org/abs/2609.05079.

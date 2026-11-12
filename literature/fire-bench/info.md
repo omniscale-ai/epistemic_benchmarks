@@ -1,5 +1,8 @@
 # FIRE-Bench
 
+> **Популярность (на 2026-11-12):** цитирований (Semantic Scholar) — **18** · ★ GitHub — **16** ([maitrix-org/FIRE-Bench](https://github.com/maitrix-org/FIRE-Bench)) · возраст ≈9 мес.
+
+
 Источники (проверено 2026-11-12): arXiv 2602.02905v2 (PDF, 10 Jul 2026, версия ICML 2026, 34 стр. с приложениями A–M; v1 от 2 Feb 2026 не читалась). Полный текст прочитан, включая приложения. Репозиторий `maitrix-org/FIRE-Bench` клонирован (коммит a7017c9 от 2026-04-28) и просмотрен: формулировки задач, эталонные выводы, запуск агентов, оценщик. Код не запускался. Ссылки на разделы ниже даны по v2.
 
 - **Статья:** «FIRE-Bench: Evaluating AI Agents on the Rediscovery of Scientific Insights». Zhen Wang, Fan Bai, Zhongyan Luo (равный вклад), Jinyan Su, Kaiser Sun, Xinle Yu, Jieyuan Liu, Kun Zhou, Claire Cardie, Mark Dredze, Zhiting Hu, Eric P. Xing. UC San Diego, Johns Hopkins, Cornell, MBZUAI, CMU. ICML 2026 (PMLR 306). arXiv: https://arxiv.org/abs/2602.02905 (v2). Сайт: https://firebench.github.io (лидерборд, форма для сабмитов).
