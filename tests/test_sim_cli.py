@@ -1,0 +1,283 @@
+import json
+import math
+import re
+import subprocess
+import threading
+from pathlib import Path
+
+import pytest
+
+from abductbench.config import Family, Stage, Truth, VariantConfig
+from abductbench.ledger import Ledger, discriminating_fraction
+from abductbench.sim_cli import main as sim_main
+from abductbench.tasks import build_task, answer_query
+from abductbench.workspace import _dir_name, make_workspace
+
+# Substrings that must never appear in anything an agent can see in a mode-2 workspace.
+TRUTH_TOKENS = ["entity", "no_entity", "truth", "neutrino", "Neptune", "Vulcan"]
+STAGE_PATTERN = re.compile(r"-[abcd]-s\d")
+
+
+def cfg(family=Family.BETA, truth=Truth.ENTITY, stage=Stage.HISTORICAL, seed=0, mode=2):
+    return VariantConfig(family=family, truth=truth, stage=stage, seed=seed, mode=mode)
+
+
+def assert_no_truth(text: str, c: VariantConfig) -> None:
+    lowered = text.lower()
+    for token in TRUTH_TOKENS:
+        assert token.lower() not in lowered, f"forbidden token {token!r} in output"
+    assert c.variant_id not in text
+    assert not STAGE_PATTERN.search(text)
+
+
+def tree_files(root: Path) -> set[str]:
+    return {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file()}
+
+
+def make_mode2(tmp_path: Path, c: VariantConfig, budget: float = 40.0):
+    """Return (task_dir, ledger_dir) for a mode-2 workspace with state outside it."""
+    task_dir = make_workspace(c, tmp_path / "ws", state_root=tmp_path / "state", budget=budget)
+    return task_dir, tmp_path / "state" / _dir_name(c.variant_id)
+
+
+def cli_base(task_dir: Path, ledger_dir: Path) -> list[str]:
+    return ["--token", task_dir.name, "--state-root", str(ledger_dir.parent)]
+
+
+def test_charge_rejects_overspend_without_changing_state(tmp_path):
+    led = Ledger(tmp_path / "l", 10.0)
+    assert led.charge("events", 6.0, {"n": 1}) is True
+    before = led.log_path.read_bytes()
+
+    assert led.charge("recoil_correlation", 5.0) is False
+    for bad in (0.0, -1.0, math.nan, math.inf):
+        assert led.charge("events", bad) is False
+
+    assert led.log_path.read_bytes() == before
+    assert led.remaining == pytest.approx(4.0)
+    assert led.charge("events", 4.0) is True
+    assert led.remaining == pytest.approx(0.0)
+
+
+def test_ledger_outside_workspace(tmp_path):
+    c = cfg()
+    ws = tmp_path / "ws"
+    with pytest.raises(ValueError):
+        make_workspace(c, ws, state_root=ws / "state")
+    assert not ws.exists()  # refused before anything was written
+
+    task_dir = make_workspace(c, ws, state_root=tmp_path / "state")
+    ledger_dir = (tmp_path / "state" / _dir_name(c.variant_id)).resolve()
+    assert (ledger_dir / "log.jsonl").exists()
+    assert ws.resolve() not in ledger_dir.parents
+    assert ledger_dir.parent != ws.resolve()
+    # The ledger never lands inside the task directory either.
+    assert task_dir.resolve() not in ledger_dir.parents
+
+
+def test_mode2_requires_state_root(tmp_path):
+    with pytest.raises(ValueError):
+        make_workspace(cfg(), tmp_path / "ws")
+
+
+def test_mode1_workspace_unchanged_and_has_no_sim(tmp_path):
+    c = cfg(mode=1)
+    d = make_workspace(c, tmp_path)
+    bundle = build_task(c)
+    assert tree_files(d) == set(bundle.public_files)
+    for name, content in bundle.public_files.items():
+        data = content.encode("utf-8") if isinstance(content, str) else content
+        assert (d / name).read_bytes() == data
+    assert not (d / "sim").exists()
+
+
+def test_mode2_layout_and_starter_sample(tmp_path):
+    c = cfg(Family.BETA)
+    task_dir, _ = make_mode2(tmp_path, c)
+    assert tree_files(task_dir) == {
+        "task.md", "events.csv", "masses.csv", "detector.md", "sim",
+    }
+    events_lines = (task_dir / "events.csv").read_text().splitlines()
+    assert len(events_lines) == 101  # header + starter sample of 100 events
+    task_md = (task_dir / "task.md").read_text()
+    assert "./sim measure" in task_md and "./sim budget" in task_md
+    assert "40" in task_md  # default budget is stated
+    assert (task_dir / "sim").stat().st_mode & 0o111
+
+    oc = cfg(Family.ORBIT)
+    odir, _ = make_mode2(tmp_path / "o", oc)
+    assert len((odir / "target_positions.csv").read_text().splitlines()) == 21
+    other = (odir / "other_residuals.csv").read_text().splitlines()
+    assert len(other) == 1 + 3 * 20  # 20 rows for each of three other bodies
+
+
+def test_measure_returns_data_and_logs(tmp_path):
+    def run_sim(task_dir, *args):
+        return subprocess.run(
+            [str(task_dir / "sim"), *args], capture_output=True, text=True, timeout=300
+        )
+
+    # Beta: events draw.
+    bdir, bledger = make_mode2(tmp_path / "b", cfg(Family.BETA), budget=10.0)
+    r = run_sim(bdir, "measure", "events", "--arg", "n=5")
+    assert r.returncode == 0, r.stderr
+    data = json.loads(r.stdout)
+    assert data["columns"] == ["kinetic_energy", "recoil_energy", "recoil_angle_deg"]
+    assert len(data["rows"]) == 5
+    budget = json.loads(run_sim(bdir, "budget").stdout)
+    assert budget == {"remaining": 9.0}
+    lines = bledger.joinpath("log.jsonl").read_text().splitlines()
+    assert len(lines) == 2
+    assert json.loads(lines[1])["query_type"] == "events"
+
+    # Orbit: residuals of the target at two times, using the public target name.
+    odir, oledger = make_mode2(tmp_path / "o", cfg(Family.ORBIT), budget=10.0)
+    name = (odir / "target_positions.csv").read_text().splitlines()[1].split(",")[0]
+    r = run_sim(odir, "measure", "residuals", "--arg", f"body={name}", "--arg", "time=[1.0, 2.5]")
+    assert r.returncode == 0, r.stderr
+    data = json.loads(r.stdout)
+    assert len(data["time"]) == 2 and len(data["residual_arcsec"]) == 2
+    assert json.loads(run_sim(odir, "budget").stdout) == {"remaining": 9.0}
+    assert len(oledger.joinpath("log.jsonl").read_text().splitlines()) == 2
+
+
+def test_discriminating_fraction(tmp_path):
+    led = Ledger(tmp_path / "l", 100.0)
+    led.charge("events", 1.0)
+    led.charge("recoil_correlation", 5.0)
+    led.charge("target_thickness_scan", 8.0)
+    disc = {"recoil_correlation", "target_thickness_scan"}
+    assert discriminating_fraction(led.log_path, disc) == pytest.approx(13.0 / 14.0)
+    empty = Ledger(tmp_path / "e", 10.0)
+    assert discriminating_fraction(empty.log_path, disc) == 0.0
+
+
+def test_unknown_query_type_error_no_truth(tmp_path, capsys):
+    c = cfg(Family.BETA, Truth.ENTITY)
+    with pytest.raises(ValueError) as info:
+        answer_query(c, "bogus", {})
+    msg = str(info.value)
+    assert "events" in msg and "target_thickness_scan" in msg
+    assert_no_truth(msg, c)
+
+    task_dir, ledger_dir = make_mode2(tmp_path, c)
+    rc = sim_main([*cli_base(task_dir, ledger_dir), "measure", "bogus"])
+    out = capsys.readouterr().out
+    assert rc != 0
+    assert "error" in json.loads(out)
+    assert_no_truth(out, c)
+    assert len(ledger_dir.joinpath("log.jsonl").read_text().splitlines()) == 1  # nothing charged
+
+
+def test_budget_exhaustion_blocks_data(tmp_path, capsys):
+    c = cfg(Family.BETA)
+    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=2.0)
+    base = cli_base(task_dir, ledger_dir)
+    assert sim_main([*base, "measure", "events", "--arg", "n=1"]) == 0
+    capsys.readouterr()
+    assert sim_main([*base, "measure", "events", "--arg", "n=1"]) == 0
+    capsys.readouterr()
+
+    rc = sim_main([*base, "measure", "events", "--arg", "n=1"])
+    out = capsys.readouterr().out
+    assert rc == 2
+    assert json.loads(out) == {"error": "insufficient budget", "remaining": 0.0}
+
+    rc = sim_main([*base, "measure", "recoil_correlation"])  # cost 5, nothing left
+    assert rc == 2
+    assert "rows" not in capsys.readouterr().out
+
+
+def test_log_is_source_of_truth(tmp_path):
+    led = Ledger(tmp_path / "l", 10.0)
+    assert led.charge("events", 4.0)
+    first_line = led.log_path.read_text().splitlines()[0]
+    assert json.loads(first_line) == {"budget": 10.0}
+
+    reopened = Ledger(tmp_path / "l", 1000.0)  # budget argument ignored for existing ledgers
+    assert reopened.remaining == pytest.approx(6.0)
+    assert reopened.charge("events", 7.0) is False
+    assert reopened.remaining == pytest.approx(6.0)
+    assert Ledger(tmp_path / "l", 1000.0).remaining == pytest.approx(6.0)
+    assert json.loads(first_line) == {"budget": 10.0}
+
+
+def test_concurrent_charges_do_not_overspend(tmp_path):
+    path = tmp_path / "l"
+    Ledger(path, 25.0)
+    results: list[bool] = []
+
+    def worker():
+        led = Ledger(path, 25.0)  # its own file handle, as a separate process would have
+        for _ in range(10):
+            results.append(led.charge("events", 1.0))
+
+    threads = [threading.Thread(target=worker) for _ in range(8)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert sum(results) == 25
+    assert Ledger(path, 25.0).remaining == pytest.approx(0.0)
+
+
+def test_beta_thickness_scan_differs_by_truth(tmp_path):
+    ent = answer_query(cfg(Family.BETA, Truth.ENTITY), "target_thickness_scan", {"_n": 0})
+    non = answer_query(cfg(Family.BETA, Truth.NO_ENTITY), "target_thickness_scan", {"_n": 0})
+    json.dumps(ent)
+    json.dumps(non)
+    assert len(ent["summaries"]) == 3
+
+    def shape(result):
+        return [s["histogram"] for s in result["summaries"]]
+
+    ent_shapes = shape(ent)
+    assert all(h == ent_shapes[0] for h in ent_shapes)  # hidden carrier: thickness-independent
+    non_shapes = shape(non)
+    assert non_shapes[0] != non_shapes[-1]  # detector artifact: tail changes with thickness
+
+
+def test_orbit_search_region_detects_only_for_entity(tmp_path):
+    full = answer_query(
+        cfg(Family.ORBIT, Truth.ENTITY), "search_region",
+        {"lon_min": 0.0, "lon_max": 360.0, "time": 5.0, "_n": 0},
+    )
+    cands = full["candidates"]
+    assert len(cands) == 1
+    lon = cands[0]["longitude_deg"]
+
+    # A one-degree sector centred on the opposite side of the sky must be empty.
+    far = answer_query(
+        cfg(Family.ORBIT, Truth.ENTITY), "search_region",
+        {"lon_min": (lon + 179.0) % 360.0, "lon_max": (lon + 181.0) % 360.0, "time": 5.0, "_n": 0},
+    )
+    assert far["candidates"] == []
+
+    none = answer_query(
+        cfg(Family.ORBIT, Truth.NO_ENTITY), "search_region",
+        {"lon_min": 0.0, "lon_max": 360.0, "time": 5.0, "_n": 0},
+    )
+    assert none["candidates"] == []
+
+
+@pytest.mark.parametrize("family", [Family.BETA, Family.ORBIT])
+def test_wrapper_contains_no_variant_info(tmp_path, family):
+    c = cfg(family, Truth.ENTITY, Stage.HISTORICAL)
+    task_dir, _ = make_mode2(tmp_path, c)
+    wrapper = (task_dir / "sim").read_text()
+    assert_no_truth(wrapper, c)
+    assert c.variant_id not in wrapper
+    for path in task_dir.rglob("*"):
+        if path.is_file():
+            assert_no_truth(path.read_text(errors="ignore"), c)
+
+
+@pytest.mark.parametrize("family", [Family.BETA, Family.ORBIT])
+def test_task_md_costs_match_charged_costs(family):
+    from abductbench.tasks import QUERY_COSTS, query_help
+
+    c = cfg(family)
+    text = query_help(c)
+    for query_type, cost in QUERY_COSTS[family].items():
+        assert f"`{query_type}` (cost {cost:g})" in text

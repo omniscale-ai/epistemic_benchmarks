@@ -323,16 +323,15 @@ def _fmt_deg(x: float) -> str:
     return f"{x:.9f}"
 
 
-def build_orbit(cfg: VariantConfig) -> TaskBundle:
-    u = _universe(cfg)
-    truth = cfg.truth
-    tgt = u.target_planet
-    others = [j for j in range(4) if j != tgt]
-    rng = np.random.default_rng([cfg.seed, cfg.mode, _STAGE_IDX[cfg.stage], _TRUTH_IDX[truth]])
-    noise = rng.normal(0.0, cfg.noise, size=(4, N_OBS))  # arcsec, one row per planet
+def _truth_splines(cfg: VariantConfig):
+    """One batched integration over the horizon: row 0 is T0, row 1 is the truth.
 
-    # One batched integration: row 0 is T0, row 1 is the truth.
-    mu, k = _truth_batch(u, truth)
+    Returns the universe, residual and unwrapped-longitude splines for the four
+    planets (arcsec and radians, public time), and the truth-row state history
+    of shape (S, N, 2) with the time grid.
+    """
+    u = _universe(cfg)
+    mu, k = _truth_batch(u, cfg.truth)
     x0, v0 = _initial_state(u.mu_base, u.elements)
     n_steps = u.n_steps(EXT_YR)
     X, _ = _run(mu, np.stack([x0, x0]), np.stack([v0, v0]), k, u.n, u.dt, n_steps)
@@ -342,6 +341,16 @@ def build_orbit(cfg: VariantConfig) -> TaskBundle:
     grid = np.arange(n_steps + 1) * u.dt
     res_spl = [CubicSpline(grid, res[:, j]) for j in range(4)]
     lam0_spl = [CubicSpline(grid, lam0[:, j]) for j in range(4)]
+    return u, res_spl, lam0_spl, X[:, 1], grid
+
+
+def build_orbit(cfg: VariantConfig) -> TaskBundle:
+    u, res_spl, lam0_spl, _, _ = _truth_splines(cfg)
+    truth = cfg.truth
+    tgt = u.target_planet
+    others = [j for j in range(4) if j != tgt]
+    rng = np.random.default_rng([cfg.seed, cfg.mode, _STAGE_IDX[cfg.stage], _TRUTH_IDX[truth]])
+    noise = rng.normal(0.0, cfg.noise, size=(4, N_OBS))  # arcsec, one row per planet
 
     t_obs = np.linspace(TIME_YR / N_OBS, TIME_YR, N_OBS) / u.tick
     obs_lon = lam0_spl[tgt](t_obs) + res_spl[tgt](t_obs) / ARCSEC_PER_RAD + noise[tgt] / ARCSEC_PER_RAD
@@ -429,3 +438,104 @@ Write a Python module `law.py` that defines:
   arcseconds, at times `t` (in {tunit}). It accepts an array of any shape and returns an array
   of the same shape.
 """
+
+
+# ---------------------------------------------------------------------------
+# Mode-2 query API. Residuals use the same truth splines as the public files,
+# plus fresh observation noise per call (cfg, query tag, call index).
+# ---------------------------------------------------------------------------
+
+_QUERY_TAG = {"residuals": 201, "other_body_residuals": 202, "search_region": 203}
+SEARCH_LON_SIGMA_DEG = 0.01  # longitude measurement scatter of a detection
+SEARCH_DIST_REL_SIGMA = 0.005  # relative distance scatter of a detection
+
+
+def _query_rng(cfg: VariantConfig, tag: int, call: int):
+    return np.random.default_rng([cfg.seed, cfg.mode, _STAGE_IDX[cfg.stage], _TRUTH_IDX[cfg.truth], tag, call])
+
+
+def query_help(cfg: VariantConfig) -> str:
+    """Lines for task.md describing the orbit query types for this stage's time units."""
+    spec = _SPECS[cfg.stage]
+    horizon = EXT_YR / spec.tick_yr
+    tunit = spec.tunit
+    return "\n".join(
+        [
+            f"- `residuals` (cost 1): `body` (one of the four planet names in `known_bodies.csv`) and "
+            f"`time` (a JSON list of times, or `{{\"start\": a, \"stop\": b, \"n\": k}}`; times in {tunit} from 0 to "
+            f"{horizon:.6g}). Returns the residual in arcseconds, observed minus T0, with measurement noise.",
+            f"- `other_body_residuals` (cost 2): `time` as above. Returns the residual series in arcseconds for "
+            "each planet other than the target.",
+            f"- `search_region` (cost 8): `time` (one value from 0 to {horizon:.6g} {tunit}), `lon_min` and "
+            "`lon_max` (heliocentric longitude range in degrees; if `lon_min` is greater than `lon_max` the "
+            "range wraps through 0). Returns the point-like objects detected in that range at that time.",
+        ]
+    )
+
+
+def _in_range(lon: float, lo: float, hi: float) -> bool:
+    if lo <= hi:
+        return lo <= lon <= hi
+    return lon >= lo or lon <= hi
+
+
+def query(cfg: VariantConfig, query_type: str, args: dict) -> dict:
+    from abductbench.tasks._query_util import call_index, float_arg, times_arg
+
+    call = call_index(args)
+    u, res_spl, _, X_truth, grid = _truth_splines(cfg)
+    horizon = EXT_YR / u.tick
+    names = u.names[1:]
+    tgt = u.target_planet
+    tunit = u.spec.tunit
+    rng = _query_rng(cfg, _QUERY_TAG.get(query_type, 0), call)
+
+    if query_type == "residuals":
+        body = args.get("body")
+        if body not in names:
+            raise ValueError(f"argument 'body' must be one of: {', '.join(names)}")
+        t = times_arg(args, "time", horizon)
+        res = res_spl[names.index(body)](t) + rng.normal(0.0, cfg.noise, size=t.shape)
+        return {"body": body, "time_unit": tunit, "time": t.tolist(), "residual_arcsec": res.tolist()}
+
+    if query_type == "other_body_residuals":
+        t = times_arg(args, "time", horizon)
+        bodies = {}
+        for j in range(4):
+            if j == tgt:
+                continue
+            res = res_spl[j](t) + rng.normal(0.0, cfg.noise, size=t.shape)
+            bodies[names[j]] = res.tolist()
+        return {"time_unit": tunit, "time": t.tolist(), "residual_arcsec": bodies}
+
+    if query_type == "search_region":
+        t = float_arg(args, "time")
+        if not 0.0 <= t <= horizon:
+            raise ValueError(f"argument 'time' must lie in [0, {horizon:.6g}] in {tunit}")
+        lon_min, lon_max = float_arg(args, "lon_min"), float_arg(args, "lon_max")
+        full_circle = lon_max - lon_min >= 360.0
+        lo, hi = lon_min % 360.0, lon_max % 360.0
+        candidates = []
+        if cfg.truth is Truth.ENTITY:
+            # The optional outer body (state PERT) exists only in the entity truth.
+            d = X_truth[:, PERT, :] - X_truth[:, 0, :]
+            lon_spl = CubicSpline(grid, np.unwrap(np.arctan2(d[:, 1], d[:, 0])))
+            r_spl = CubicSpline(grid, np.hypot(d[:, 0], d[:, 1]))
+            lon = float(np.degrees(lon_spl(t)) % 360.0)
+            if full_circle or _in_range(lon, lo, hi):
+                candidates.append(
+                    {
+                        "longitude_deg": float((lon + rng.normal(0.0, SEARCH_LON_SIGMA_DEG)) % 360.0),
+                        "distance": float(r_spl(t) * (1.0 + rng.normal(0.0, SEARCH_DIST_REL_SIGMA))),
+                        "distance_unit": u.spec.dunit,
+                    }
+                )
+        return {
+            "time": t,
+            "time_unit": tunit,
+            "lon_min": lon_min,
+            "lon_max": lon_max,
+            "candidates": candidates,
+        }
+
+    raise ValueError(f"unknown query type {query_type!r}")

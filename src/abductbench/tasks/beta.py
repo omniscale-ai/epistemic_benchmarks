@@ -107,10 +107,12 @@ def _raw_entity(T: np.ndarray, s: _Setup) -> np.ndarray:
     return np.where(inside, f, 0.0)
 
 
-def _raw_no_entity(T: np.ndarray, s: _Setup) -> np.ndarray:
+def _raw_no_entity(T: np.ndarray, s: _Setup, thickness: float = 1.0) -> np.ndarray:
+    # thickness scales the energy-loss tail (length and weight); 1.0 is the generator's nominal target.
     Q, sig = s.Q, s.sigma
-    lam = 0.1 * Q
+    lam = 0.1 * Q * thickness
     w_peak, w_tail, w_shelf = NO_ENTITY_WEIGHTS
+    w_tail = w_tail * thickness
     peak = np.exp(-0.5 * ((T - Q) / sig) ** 2) / (sig * math.sqrt(2 * math.pi))
     tail = np.where(T <= Q, np.exp(np.minimum((T - Q) / lam, 0.0)) / lam, 0.0)
     shelf = np.where((T >= 0) & (T <= Q), 1.0 / Q, 0.0)
@@ -118,8 +120,9 @@ def _raw_no_entity(T: np.ndarray, s: _Setup) -> np.ndarray:
     return np.where(T >= 0, f, 0.0)
 
 
-def _raw(truth: Truth, T: np.ndarray, s: _Setup) -> np.ndarray:
-    return _raw_entity(T, s) if truth is Truth.ENTITY else _raw_no_entity(T, s)
+def _raw(truth: Truth, T: np.ndarray, s: _Setup, thickness: float = 1.0) -> np.ndarray:
+    # The hidden-carrier line shape does not depend on the target thickness.
+    return _raw_entity(T, s) if truth is Truth.ENTITY else _raw_no_entity(T, s, thickness)
 
 
 def _integrate(f: np.ndarray, x: np.ndarray) -> float:
@@ -148,21 +151,21 @@ def _make_truth_law(truth: Truth, s: _Setup):
     return law
 
 
-def _sample_truth_mev(truth: Truth, s: _Setup, rng, n: int) -> np.ndarray:
+def _sample_truth_mev(truth: Truth, s: _Setup, rng, n: int, thickness: float = 1.0) -> np.ndarray:
     lo, hi = WINDOW[0] * s.Q, WINDOW[1] * s.Q
     grid = np.linspace(lo, hi, GRID)
-    f = _raw(truth, grid, s)
+    f = _raw(truth, grid, s, thickness)
     cdf = np.concatenate([[0.0], np.cumsum((f[1:] + f[:-1]) * np.diff(grid) / 2.0)])
     cdf /= cdf[-1]
     return np.interp(rng.random(n), cdf, grid)
 
 
-def _events(truth: Truth, s: _Setup, rng) -> dict[str, np.ndarray]:
+def _events(truth: Truth, s: _Setup, rng, n: int = N_EVENTS) -> dict[str, np.ndarray]:
     lo, hi = WINDOW[0] * s.Q, WINDOW[1] * s.Q
     kept_T, kept_true = [], []
     got = 0
-    while got < N_EVENTS:
-        T_true = _sample_truth_mev(truth, s, rng, 2 * N_EVENTS)
+    while got < n:
+        T_true = _sample_truth_mev(truth, s, rng, 2 * n)
         if truth is Truth.ENTITY:
             T_obs = T_true + rng.normal(0.0, s.sigma, size=T_true.shape)
         else:
@@ -171,26 +174,26 @@ def _events(truth: Truth, s: _Setup, rng) -> dict[str, np.ndarray]:
         kept_T.append(T_obs[ok])
         kept_true.append(T_true[ok])
         got += int(ok.sum())
-    T_obs = np.concatenate(kept_T)[:N_EVENTS]
-    T_true = np.concatenate(kept_true)[:N_EVENTS]
+    T_obs = np.concatenate(kept_T)[:n]
+    T_true = np.concatenate(kept_true)[:n]
 
     # Two-body kinematics for the recoil, in the electron direction frame.
     p_e = np.sqrt(np.maximum((T_true + s.m_e) ** 2 - s.m_e**2, 0.0))
     if truth is Truth.NO_ENTITY:
         p_r = p_e
-        angle = np.full(N_EVENTS, math.pi)
+        angle = np.full(n, math.pi)
     else:
         dq = s.Q - T_true
         p_X = np.sqrt(np.maximum(dq**2 - s.m_X**2, 0.0)) if s.stage is Stage.COUNTERFACTUAL else dq
-        phi = rng.uniform(0.0, 2 * math.pi, size=N_EVENTS)
+        phi = rng.uniform(0.0, 2 * math.pi, size=n)
         Sx = p_e + p_X * np.cos(phi)
         Sy = p_X * np.sin(phi)
         p_r = np.hypot(Sx, Sy)
         angle = np.arccos(np.clip(-Sx / np.maximum(p_r, 1e-12), -1.0, 1.0))
 
     E_r = np.sqrt(p_r**2 + s.M_d**2) - s.M_d
-    E_r_obs = E_r * (1.0 + s.noise * rng.normal(size=N_EVENTS))
-    angle_obs = np.degrees(angle) + 40.0 * s.noise * rng.normal(size=N_EVENTS)
+    E_r_obs = E_r * (1.0 + s.noise * rng.normal(size=n))
+    angle_obs = np.degrees(angle) + 40.0 * s.noise * rng.normal(size=n)
     return {"T": T_obs, "E_r": E_r_obs, "angle": angle_obs}
 
 
@@ -296,3 +299,103 @@ def build_beta(cfg: VariantConfig) -> TaskBundle:
         discriminating_queries=frozenset({"recoil_correlation", "target_thickness_scan"}),
         oracle_family=partial(beta_oracle, truth=truth, stage=cfg.stage),
     )
+
+
+# ---------------------------------------------------------------------------
+# Mode-2 query API. Results are generated from the same process as the public
+# files, with a fresh sub-seed per call (cfg, query tag, call index).
+# ---------------------------------------------------------------------------
+
+_QUERY_TAG = {"events": 101, "recoil_correlation": 102, "target_thickness_scan": 103}
+THICKNESS_LEVELS = (0.5, 1.0, 2.0)  # relative to the nominal target thickness
+SCAN_EVENTS = N_EVENTS
+SCAN_BINS = 10
+EVENT_COLUMNS = ["kinetic_energy", "recoil_energy", "recoil_angle_deg"]
+
+
+def _query_rng(cfg: VariantConfig, tag: int, call: int):
+    return np.random.default_rng(
+        [cfg.seed, cfg.mode, _STAGE_IDX[cfg.stage], _TRUTH_IDX[cfg.truth], tag, call]
+    )
+
+
+def query_help(cfg: VariantConfig) -> str:
+    """Lines for task.md describing the beta query types (no truth-revealing content)."""
+    return "\n".join(
+        [
+            "- `events` (cost 1), optional `n` (integer 1 to 500, default 100): new events from the same "
+            f"measurement, columns {', '.join(EVENT_COLUMNS)} in the units of `events.csv`.",
+            "- `recoil_correlation` (cost 5), optional `n` (integer 1 to 500, default 200): statistics "
+            "comparing electron and recoil momenta for `n` new events, plus a sample of rows.",
+            "- `target_thickness_scan` (cost 8), no arguments: energy spectrum summaries at three "
+            "target thicknesses.",
+        ]
+    )
+
+
+def query(cfg: VariantConfig, query_type: str, args: dict) -> dict:
+    from abductbench.tasks._query_util import call_index, int_arg
+
+    s = _setup(cfg)
+    call = call_index(args)
+    scale = s.scale
+
+    if query_type == "events":
+        n = int_arg(args, "n", 100, 1, 500)
+        ev = _events(cfg.truth, s, _query_rng(cfg, _QUERY_TAG[query_type], call), n)
+        rows = [[float(T / scale), float(Er / scale), float(a)] for T, Er, a in zip(ev["T"], ev["E_r"], ev["angle"])]
+        return {"columns": EVENT_COLUMNS, "rows": rows}
+
+    if query_type == "recoil_correlation":
+        n = int_arg(args, "n", 200, 1, 500)
+        ev = _events(cfg.truth, s, _query_rng(cfg, _QUERY_TAG[query_type], call), n)
+        p_e = np.sqrt(np.maximum(ev["T"] * (ev["T"] + 2.0 * s.m_e), 0.0))
+        p_r = np.sqrt(np.maximum(ev["E_r"] * (ev["E_r"] + 2.0 * s.M_d), 0.0))
+        mismatch = (p_r - p_e) / np.maximum(p_e, 1e-12)
+        k = min(10, n)
+        rows = [[float(T / scale), float(Er / scale), float(a)] for T, Er, a in zip(ev["T"][:k], ev["E_r"][:k], ev["angle"][:k])]
+        return {
+            "n_events": n,
+            "mismatch_mean": float(np.mean(mismatch)),
+            "mismatch_std": float(np.std(mismatch)),
+            "mismatch_rms": float(np.sqrt(np.mean(mismatch**2))),
+            "columns": EVENT_COLUMNS,
+            "sample_rows": rows,
+        }
+
+    if query_type == "target_thickness_scan":
+        return _thickness_scan(cfg, s, call)
+
+    raise ValueError(f"unknown query type {query_type!r}")
+
+
+def _thickness_scan(cfg: VariantConfig, s: _Setup, call: int) -> dict:
+    lo, hi = WINDOW[0] * s.Q, WINDOW[1] * s.Q
+    scale = s.scale
+    edges_mev = np.linspace(lo, hi, SCAN_BINS + 1)
+    summaries = []
+    for th in THICKNESS_LEVELS:
+        # Common random numbers: every thickness starts from the same generator state,
+        # so any difference between summaries comes from the thickness itself.
+        rng = _query_rng(cfg, _QUERY_TAG["target_thickness_scan"], call)
+        T_true = _sample_truth_mev(cfg.truth, s, rng, SCAN_EVENTS, thickness=th)
+        if cfg.truth is Truth.ENTITY:
+            T_obs = T_true + rng.normal(0.0, s.sigma, size=T_true.shape)
+        else:
+            T_obs = T_true  # resolution is already part of the line shape
+        inside = (T_obs >= lo) & (T_obs <= hi)
+        kept = T_obs[inside]
+        counts, _ = np.histogram(kept, bins=edges_mev)
+        summaries.append(
+            {
+                "thickness": float(th),
+                "n_events": int(SCAN_EVENTS),
+                "n_in_window": int(inside.sum()),
+                "mean": float(np.mean(kept) / scale) if kept.size else None,
+                "std": float(np.std(kept) / scale) if kept.size else None,
+                "line_fraction": float(np.mean(np.abs(T_obs - s.Q) <= 3 * s.sigma)),
+                "tail_fraction": float(np.mean(T_obs < s.Q - 3 * s.sigma)),
+                "histogram": [int(c) for c in counts],
+            }
+        )
+    return {"units": s.names["unit"], "bin_edges": [float(e / scale) for e in edges_mev], "summaries": summaries}
