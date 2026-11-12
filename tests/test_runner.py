@@ -146,8 +146,8 @@ def test_mode2_ledger_copied_and_outside_workspace(tmp_path):
     assert first == {"budget": 40.0}
     assert not (rec.workspace / LOG_NAME).exists()
     assert not any(p.name == LOG_NAME for p in rec.workspace.rglob("*"))
-    assert not Path(rec.workspace).resolve().is_relative_to(runs / "_state")
-    assert not (runs / "_state").resolve().is_relative_to(rec.workspace.resolve())
+    assert not Path(rec.workspace).resolve().is_relative_to(runs / "_s")
+    assert not (runs / "_s").resolve().is_relative_to(rec.workspace.resolve())
 
 
 def test_run_record_json_roundtrip(tmp_path):
@@ -227,3 +227,36 @@ def test_runner_source_imports_no_evaluator():
             modules.add(node.module)
     bad = sorted(m for m in modules if m.startswith("abductbench.evaluate") or "judge" in m or "rubric" in m or "oracle" in m)
     assert bad == []
+
+
+LEAK_WORDS = ["entity", "beta", "orbit", "neutrino", "neptune", "vulcan", "truth"]
+
+
+@pytest.mark.parametrize("family", list(Family))
+@pytest.mark.parametrize("truth", list(Truth))
+@pytest.mark.parametrize("stage", list(Stage))
+@pytest.mark.parametrize("mode", [1, 2])
+def test_launch_paths_and_wrapper_do_not_leak_variant(tmp_path, family, truth, stage, mode):
+    import re
+
+    c = cfg(family=family, truth=truth, stage=stage, seed=3, mode=mode)
+    runs = tmp_path / "runs"
+    rec = make_run(c, runs, agent_cmd=fake("nothing"), timeout_s=60)
+    ws = rec.workspace.resolve()
+    paths = list(ws.relative_to(runs.resolve()).parts)
+    texts = []
+    # nothing but the workspace itself is in its parent (no sibling variants, no index)
+    assert [p.name for p in ws.parent.iterdir()] == [ws.name]
+    if mode == 2:
+        wrapper = (ws / "sim").read_text()
+        # only the sim token and the state root are variant-neutral by construction
+        texts.append(wrapper.split("PYTHONPATH=")[0] + wrapper.split("--token", 1)[1])
+        state = Path(re.search(r"--state-root (\S+)", wrapper).group(1).strip("'"))
+        paths += list(state.relative_to(runs.resolve()).parts)
+    for text in paths + texts:
+        low = text.lower()
+        for w in LEAK_WORDS + [c.variant_id]:
+            assert w.lower() not in low, (w, text)
+        assert not re.search(r"-[abcd]-s\d+|-s\d+-m[12]", low)
+    record = json.loads((runs / c.variant_id / "record.json").read_text())
+    assert record["variant_id"] == c.variant_id

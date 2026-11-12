@@ -53,7 +53,7 @@ from pathlib import Path
 
 from abductbench.config import VariantConfig
 from abductbench.ledger import LOG_NAME
-from abductbench.workspace import DEFAULT_BUDGET, make_workspace
+from abductbench.workspace import DEFAULT_BUDGET, INDEX_NAME, make_workspace
 
 AGENT_MODEL = "sonnet"
 AGENT_TIMEOUT_S = 3600
@@ -295,20 +295,24 @@ def make_run(
 ) -> RunRecord:
     """Build a fresh workspace, run the agent, and write ``record.json`` (and the ledger).
 
-    The workspace goes under ``runs_root/_work/``. Each call gets a fresh mode-2 state root
-    under ``runs_root/_state/`` so that a re-run starts with the full budget and the ledger
+    The workspace goes under ``runs_root/_w/w-XXXX/`` (neutral names). Each call gets a fresh mode-2
+    state root under ``runs_root/_s/s-XXXX`` so that a re-run starts with the full budget and the ledger
     stays outside the workspace.
     """
     runs_root = Path(runs_root)
-    work_parent = runs_root / "_work"
+    work_parent = runs_root / "_w"
     work_parent.mkdir(parents=True, exist_ok=True)
-    work_root = Path(tempfile.mkdtemp(prefix=f"{cfg.variant_id}-", dir=work_parent))
+    # Neutral random names, one private parent per workspace: no variant id in any path the agent
+    # sees (cwd, parents, siblings, state root). The mapping lives only in record.json.
+    work_root = Path(tempfile.mkdtemp(prefix="w-", dir=work_parent))
     state_root = None
     if cfg.mode == 2:
-        state_parent = runs_root / "_state"
+        state_parent = runs_root / "_s"
         state_parent.mkdir(parents=True, exist_ok=True)
-        state_root = Path(tempfile.mkdtemp(prefix=f"{cfg.variant_id}-", dir=state_parent))
+        state_root = Path(tempfile.mkdtemp(prefix="s-", dir=state_parent))
     workspace = make_workspace(cfg, work_root, state_root=state_root, budget=budget)
+    # The index maps the neutral task dir back to the variant id; the agent must not read it.
+    (work_root / INDEX_NAME).unlink(missing_ok=True)
 
     record = run_agent(cfg, workspace, runs_root, agent_cmd=agent_cmd, timeout_s=timeout_s)
     dest = runs_root / cfg.variant_id
