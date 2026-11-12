@@ -5,6 +5,7 @@ import math
 import sys
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,6 +51,15 @@ def test_smoke_all_16_variants_oracle_agent(oracle_result):
     assert (runs.rubric_pass_rate == 1.0).all()
     assert (runs.domain_score > 0.99).all()
 
+    assert (runs.mech_status == "ok").all()
+    assert runs.mech_kind_ok.astype(bool).all()
+    for _, row in runs.iterrows():
+        if row["mech_declared_kind"] == "detector_response":
+            assert row["mech_params_ok"] is None or pd.isna(row["mech_params_ok"]), row["variant_id"]
+        else:
+            assert row["mech_params_ok"] is True or row["mech_params_ok"] == True, row["variant_id"]  # noqa: E712
+    assert (oracle_result["summary"].mechanism_kind_rate == 1.0).all()
+
 
 def test_smoke_constant_yes_agent_pair_rate_zero(tmp_path, oracle_cache):
     result = smoke.run_smoke(tmp_path, seed=0, agent="constant_yes", oracle_cache=oracle_cache)
@@ -60,6 +70,27 @@ def test_smoke_constant_yes_agent_pair_rate_zero(tmp_path, oracle_cache):
     summary = result["summary"]
     assert set(summary.entity_correct_rate) == {0.0, 1.0}
     assert summary.entity_correct_rate.mean() == pytest.approx(0.5)
+
+
+def test_smoke_curve_fit_agent_scores_on_prediction_not_mechanism(tmp_path, oracle_cache):
+    result = smoke.run_smoke(tmp_path, seed=0, agent="curve_fit", oracle_cache=oracle_cache)
+    runs = result["runs"]
+    assert len(runs) == 16
+    assert (runs.mech_status == "missing").all()
+    assert not runs.mech_kind_ok.astype(bool).any()
+    assert (runs.law_status == "ok").all()
+    assert (runs.nrmse_in < 1e-6).all()
+    assert (result["summary"].mechanism_kind_rate == 0.0).all()
+
+
+def test_smoke_wrong_mechanism_agent_kind_not_ok(tmp_path, oracle_cache):
+    result = smoke.run_smoke(tmp_path, seed=0, agent="wrong_mechanism", oracle_cache=oracle_cache)
+    runs = result["runs"]
+    assert len(runs) == 16
+    assert (runs.law_status == "ok").all()
+    assert (runs.mech_status == "ok").all()
+    assert not runs.mech_kind_ok.astype(bool).any()
+    assert (result["summary"].mechanism_kind_rate == 0.0).all()
 
 
 def test_smoke_runner_never_leaks_truth_into_workspace(oracle_result):

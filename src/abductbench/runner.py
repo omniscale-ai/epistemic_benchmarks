@@ -88,6 +88,9 @@ _PROMPT_BODY = """You are solving a scientific inference task. Everything you ne
 Steps:
 1. Read task.md. It describes the observations, the required signature of law(...) and the keys of DOMAIN.
 2. Write law.py. It must define law(...) with exactly the signature given in task.md, and a module-level dict DOMAIN with exactly the keys named in task.md; every DOMAIN value is a (lo, hi) tuple of numbers. law.py must be deterministic, must not read files or use the network, and must run quickly. The evaluator imports law.py and calls law(...) twice (once on points inside DOMAIN, once on extrapolation points) in an environment with only numpy and scipy; the total time limit for importing and both calls is 20 seconds. It may import helper modules that you save in this directory (they stay importable next to law.py).
+   - law.py must also define a module-level dict MECHANISM, exactly as specified in task.md (the schema and the allowed forms are given there). It is checked automatically against the true mechanism.
+   - The evaluator also scores law(...) at points far outside the range of the data, so a curve fitted only to the data is not enough: the law should follow from the mechanism you propose.
+   - The "## Explanation" section of answer.md and MECHANISM must agree with each other.
 3. Write answer.md with exactly three markdown sections, in this order: "## Law", "## Limits", "## Explanation".
    - Law: the law in words, referring to law.py.
    - Limits: where the law applies and where it does not.

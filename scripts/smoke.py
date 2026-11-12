@@ -6,7 +6,7 @@ fake agent, ``evaluate_run`` scores the saved files (law, answer, judge), and
 with the hidden ``--copy-agent`` flag: it copies a pre-computed ``law.py`` and ``answer.md``
 into its working directory. The judge is a stub that passes every rubric item.
 
-Usage: ``python scripts/smoke.py <root> [--agent oracle|constant_yes] [--seed N]``
+Usage: ``python scripts/smoke.py <root> [--agent oracle|constant_yes|curve_fit|wrong_mechanism] [--seed N]``
 """
 from __future__ import annotations
 
@@ -48,20 +48,40 @@ from abductbench.evaluate.rubric import Rubric, load_rubric  # noqa: E402
 from abductbench.runner import make_run  # noqa: E402
 from abductbench.tasks import build_task  # noqa: E402
 
-AGENTS = ("oracle", "constant_yes")
+AGENTS = ("oracle", "constant_yes", "curve_fit", "wrong_mechanism")
 AGENT_TIMEOUT_S = 120
 
 
-def perfect_law_source(bundle: TaskBundle, family: Family) -> str:
-    """law.py that interpolates the true law over dense embedded points, with the true DOMAIN."""
+def public_mechanism(bundle: TaskBundle) -> dict:
+    """The true mechanism without its tolerances (the agent never sees tolerances)."""
+    return {k: v for k, v in bundle.true_mechanism.items() if k != "tolerance"}
+
+
+def wrong_mechanism(bundle: TaskBundle) -> dict:
+    """A mechanism of the other kind of the same family, with arbitrary parameters."""
+    other = {
+        "hidden_body": {"kind": "force_law", "n": 3.0, "k": 1.0},
+        "force_law": {"kind": "hidden_body", "a": 1.0, "mass": 1.0},
+        "hidden_carriers": {"kind": "detector_response"},
+        "detector_response": {"kind": "hidden_carriers", "n_carriers": 2, "mass": 0.0},
+    }
+    return other[bundle.true_mechanism["kind"]]
+
+
+def perfect_law_source(bundle: TaskBundle, family: Family, mechanism: dict | None = None) -> str:
+    """law.py that interpolates the true law over dense embedded points, with the true DOMAIN.
+
+    ``mechanism`` (if given) is written as the module-level MECHANISM dict; None writes none."""
     ep = bundle.eval_points()
     x = np.unique(np.concatenate([ep.in_range, ep.extrapolation]).astype(float))
     y = np.asarray(bundle.truth_law(x), dtype=float)
     arg = "T" if family is Family.BETA else "t"
     domain = {k: [float(lo), float(hi)] for k, (lo, hi) in bundle.true_domain.items()}
+    mech_line = f"MECHANISM = {json.dumps(mechanism)}\n" if mechanism is not None else ""
     return (
         "import numpy as np\n"
         f"DOMAIN = {json.dumps(domain)}\n"
+        f"{mech_line}"
         f"_X = np.array({json.dumps(x.tolist())})\n"
         f"_Y = np.array({json.dumps(y.tolist())})\n"
         f"def law({arg}):\n"
@@ -96,7 +116,8 @@ def run_smoke(
     """Run the 16 variants of ``seed`` (mode 1) under ``root`` and return the results.
 
     ``agent="oracle"`` answers with the true ENTITY value; ``"constant_yes"`` always says
-    yes. ``judge_stub`` replaces the default all-pass stub when given. Returns a dict with
+    yes; ``"curve_fit"`` has the perfect law but no MECHANISM; ``"wrong_mechanism"`` declares
+    the other kind of the family. ``judge_stub`` replaces the default all-pass stub when given. Returns a dict with
     ``runs`` (one row per variant), ``summary`` (aggregate), ``pairs`` (pair_table) and
     ``judge_calls``.
     """
@@ -110,7 +131,13 @@ def run_smoke(
         for cfg in all_variants(seeds=[seed], modes=(1,)):
             bundle = build_task(cfg)
             law_src = Path(tmp) / f"{cfg.variant_id}-law.py"
-            law_src.write_text(perfect_law_source(bundle, cfg.family), encoding="utf-8")
+            mechanism = {
+                "oracle": public_mechanism,
+                "constant_yes": public_mechanism,
+                "curve_fit": lambda b: None,
+                "wrong_mechanism": wrong_mechanism,
+            }[agent](bundle)
+            law_src.write_text(perfect_law_source(bundle, cfg.family, mechanism), encoding="utf-8")
             entity = bool(bundle.entity) if agent == "oracle" else True
             answer_src = Path(tmp) / f"{cfg.variant_id}-answer.md"
             answer_src.write_text(answer_text(entity), encoding="utf-8")
@@ -147,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
 
     result = run_smoke(args.root, seed=args.seed, agent=args.agent)
     runs = result["runs"]
-    cols = ["variant_id", "law_status", "nrmse_in", "rel_in", "domain_score", "answer_status", "entity_pred", "entity_truth"]
+    cols = ["variant_id", "law_status", "nrmse_in", "rel_in", "domain_score", "answer_status", "entity_pred", "entity_truth", "mech_status", "mech_kind_ok", "mech_params_ok"]
     with pd.option_context("display.width", 200, "display.max_columns", None):
         print(runs[cols].to_string(index=False))
         print()

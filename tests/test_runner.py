@@ -272,7 +272,16 @@ def test_prompt_states_evaluator_limits():
     text = build_agent_prompt(cfg())
     assert "twice" in text and "20 seconds" in text
     assert "numpy and scipy" in text and "helper modules" in text
+    assert "far outside" in text and "scores law" in text
     assert build_agent_prompt(cfg(mode=1)).split("Note:")[0] == build_agent_prompt(cfg(mode=2)).split("Note:")[0]
+
+
+def test_prompt_mentions_mechanism_and_task_md():
+    text = build_agent_prompt(cfg())
+    assert "MECHANISM" in text and "task.md" in text
+    assert "checked automatically" in text and "must agree" in text
+    for word in ("hidden_body", "force_law", "hidden_carriers", "detector_response"):
+        assert word not in text
 
 
 def test_agent_environ_prepends_agent_venv_and_drops_python_vars(tmp_path):
