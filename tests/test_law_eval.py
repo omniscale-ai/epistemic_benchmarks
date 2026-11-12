@@ -239,3 +239,40 @@ def test_no_domain_scores_zero_and_stays_ok(tmp_path):
     r = evaluate_law(b, write_law(tmp_path, zeros_source()))
     assert r.status == "ok", r.detail
     assert r.domain_score == 0.0
+
+
+def test_law_can_import_sibling_module(tmp_path):
+    b = bundle_for(Family.ORBIT)
+    law = write_law(
+        tmp_path,
+        "import numpy as np\n"
+        "from sib import zero_like\n"
+        "def law(t):\n"
+        "    return zero_like(np.asarray(t, dtype=float))\n",
+    )
+    (law.parent / "sib.py").write_text(
+        "import numpy as np\ndef zero_like(t):\n    return np.zeros_like(t)\n", encoding="utf-8"
+    )
+    r = evaluate_law(b, law)
+    assert r.status == "ok", r.detail
+    assert not (law.parent / "__pycache__").exists()
+
+
+def test_large_stdout_still_ok(tmp_path):
+    b = bundle_for(Family.ORBIT)
+    law = write_law(
+        tmp_path,
+        "import sys\nimport numpy as np\n"
+        "sys.stdout.write('x' * 1_000_000)\n"
+        "def law(t):\n"
+        "    return np.zeros_like(np.asarray(t, dtype=float))\n",
+    )
+    r = evaluate_law(b, law)
+    assert r.status == "ok", r.detail
+
+
+def test_sys_exit_at_import_is_crash(tmp_path):
+    b = bundle_for(Family.ORBIT)
+    law = write_law(tmp_path, "import sys\nsys.exit(0)\ndef law(t):\n    return t\n")
+    r = evaluate_law(b, law)
+    assert r.status == "crash", r.detail

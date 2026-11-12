@@ -7,7 +7,9 @@ failure inside the child becomes a status; this module does not raise on agent c
 
 Limitations: the child is not a real sandbox. It is not network-isolated (only the
 environment is stripped, so no proxies), and it can still touch absolute paths.
-``PYTHONHASHSEED`` is ignored under ``-I`` (which implies ``-E``).
+Hash seeding is not pinned: ``PYTHONHASHSEED`` is ignored under ``-I`` (which implies ``-E``).
+The law directory is appended to ``sys.path`` so law.py can import sibling files; bytecode
+writing is disabled so no ``__pycache__`` appears in the workspace.
 """
 
 from __future__ import annotations
@@ -67,6 +69,10 @@ def read_domain(mod):
 
 
 def main():
+    # Let law.py import sibling modules from its own directory (e.g. a public t0_model.py).
+    # Appended, not prepended: a workspace file must not shadow stdlib modules that law.py
+    # imports lazily.
+    sys.path.append(os.path.dirname(os.path.abspath(law_path)))
     try:
         spec = importlib.util.spec_from_file_location("law_under_test", law_path)
         mod = importlib.util.module_from_spec(spec)
@@ -108,8 +114,8 @@ main()
 '''
 
 # Minimal environment for the child. Proxy variables are deliberately absent.
+# PYTHONHASHSEED is not set: under -I (implies -E) the variable is ignored anyway.
 _CHILD_ENV = {
-    "PYTHONHASHSEED": "0",
     "PYTHONDONTWRITEBYTECODE": "1",
     "LANG": "C.UTF-8",
     "LC_ALL": "C.UTF-8",
