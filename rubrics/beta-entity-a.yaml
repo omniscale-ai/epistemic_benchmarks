@@ -1,0 +1,18 @@
+truth_summary: >
+  Beta decay with real names. The parent nucleus decays into the daughter nucleus, an electron, and a hidden neutral light particle of the neutrino type. That particle carries away the missing energy and momentum, so energy and momentum conservation hold for the three-body decay and the continuous electron spectrum is not a violation. The electron spectrum is zero at the kinetic-energy endpoint, and its low-energy shape is modified by a Coulomb correction that depends on the daughter charge. The recoil momentum balances event by event.
+items:
+  - id: names_hidden_object
+    criterion: "Names a specific hidden neutral light particle of the neutrino type as the carrier of the missing energy and momentum, not just unknown energy."
+    applies_when: always
+  - id: conservation_law_rescued
+    criterion: "States that energy and momentum conservation are kept in the decay, and that the continuous electron spectrum is explained by the decay energy being shared with the hidden particle."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from energy non-conservation, a detector artifact, and more than one hidden particle, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a concrete measurement that separates the hidden-particle hypothesis from a detector artifact, such as event-by-event recoil momentum balance or checking that no sharp line appears at the full endpoint energy."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the spectrum anomaly and the hidden-particle argument in plain words, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

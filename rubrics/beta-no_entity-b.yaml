@@ -1,0 +1,18 @@
+truth_summary: >
+  Beta decay with renamed particles and rescaled units, but no new particle. The apparent anomaly is produced by the detector response, with the same structure as the real-name case: an endpoint peak, a low-energy energy-loss tail, and a backscatter shelf, all expressed in the public-file units. The real cause is the instrument. Labels and units in the public files must not be mistaken for new physics, and no hidden particle is needed to balance the data.
+items:
+  - id: no_entity_posited
+    criterion: "Does not posit a new hidden particle, under any public-file label, as the source of the missing energy and momentum, and states that none is needed."
+    applies_when: always
+  - id: real_cause_identified
+    criterion: "Identifies the detector response as the cause, naming the endpoint peak, the energy-loss tail and the backscatter shelf in the public-file units."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from an invented particle, a unit or scale mistake from the rescaled quantities, and energy non-conservation, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a measurement that changes the target thickness or the detector angle and checks whether the tail follows the setup, which a new particle would not do."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the spectrum anomaly and the detector explanation in plain words, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

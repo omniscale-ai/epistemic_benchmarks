@@ -1,0 +1,18 @@
+truth_summary: >
+  Neptune-like case with renamed bodies, units and scales. An unseen outer body with mass perturbs the outer target body, and the public files refer to bodies by labels rather than real planets. Newtonian gravity is unchanged, and momentum and angular momentum of the whole system, including the hidden body, are conserved. The residual is the hidden body's pull, so the explanation must use the public-file labels and units.
+items:
+  - id: names_hidden_object
+    criterion: "Names the unseen outer body by its public-file label or an equivalent description, and gives it as the cause of the target body's residual."
+    applies_when: always
+  - id: conservation_law_rescued
+    criterion: "States that the force law and the conservation of momentum and angular momentum for the whole system are kept, and that the residual is explained by the hidden body's pull."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from a modified force law acting on all bodies, a timing or scale error from the rescaled units, and a non-gravitational effect, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a targeted search at the predicted position of the hidden body, or a check that the residual follows its predicted path over time, as a test that separates it from a modified force law."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

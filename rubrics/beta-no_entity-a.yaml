@@ -1,0 +1,18 @@
+truth_summary: >
+  Beta decay with real names, but no new particle. The apparent continuous electron spectrum and the apparent missing momentum are a detector artifact: the detector response has a resolution peak at the endpoint, a low-energy tail from energy loss in the target, and a backscatter shelf. The real cause is this detector response, and recoil momentum balances in the data. A real particle would not change the tail with target thickness or detector angle, so those changes distinguish the artifact from a new particle.
+items:
+  - id: no_entity_posited
+    criterion: "Does not posit a new neutral particle or any other additional carrier of missing energy and momentum, and states that none is needed."
+    applies_when: always
+  - id: real_cause_identified
+    criterion: "Identifies the detector response as the cause, naming a peak at the full decay energy together with a low-energy energy-loss tail and a backscatter shelf."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from an invented hidden particle, energy non-conservation, and a detector artifact, and gives a specific reason for rejecting each one listed, citing the recoil momentum balance where it applies."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a measurement that changes the target thickness or the detector angle and checks whether the low-energy tail and the endpoint peak follow the setup, which a real particle would not do."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the spectrum anomaly and the detector explanation in plain words, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

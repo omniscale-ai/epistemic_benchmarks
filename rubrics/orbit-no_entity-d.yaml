@@ -1,0 +1,18 @@
+truth_summary: >
+  Synthetic orbit case with invented bodies and an invented force law, and no hidden body. The target body's residual comes from a modification of the generator's central law acting on every body. The explanation must identify the law modification and must not posit an invented body or a real planet.
+items:
+  - id: no_entity_posited
+    criterion: "Does not posit a new hidden body in the synthetic system, and states that the residual is explained by the force law alone."
+    applies_when: always
+  - id: real_cause_identified
+    criterion: "Identifies the cause as a modification of the central force law of the synthetic system, applied to every body, rather than an object or an observation error."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from an unseen body, an observation error, and a different invented law that is inconsistent with the other bodies, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a test that checks whether the same law modification predicts the residuals of the other bodies, or a search for a hidden body that is expected to return nothing."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

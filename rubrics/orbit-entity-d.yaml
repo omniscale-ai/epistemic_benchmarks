@@ -1,0 +1,18 @@
+truth_summary: >
+  Synthetic orbit case in an invented solar system with invented bodies and invented conservation rules. An invented outer body with mass perturbs the target body, and the generator's own conservation rules hold once the body is included. The explanation must identify the invented body and its role, not a real planet, and it must not rely on the familiar solar system.
+items:
+  - id: names_hidden_object
+    criterion: "Names the invented outer body of the synthetic system, using the names in the public files, and gives its role in producing the target's residual."
+    applies_when: always
+  - id: conservation_law_rescued
+    criterion: "States that the synthetic system's conservation rule is kept, and that the invented body carries the balancing quantity, so nothing is violated."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from a modification of the force law acting on all bodies, a known real planet as the cause, and an observation error, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a targeted search at the predicted location of the invented body, or a check whether other bodies show the same residual, as a test that separates the hypotheses."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

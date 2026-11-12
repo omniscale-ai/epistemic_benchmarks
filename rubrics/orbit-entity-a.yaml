@@ -1,0 +1,18 @@
+truth_summary: >
+  Neptune-like case with real names. An unseen outer body with real mass perturbs the orbit of the outer target planet and produces its residual longitude drift. Newtonian gravity and the known bodies are unchanged; the hidden body is the carrier of the residual, and total momentum and angular momentum of the whole system, including the hidden body, are conserved. An independent check is consistent with the body: a search in the predicted sky region finds it.
+items:
+  - id: names_hidden_object
+    criterion: "Names a specific unseen outer body, with an approximate orbit or sky position, as the cause of the outer planet's residual, not just an unknown effect."
+    applies_when: always
+  - id: conservation_law_rescued
+    criterion: "States that Newtonian gravity is kept, that momentum and angular momentum are conserved for the whole system including the hidden body, and that the body's gravitational pull explains the residual."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from a modified force law acting on all bodies, an observation or ephemeris error, and a non-gravitational effect, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a targeted search at the predicted sky position of the body, or a check that the residual follows the body's predicted path over time, as a test that separates it from a modified force law."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

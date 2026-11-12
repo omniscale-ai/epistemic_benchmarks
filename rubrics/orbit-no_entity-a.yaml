@@ -1,0 +1,18 @@
+truth_summary: >
+  Vulcan-like case with real names and no new body. The inner target planet's perihelion precesses because the attraction law itself is modified: an extra short-range radial term acts on every body, so the cause is part of the law and not an external object. The same modification changes the precession of the other inner planets as well. Standard gravity with the known bodies is not sufficient, and no unseen body is needed.
+items:
+  - id: no_entity_posited
+    criterion: "Does not posit a new unseen body or planet as the cause of the inner planet's residual, and states that none is needed or supported."
+    applies_when: always
+  - id: real_cause_identified
+    criterion: "Identifies the cause as a modification of the central gravitational force law acting on the bodies, an extra radial term, and not an unseen body and not an observation error alone."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from an unseen perturbing body, an observation or ephemeris error, and a modified force law, and gives a specific reason for rejecting each one listed, including why one hidden body would not fit the other inner planets."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a test that separates a law modification from a hidden body, such as checking whether the other inner planets precess at the rate the same modified law predicts, or a targeted search in the predicted region that is expected to come up empty."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

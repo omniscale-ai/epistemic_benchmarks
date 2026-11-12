@@ -1,0 +1,18 @@
+truth_summary: >
+  Synthetic beta decay in an invented world with invented particles and an invented conservation law. The decay emits an invented number of hidden massless particles, which together carry away the balance of the generator's conserved quantity, so the electron spectrum has a generator-defined power-law shape rather than the familiar form. The anomaly is a conserved quantity shared with hidden particles, not a violation of the rule. The explanation must identify the invented hidden particles and their role, not a standard neutrino or the familiar spectrum.
+items:
+  - id: names_hidden_object
+    criterion: "Names the invented hidden particles, using the names of the synthetic world, as the carriers of the missing quantity, and states how many of them the explanation proposes."
+    applies_when: always
+  - id: conservation_law_rescued
+    criterion: "Identifies the conserved quantity that the synthetic world obeys and states that the hidden particles carry it away, so the anomaly is accounted for rather than violating the rule."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from non-conservation, a detector artifact, a single hidden particle, and an unchanged standard spectral shape, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a measurement that distinguishes the number or type of hidden particles, such as how the spectral shape changes with the decay energy or with the recoil balance, rather than only confirming that an anomaly exists."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the spectrum anomaly and the hidden-particle argument in plain words, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

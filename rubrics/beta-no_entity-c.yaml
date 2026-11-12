@@ -1,0 +1,18 @@
+truth_summary: >
+  Counterfactual beta decay with no new particle, and the remembered textbook spectrum is not the right reference. The apparent anomaly is a detector artifact: an endpoint peak with an energy-loss tail and a backscatter shelf, whose shape in this variant differs from the textbook form. The real cause is the detector response. No heavy or light hidden particle is needed, and the spectral shape must not be attributed to one.
+items:
+  - id: no_entity_posited
+    criterion: "Does not posit a hidden particle, massive or massless, as the source of the anomaly, and states that none is needed."
+    applies_when: always
+  - id: real_cause_identified
+    criterion: "Identifies the detector response as the cause, and does not attribute the spectrum to a hidden particle of any mass or to the textbook massless spectrum."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from a massive hidden particle, a massless hidden particle, and energy non-conservation, and gives a specific reason for rejecting each one, such as the momentum balance or the shape of the endpoint region."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a measurement that changes the target thickness or the detector angle and checks whether the endpoint peak and the tail follow the setup, which a heavy particle's spectrum would not do."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the spectrum anomaly and the detector explanation in plain words, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

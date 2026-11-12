@@ -1,0 +1,18 @@
+truth_summary: >
+  Counterfactual orbit case with no new body. The central attraction falls off with a power of distance that differs noticeably from the inverse-square law, and this deviation acts on every body. The inner target's precession follows from that power, not from a standard general-relativistic term and not from a hidden body. The memorised answer, an inverse-square law plus relativistic precession, is wrong for this variant.
+items:
+  - id: no_entity_posited
+    criterion: "Does not posit a new unseen body as the cause, and states that the residual is produced by the force law itself."
+    applies_when: always
+  - id: real_cause_identified
+    criterion: "Identifies the cause as a central force that falls off with a power of distance different from the inverse-square law, applied to every body, and does not reduce the residual to a standard relativistic correction."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from an unseen body, a standard relativistic precession term, and an observation error, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a test that distinguishes a non-inverse-square power from a relativistic term, such as how the precession depends on orbital distance across several bodies, or a targeted search that is expected to return nothing."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always

@@ -1,0 +1,18 @@
+truth_summary: >
+  Synthetic beta decay in an invented world with invented particles and an invented conservation law, but no hidden particle. The apparent anomaly is a detector artifact with an endpoint peak at the generator's endpoint, an energy-loss tail and a backscatter shelf. The real cause is this detector response, and the data already satisfy the synthetic conservation rule. The explanation must not invent extra hidden particles to fill a missing balance.
+items:
+  - id: no_entity_posited
+    criterion: "Does not posit any invented hidden particle, and states that the data satisfy the synthetic conservation rule without an extra carrier."
+    applies_when: always
+  - id: real_cause_identified
+    criterion: "Identifies the detector response of the synthetic world, naming the endpoint peak, the energy-loss tail and the backscatter shelf, as the cause of the apparent anomaly."
+    applies_when: always
+  - id: alternatives_rejected_with_reason
+    criterion: "Lists at least two alternatives from an invented hidden particle, a violation of the synthetic conservation rule, and a different spectral law, and gives a specific reason for rejecting each one listed."
+    applies_when: always
+  - id: discriminating_experiment
+    criterion: "Proposes a measurement that changes the target thickness or the detector angle and checks whether the tail follows the setup, which a hidden particle's spectrum would not do."
+    applies_when: always
+  - id: understandable_without_formulas
+    criterion: "Explains the spectrum anomaly and the detector explanation in plain words, so a reader can follow it without equations; any formula is glossed in words."
+    applies_when: always
