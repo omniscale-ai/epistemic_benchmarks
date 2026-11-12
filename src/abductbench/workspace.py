@@ -29,7 +29,7 @@ from abductbench.tasks import build_task, query_help
 
 SALT = "abductbench-workspace-v1"
 INDEX_NAME = "_index.json"
-DEFAULT_BUDGET = 40.0
+DEFAULT_BUDGET = 20  # simulations (successful `./sim measure` calls)
 # The simulator finds a workspace by hashing variant ids over seeds range(TOKEN_SCAN_SEEDS).
 TOKEN_SCAN_SEEDS = 100
 SIM_NAME = "sim"
@@ -93,11 +93,12 @@ def _sim_section(cfg: VariantConfig, budget: float) -> str:
         "`sim` program in this folder:",
         "",
         "- `./sim budget` prints the remaining budget as JSON.",
-        "- `./sim measure <query_type> [--arg key=value ...]` prints the answer as JSON and charges its cost. "
+        "- `./sim measure <query_type> [--arg key=value ...]` prints the answer as JSON and uses up one simulation. "
         "Values are read as JSON when possible, e.g. `--arg n=200`.",
-        "- A query whose cost exceeds the remaining budget is refused (exit code 2) and returns no data.",
+        "- Once the budget is used up, further queries are refused (exit code 2) and returns no data.",
         "",
-        f"Total budget: {budget:g} units. Query types, costs and arguments:",
+        f"Total budget: {budget:g} simulations. Each `./sim measure` call is one simulation, whatever the "
+        "query type or size (see the per-call limits). Query types and arguments:",
         "",
         query_help(cfg),
         "",

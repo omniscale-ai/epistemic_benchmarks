@@ -364,7 +364,7 @@ def _query_rng(cfg: VariantConfig, tag: int, call: int, sub: int = 0):
 
 
 def row_count(query_type: str, args: dict) -> int | None:
-    """Rows of the answer table that the price is based on; None if the query is not row-priced."""
+    """Rows of one answer (validates the per-call size cap); None for queries without a row count."""
     from abductbench.tasks._query_util import int_arg
 
     if query_type == "events":
@@ -377,14 +377,12 @@ def query_help(cfg: VariantConfig) -> str:
     light = _setup(cfg).names["light"]
     return "\n".join(
         [
-            "- `events` (cost 1 per 50 rows, rounded up), optional `n` (integer 1 to 500, default 100): "
-            f"new events from the same measurement, columns {', '.join(EVENT_COLUMNS)} in the units of `events.csv`.",
-            "- `recoil_correlation` (cost 5), optional `n` (integer 1 to 500, default 200): statistics "
+            "- `events`: optional `n` (integer 1 to 500, default 100): "
+            f"new events from the same measurement, columns {', '.join(EVENT_COLUMNS)} on the same scale as `events.csv`.",
+            "- `recoil_correlation`: optional `n` (integer 1 to 500, default 200): statistics "
             f"comparing {light} and recoil momenta for `n` new events, plus a sample of 10 rows.",
-            "- `target_thickness_scan` (cost 8), no arguments: energy spectrum summaries at three "
+            "- `target_thickness_scan`: no arguments: energy spectrum summaries at three "
             "target thicknesses.",
-            "Pricing: `events` costs 1 unit per block of 50 events, or part of a block. 50 or fewer events "
-            "cost 1 unit and 500 events cost 10 units. The other two query types have fixed costs.",
         ]
     )
 

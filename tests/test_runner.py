@@ -143,7 +143,7 @@ def test_mode2_ledger_copied_and_outside_workspace(tmp_path):
     ledger = dest / "ledger.jsonl"
     assert ledger.is_file()
     first = json.loads(ledger.read_text().splitlines()[0])
-    assert first == {"budget": 40.0}
+    assert first == {"budget": 20}
     assert not (rec.workspace / LOG_NAME).exists()
     assert not any(p.name == LOG_NAME for p in rec.workspace.rglob("*"))
     assert not Path(rec.workspace).resolve().is_relative_to(runs / "_s")
@@ -184,8 +184,10 @@ def test_agent_command_flags(tmp_path):
     disallowed = argv[argv.index("--disallowedTools") + 1]
     assert "WebSearch" in disallowed and "WebFetch" in disallowed and "Task" in disallowed
     assert "--max-turns" not in argv
-    assert argv[argv.index("--max-budget-usd") + 1] == "5"
-    assert float(argv[argv.index("--max-budget-usd") + 1]) == runner.MAX_BUDGET_USD
+    assert runner.MAX_BUDGET_USD is None
+    assert "--max-budget-usd" not in argv  # no dollar cap by default
+    capped = _agent_command(prompt, tmp_path, max_budget_usd=3)
+    assert capped[capped.index("--max-budget-usd") + 1] == "3"
     assert _agent_command(prompt, tmp_path, max_budget_usd=2.5)[-1] == "2.5"
     joined = " ".join(argv)
     assert "dangerously-skip-permissions" not in joined

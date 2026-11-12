@@ -1,20 +1,18 @@
 from __future__ import annotations
 
 import importlib.util
-import math
 
 from abductbench.config import Family, TaskBundle, VariantConfig
 from abductbench.tasks import beta as _beta
 from abductbench.tasks.beta import build_beta
 
-# Mode-2 query types and their costs, per family. Every key is a legal query_type.
-QUERY_COSTS: dict[Family, dict[str, float]] = {
-    Family.BETA: {"events": 1.0, "recoil_correlation": 5.0, "target_thickness_scan": 8.0},
-    Family.ORBIT: {"residuals": 1.0, "other_body_residuals": 2.0, "search_region": 8.0},
+# Mode-2 query types per family. Every query costs exactly one simulation.
+QUERY_TYPES: dict[Family, tuple[str, ...]] = {
+    Family.BETA: ("events", "recoil_correlation", "target_thickness_scan"),
+    Family.ORBIT: ("residuals", "other_body_residuals", "search_region"),
 }
 
-
-ROWS_PER_PRICE_BLOCK = 50
+SIMULATION_COST = 1.0  # ledger charge for one successful measure call
 
 
 def build_task(cfg: VariantConfig) -> TaskBundle:
@@ -29,32 +27,21 @@ def build_task(cfg: VariantConfig) -> TaskBundle:
     raise ValueError(f"unknown family: {cfg.family}")
 
 
-def _base_cost(cfg: VariantConfig, query_type: str) -> float:
-    costs = QUERY_COSTS.get(cfg.family, {})
-    if not isinstance(query_type, str) or query_type not in costs:
-        allowed = ", ".join(sorted(costs))
-        raise ValueError(f"unknown query type {query_type!r}; allowed types: {allowed}")
-    return costs[query_type]
+def check_query(cfg: VariantConfig, query_type: str, args: dict) -> float:
+    """Validate the query type and per-call size caps; return its cost (always one simulation).
 
-
-def query_cost(cfg: VariantConfig, query_type: str, args: dict) -> float:
-    """Price of one query with these arguments.
-
-    Row-priced queries (events, residuals, other_body_residuals) cost the base
-    amount for each block of ROWS_PER_PRICE_BLOCK rows, or part of a block. The
-    other query types cost the base amount. Raises ValueError for unknown types
-    or invalid arguments.
+    Raises ValueError for unknown types or invalid/oversized arguments, before anything is charged.
     """
-    base = _base_cost(cfg, query_type)
+    types = QUERY_TYPES.get(cfg.family, ())
+    if not isinstance(query_type, str) or query_type not in types:
+        raise ValueError(f"unknown query type {query_type!r}; allowed types: {', '.join(sorted(types))}")
     if cfg.family is Family.BETA:
-        rows = _beta.row_count(query_type, args)
+        _beta.row_count(query_type, args)
     else:
         from abductbench.tasks import orbit as _orbit
 
-        rows = _orbit.row_count(cfg, query_type, args)
-    if rows is None:
-        return base
-    return base * math.ceil(rows / ROWS_PER_PRICE_BLOCK)
+        _orbit.row_count(cfg, query_type, args)
+    return SIMULATION_COST
 
 
 def query_help(cfg: VariantConfig) -> str:
@@ -68,7 +55,7 @@ def query_help(cfg: VariantConfig) -> str:
 
 def answer_query(cfg: VariantConfig, query_type: str, args: dict | None = None) -> dict:
     """Generate the JSON-serialisable answer to one mode-2 query (no cost is charged here)."""
-    _base_cost(cfg, query_type)  # validates the type
+    check_query(cfg, query_type, dict(args or {}))  # validates the type and size caps
     args = dict(args or {})
     if cfg.family is Family.BETA:
         return _beta.query(cfg, query_type, args)
@@ -77,4 +64,4 @@ def answer_query(cfg: VariantConfig, query_type: str, args: dict | None = None) 
     return _orbit.query(cfg, query_type, args)
 
 
-__all__ = ["build_task", "build_beta", "answer_query", "query_cost", "query_help", "QUERY_COSTS", "ROWS_PER_PRICE_BLOCK"]
+__all__ = ["build_task", "build_beta", "answer_query", "check_query", "query_help", "QUERY_TYPES", "SIMULATION_COST"]

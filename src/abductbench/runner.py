@@ -17,7 +17,9 @@ against ``claude --help`` (Claude Code CLI of this environment). Choices:
   be denied instead of hanging.
 - ``--disallowedTools WebSearch,WebFetch,Task``: no network tools, no subagents.
 - ``--setting-sources ""``, ``--disable-slash-commands``, ``--no-session-persistence``.
-- ``--max-budget-usd``: spend cap per run (``MAX_BUDGET_USD``, overridable via the argument).
+- ``--max-budget-usd``: optional spend cap per run, OFF by default (``MAX_BUDGET_USD = None``); passed
+  only when a value is given. The run is bounded by the wall-clock timeout and, in mode 2, by the
+  simulation budget, not by dollars.
 - No turn cap: ``claude --help`` lists no ``--max-turns`` option, so the only limit is the
   wall-clock ``timeout_s``. Nothing bypasses permissions (no ``--dangerously-skip-permissions``).
 - The output is ``stream-json`` (requires ``--verbose``) and is stored as the transcript.
@@ -66,7 +68,7 @@ AGENT_TIMEOUT_S = 3600
 # Separate interpreter for the agent: numpy/scipy only (same numpy as the evaluator), no abductbench.
 AGENT_ENV_DIR = Path(__file__).resolve().parents[2] / ".agent-venv"
 AGENT_ENV_PACKAGES = ("numpy", "scipy")
-MAX_BUDGET_USD = 5.0  # per-run API spend cap passed as --max-budget-usd
+MAX_BUDGET_USD: float | None = None  # optional per-run API spend cap (--max-budget-usd); off by default
 AGENT_ALLOWED_TOOLS = "Read,Write,Edit,Bash"
 AGENT_DISALLOWED_TOOLS = "WebSearch,WebFetch,Task"
 
@@ -103,11 +105,11 @@ def build_agent_prompt(cfg: VariantConfig) -> str:
     return _PROMPT_BODY + "\n" + MODE_NOTES[cfg.mode] + "\n"
 
 
-def _agent_command(prompt: str, workspace: Path, max_budget_usd: float = MAX_BUDGET_USD) -> list[str]:
+def _agent_command(prompt: str, workspace: Path, max_budget_usd: float | None = MAX_BUDGET_USD) -> list[str]:
     """argv for one non-interactive agent run (cwd is set by the caller). See module docstring.
 
-    ``--max-budget-usd`` caps the API spend of the run (default ``MAX_BUDGET_USD``)."""
-    return [
+    ``--max-budget-usd`` is added only when a value is given (default ``MAX_BUDGET_USD``, None: no dollar cap)."""
+    argv = [
         "claude",
         "-p",
         prompt,
@@ -133,9 +135,10 @@ def _agent_command(prompt: str, workspace: Path, max_budget_usd: float = MAX_BUD
         "",
         "--no-session-persistence",
         "--disable-slash-commands",
-        "--max-budget-usd",
-        f"{max_budget_usd:g}",
     ]
+    if max_budget_usd is not None:
+        argv += ["--max-budget-usd", f"{max_budget_usd:g}"]
+    return argv
 
 
 @dataclass

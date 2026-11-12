@@ -461,7 +461,7 @@ def _public_horizon(cfg: VariantConfig) -> float:
 
 
 def row_count(cfg: VariantConfig, query_type: str, args: dict) -> int | None:
-    """Rows of the answer table that the price is based on; None if the query is not row-priced."""
+    """Rows of one answer (validates the per-call size cap); None for queries without a row count."""
     from abductbench.tasks._query_util import times_arg
 
     if query_type == "residuals":
@@ -478,21 +478,17 @@ def query_help(cfg: VariantConfig) -> str:
     tunit = spec.tunit
     return "\n".join(
         [
-            f"- `residuals` (cost 1 per 50 rows, rounded up): `body` (one of the four planet names in "
+            f"- `residuals`: `body` (one of the four planet names in "
             f"`known_bodies.csv`) and `time` (a JSON list of times, or `{{\"start\": a, \"stop\": b, \"n\": k}}`; "
             f"times in {tunit} from 0 to {horizon:.6g}). Returns the residual in arcseconds, observed minus T0, "
             "with measurement noise. One row per time point.",
-            f"- `other_body_residuals` (cost 2 per 50 rows, rounded up): `time` as above. Returns the residual "
+            f"- `other_body_residuals`: `time` as above. Returns the residual "
             "series in arcseconds for each planet other than the target. One row per time point and body.",
-            f"- `search_region` (cost 8): `time` (one value from 0 to {horizon:.6g} {tunit}), `lon_min` and "
+            f"- `search_region`: `time` (one value from 0 to {horizon:.6g} {tunit}), `lon_min` and "
             "`lon_max` (heliocentric longitude range in degrees; if `lon_min` is greater than `lon_max` the "
             f"range wraps through 0); the window must be at most {SEARCH_MAX_WIDTH_DEG:g} degrees wide, wider "
             "queries are rejected and not charged. Returns the point-like objects detected in that range "
             "at that time.",
-            "Pricing: `residuals` costs 1 unit per block of 50 rows, or part of a block; "
-            "`other_body_residuals` costs 2 units per block of 50 rows, or part of a block. "
-            "50 or fewer rows cost the base amount, and 500 residual time points cost 10 units. "
-            "`search_region` has a fixed cost.",
         ]
     )
 

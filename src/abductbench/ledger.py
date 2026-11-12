@@ -130,7 +130,7 @@ class Ledger:
 
 
 def discriminating_fraction(log_path: Path, discriminating: Collection[str]) -> float:
-    """Cost spent on discriminating query types divided by total cost spent (0.0 if nothing spent)."""
+    """Share of simulations spent on discriminating query types (each costs 1.0); 0.0 if nothing spent."""
     text = Path(log_path).read_text(encoding="utf-8")
     entries = [json.loads(line) for line in text.splitlines() if line.strip()][1:]
     total = sum(float(e["cost"]) for e in entries)

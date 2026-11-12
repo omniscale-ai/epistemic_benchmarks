@@ -21,7 +21,7 @@ from pathlib import Path
 
 from abductbench.config import VariantConfig, all_variants
 from abductbench.ledger import LOG_NAME, Ledger
-from abductbench.tasks import answer_query, query_cost
+from abductbench.tasks import answer_query, check_query
 from abductbench.workspace import TOKEN_SCAN_SEEDS, _dir_name
 
 
@@ -83,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         args = parse_kv(ns.arg)
-        cost = query_cost(cfg, ns.query_type, args)
+        cost = check_query(cfg, ns.query_type, args)
         ok, result = ledger.spend(
             ns.query_type,
             cost,

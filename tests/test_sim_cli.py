@@ -10,7 +10,7 @@ import pytest
 from abductbench.config import Family, Stage, Truth, VariantConfig
 from abductbench.ledger import Ledger, discriminating_fraction
 from abductbench.sim_cli import main as sim_main
-from abductbench.tasks import QUERY_COSTS, answer_query, build_task, query_help
+from abductbench.tasks import answer_query, build_task, query_help
 from abductbench.workspace import _dir_name, make_workspace
 
 # Substrings that must never appear in anything an agent can see in a mode-2 workspace.
@@ -34,7 +34,7 @@ def tree_files(root: Path) -> set[str]:
     return {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file()}
 
 
-def make_mode2(tmp_path: Path, c: VariantConfig, budget: float = 40.0):
+def make_mode2(tmp_path: Path, c: VariantConfig, budget: float = 20):
     """Return (task_dir, ledger_dir) for a mode-2 workspace with state outside it."""
     task_dir = make_workspace(c, tmp_path / "ws", state_root=tmp_path / "state", budget=budget)
     return task_dir, tmp_path / "state" / _dir_name(c.variant_id)
@@ -101,7 +101,7 @@ def test_mode2_layout_and_starter_sample(tmp_path):
     assert len(events_lines) == 101  # header + starter sample of 100 events
     task_md = (task_dir / "task.md").read_text()
     assert "./sim measure" in task_md and "./sim budget" in task_md
-    assert "40" in task_md  # default budget is stated
+    assert "20 simulations" in task_md  # default budget is stated
     assert (task_dir / "sim").stat().st_mode & 0o111
 
     oc = cfg(Family.ORBIT)
@@ -118,26 +118,26 @@ def test_measure_returns_data_and_logs(tmp_path):
         )
 
     # Beta: events draw.
-    bdir, bledger = make_mode2(tmp_path / "b", cfg(Family.BETA), budget=10.0)
+    bdir, bledger = make_mode2(tmp_path / "b", cfg(Family.BETA), budget=10)
     r = run_sim(bdir, "measure", "events", "--arg", "n=5")
     assert r.returncode == 0, r.stderr
     data = json.loads(r.stdout)
     assert data["columns"] == ["kinetic_energy", "recoil_energy", "recoil_angle_deg"]
     assert len(data["rows"]) == 5
     budget = json.loads(run_sim(bdir, "budget").stdout)
-    assert budget == {"remaining": 9.0}
+    assert budget == {"remaining": 9}
     lines = bledger.joinpath("log.jsonl").read_text().splitlines()
     assert len(lines) == 2
     assert json.loads(lines[1])["query_type"] == "events"
 
     # Orbit: residuals of the target at two times, using the public target name.
-    odir, oledger = make_mode2(tmp_path / "o", cfg(Family.ORBIT), budget=10.0)
+    odir, oledger = make_mode2(tmp_path / "o", cfg(Family.ORBIT), budget=10)
     name = (odir / "target_positions.csv").read_text().splitlines()[1].split(",")[0]
     r = run_sim(odir, "measure", "residuals", "--arg", f"body={name}", "--arg", "time=[1.0, 2.5]")
     assert r.returncode == 0, r.stderr
     data = json.loads(r.stdout)
     assert len(data["time"]) == 2 and len(data["residual_arcsec"]) == 2
-    assert json.loads(run_sim(odir, "budget").stdout) == {"remaining": 9.0}
+    assert json.loads(run_sim(odir, "budget").stdout) == {"remaining": 9}
     assert len(oledger.joinpath("log.jsonl").read_text().splitlines()) == 2
 
 
@@ -171,7 +171,7 @@ def test_unknown_query_type_error_no_truth(tmp_path, capsys):
 
 def test_budget_exhaustion_blocks_data(tmp_path, capsys):
     c = cfg(Family.BETA)
-    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=2.0)
+    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=2)
     base = cli_base(task_dir, ledger_dir)
     assert sim_main([*base, "measure", "events", "--arg", "n=1"]) == 0
     capsys.readouterr()
@@ -183,7 +183,7 @@ def test_budget_exhaustion_blocks_data(tmp_path, capsys):
     assert rc == 2
     assert json.loads(out) == {"error": "insufficient budget", "remaining": 0.0}
 
-    rc = sim_main([*base, "measure", "recoil_correlation"])  # cost 5, nothing left
+    rc = sim_main([*base, "measure", "recoil_correlation"])  # nothing left
     assert rc == 2
     assert "rows" not in capsys.readouterr().out
 
@@ -335,11 +335,13 @@ def test_wrapper_contains_no_variant_info(tmp_path, c):
 
 
 @pytest.mark.parametrize("family", [Family.BETA, Family.ORBIT])
-def test_task_md_costs_match_charged_costs(family):
+def test_task_md_counts_simulations_not_prices(tmp_path, family):
     c = cfg(family)
-    text = query_help(c)
-    for query_type, cost in QUERY_COSTS[family].items():
-        assert f"`{query_type}` (cost {cost:g}" in text
+    task_dir, _ = make_mode2(tmp_path, c)
+    text = (task_dir / "task.md").read_text() + query_help(c)
+    assert "simulations" in text
+    for banned in ("units", "per 50 rows", "Pricing"):
+        assert banned not in text, banned
 
 
 def test_orbit_queries_capped_at_public_window(tmp_path, capsys):
@@ -376,32 +378,62 @@ def test_beta_events_stay_in_public_window():
         assert min(energies) >= lo and max(energies) <= hi
 
 
-def test_row_pricing():
-    from abductbench.tasks import query_cost
-
-    beta = cfg(Family.BETA, Truth.ENTITY, Stage.HISTORICAL)
-    orbit = cfg(Family.ORBIT, Truth.ENTITY, Stage.HISTORICAL)
-    assert query_cost(beta, "events", {"n": 50}) == 1.0
-    assert query_cost(beta, "events", {"n": 51}) == 2.0
-    assert query_cost(beta, "events", {"n": 500}) == 10.0
-    assert query_cost(beta, "recoil_correlation", {"n": 500}) == 5.0  # fixed price
-    assert query_cost(beta, "target_thickness_scan", {}) == 8.0
-    assert query_cost(orbit, "residuals", {"body": "Uranus", "time": {"start": 0, "stop": 9, "n": 500}}) == 10.0
-    assert query_cost(orbit, "residuals", {"body": "Uranus", "time": [1.0]}) == 1.0
-    # 50 time points for three bodies is 150 rows, which is three blocks of 50.
-    assert query_cost(orbit, "other_body_residuals", {"time": {"start": 0, "stop": 9, "n": 50}}) == 6.0
-    assert query_cost(orbit, "search_region", {"time": 1.0, "lon_min": 0, "lon_max": 1}) == 8.0
+QUERIES_BY_FAMILY = {
+    Family.BETA: [
+        ("events", ["n=3"]),
+        ("recoil_correlation", ["n=5"]),
+        ("target_thickness_scan", []),
+    ],
+    Family.ORBIT: [
+        ("residuals", ["body=Uranus", "time=[1.0, 2.0, 3.0]"]),
+        ("other_body_residuals", ["time=[1.0, 2.0]"]),
+        ("search_region", ["time=1.0", "lon_min=0", "lon_max=10"]),
+    ],
+}
 
 
-def test_budget_buys_about_2000_event_rows(tmp_path, capsys):
-    c = cfg(Family.BETA)
-    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=40.0)
+@pytest.mark.parametrize("family", [Family.BETA, Family.ORBIT])
+def test_every_query_type_costs_one_simulation(tmp_path, capsys, family):
+    c = cfg(family, Truth.ENTITY, Stage.HISTORICAL)
+    queries = QUERIES_BY_FAMILY[family]
+    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=10)
     base = cli_base(task_dir, ledger_dir)
-    for _ in range(4):  # 4 x 500 rows at 10 units each
-        assert sim_main([*base, "measure", "events", "--arg", "n=500"]) == 0
-        assert len(json.loads(capsys.readouterr().out)["rows"]) == 500
-    assert json.loads(sim_main_budget(base, capsys)) == {"remaining": 0.0}
-    assert sim_main([*base, "measure", "events", "--arg", "n=1"]) == 2
+    for i, (qt, args) in enumerate(queries, start=1):
+        extra = [x for a in args for x in ("--arg", a)]
+        assert sim_main([*base, "measure", qt, *extra]) == 0, qt
+        capsys.readouterr()
+        assert Ledger(ledger_dir).remaining == pytest.approx(10 - i)
+    entries = [json.loads(l) for l in ledger_dir.joinpath("log.jsonl").read_text().splitlines()[1:]]
+    assert [e["cost"] for e in entries] == [1.0] * len(queries)
+
+
+@pytest.mark.parametrize("family", [Family.BETA, Family.ORBIT])
+def test_budget_of_n_allows_exactly_n_measures(tmp_path, capsys, family):
+    c = cfg(family, Truth.ENTITY, Stage.HISTORICAL)
+    qt, args = QUERIES_BY_FAMILY[family][0]
+    extra = [x for a in args for x in ("--arg", a)]
+    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=3)
+    base = cli_base(task_dir, ledger_dir)
+    for _ in range(3):
+        assert sim_main([*base, "measure", qt, *extra]) == 0
+        capsys.readouterr()
+    assert json.loads(sim_main_budget(base, capsys)) == {"remaining": 0}
+    rc = sim_main([*base, "measure", qt, *extra])
+    out = capsys.readouterr().out
+    assert rc == 2
+    assert "rows" not in out and "residual_arcsec" not in out
+    assert len(ledger_dir.joinpath("log.jsonl").read_text().splitlines()) == 1 + 3
+
+
+def test_huge_n_rejected_by_size_cap_and_not_charged(tmp_path, capsys):
+    c = cfg(Family.BETA)
+    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=5)
+    base = cli_base(task_dir, ledger_dir)
+    rc = sim_main([*base, "measure", "events", "--arg", "n=100000"])
+    assert rc == 1
+    assert "error" in json.loads(capsys.readouterr().out)
+    assert len(ledger_dir.joinpath("log.jsonl").read_text().splitlines()) == 1
+    assert Ledger(ledger_dir).remaining == pytest.approx(5)
 
 
 def sim_main_budget(base, capsys) -> str:
