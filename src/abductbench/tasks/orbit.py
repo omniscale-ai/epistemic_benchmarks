@@ -454,21 +454,42 @@ def _query_rng(cfg: VariantConfig, tag: int, call: int):
     return np.random.default_rng([cfg.seed, cfg.mode, _STAGE_IDX[cfg.stage], _TRUTH_IDX[cfg.truth], tag, call])
 
 
+def _public_horizon(cfg: VariantConfig) -> float:
+    """Last public time in the stage's time unit. Queries never go past the public window."""
+    return TIME_YR / _SPECS[cfg.stage].tick_yr
+
+
+def row_count(cfg: VariantConfig, query_type: str, args: dict) -> int | None:
+    """Rows of the answer table that the price is based on; None if the query is not row-priced."""
+    from abductbench.tasks._query_util import times_arg
+
+    if query_type == "residuals":
+        return len(times_arg(args, "time", _public_horizon(cfg)))
+    if query_type == "other_body_residuals":
+        return 3 * len(times_arg(args, "time", _public_horizon(cfg)))  # three bodies other than the target
+    return None
+
+
 def query_help(cfg: VariantConfig) -> str:
     """Lines for task.md describing the orbit query types for this stage's time units."""
     spec = _SPECS[cfg.stage]
-    horizon = EXT_YR / spec.tick_yr
+    horizon = _public_horizon(cfg)
     tunit = spec.tunit
     return "\n".join(
         [
-            f"- `residuals` (cost 1): `body` (one of the four planet names in `known_bodies.csv`) and "
-            f"`time` (a JSON list of times, or `{{\"start\": a, \"stop\": b, \"n\": k}}`; times in {tunit} from 0 to "
-            f"{horizon:.6g}). Returns the residual in arcseconds, observed minus T0, with measurement noise.",
-            f"- `other_body_residuals` (cost 2): `time` as above. Returns the residual series in arcseconds for "
-            "each planet other than the target.",
+            f"- `residuals` (cost 1 per 50 rows, rounded up): `body` (one of the four planet names in "
+            f"`known_bodies.csv`) and `time` (a JSON list of times, or `{{\"start\": a, \"stop\": b, \"n\": k}}`; "
+            f"times in {tunit} from 0 to {horizon:.6g}). Returns the residual in arcseconds, observed minus T0, "
+            "with measurement noise. One row per time point.",
+            f"- `other_body_residuals` (cost 2 per 50 rows, rounded up): `time` as above. Returns the residual "
+            "series in arcseconds for each planet other than the target. One row per time point and body.",
             f"- `search_region` (cost 8): `time` (one value from 0 to {horizon:.6g} {tunit}), `lon_min` and "
             "`lon_max` (heliocentric longitude range in degrees; if `lon_min` is greater than `lon_max` the "
             "range wraps through 0). Returns the point-like objects detected in that range at that time.",
+            "Pricing: `residuals` costs 1 unit per block of 50 rows, or part of a block; "
+            "`other_body_residuals` costs 2 units per block of 50 rows, or part of a block. "
+            "50 or fewer rows cost the base amount, and 500 residual time points cost 10 units. "
+            "`search_region` has a fixed cost.",
         ]
     )
 
@@ -484,7 +505,7 @@ def query(cfg: VariantConfig, query_type: str, args: dict) -> dict:
 
     call = call_index(args)
     u, res_spl, _, X_truth, grid = _truth_splines(cfg)
-    horizon = EXT_YR / u.tick
+    horizon = _public_horizon(cfg)
     names = u.names[1:]
     tgt = u.target_planet
     tunit = u.spec.tunit

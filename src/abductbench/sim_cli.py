@@ -82,8 +82,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     try:
-        cost = query_cost(cfg, ns.query_type)
         args = parse_kv(ns.arg)
+        cost = query_cost(cfg, ns.query_type, args)
         ok, result = ledger.spend(
             ns.query_type,
             cost,

@@ -313,22 +313,33 @@ SCAN_BINS = 10
 EVENT_COLUMNS = ["kinetic_energy", "recoil_energy", "recoil_angle_deg"]
 
 
-def _query_rng(cfg: VariantConfig, tag: int, call: int):
+def _query_rng(cfg: VariantConfig, tag: int, call: int, sub: int = 0):
     return np.random.default_rng(
-        [cfg.seed, cfg.mode, _STAGE_IDX[cfg.stage], _TRUTH_IDX[cfg.truth], tag, call]
+        [cfg.seed, cfg.mode, _STAGE_IDX[cfg.stage], _TRUTH_IDX[cfg.truth], tag, call, sub]
     )
+
+
+def row_count(query_type: str, args: dict) -> int | None:
+    """Rows of the answer table that the price is based on; None if the query is not row-priced."""
+    from abductbench.tasks._query_util import int_arg
+
+    if query_type == "events":
+        return int_arg(args, "n", 100, 1, 500)
+    return None
 
 
 def query_help(cfg: VariantConfig) -> str:
     """Lines for task.md describing the beta query types (no truth-revealing content)."""
     return "\n".join(
         [
-            "- `events` (cost 1), optional `n` (integer 1 to 500, default 100): new events from the same "
-            f"measurement, columns {', '.join(EVENT_COLUMNS)} in the units of `events.csv`.",
+            "- `events` (cost 1 per 50 rows, rounded up), optional `n` (integer 1 to 500, default 100): "
+            f"new events from the same measurement, columns {', '.join(EVENT_COLUMNS)} in the units of `events.csv`.",
             "- `recoil_correlation` (cost 5), optional `n` (integer 1 to 500, default 200): statistics "
-            "comparing electron and recoil momenta for `n` new events, plus a sample of rows.",
+            "comparing electron and recoil momenta for `n` new events, plus a sample of 10 rows.",
             "- `target_thickness_scan` (cost 8), no arguments: energy spectrum summaries at three "
             "target thicknesses.",
+            "Pricing: `events` costs 1 unit per block of 50 events, or part of a block. 50 or fewer events "
+            "cost 1 unit and 500 events cost 10 units. The other two query types have fixed costs.",
         ]
     )
 
@@ -375,9 +386,8 @@ def _thickness_scan(cfg: VariantConfig, s: _Setup, call: int) -> dict:
     edges_mev = np.linspace(lo, hi, SCAN_BINS + 1)
     summaries = []
     for th in THICKNESS_LEVELS:
-        # Common random numbers: every thickness starts from the same generator state,
-        # so any difference between summaries comes from the thickness itself.
-        rng = _query_rng(cfg, _QUERY_TAG["target_thickness_scan"], call)
+        # Independent measurement noise per thickness; the underlying shape is shared.
+        rng = _query_rng(cfg, _QUERY_TAG["target_thickness_scan"], call, sub=int(round(th * 10)))
         T_true = _sample_truth_mev(cfg.truth, s, rng, SCAN_EVENTS, thickness=th)
         if cfg.truth is Truth.ENTITY:
             T_obs = T_true + rng.normal(0.0, s.sigma, size=T_true.shape)

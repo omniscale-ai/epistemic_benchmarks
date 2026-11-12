@@ -10,7 +10,7 @@ import pytest
 from abductbench.config import Family, Stage, Truth, VariantConfig
 from abductbench.ledger import Ledger, discriminating_fraction
 from abductbench.sim_cli import main as sim_main
-from abductbench.tasks import build_task, answer_query
+from abductbench.tasks import QUERY_COSTS, answer_query, build_task, query_help
 from abductbench.workspace import _dir_name, make_workspace
 
 # Substrings that must never appear in anything an agent can see in a mode-2 workspace.
@@ -228,14 +228,14 @@ def test_beta_thickness_scan_differs_by_truth(tmp_path):
     json.dumps(ent)
     json.dumps(non)
     assert len(ent["summaries"]) == 3
-
-    def shape(result):
-        return [s["histogram"] for s in result["summaries"]]
-
-    ent_shapes = shape(ent)
-    assert all(h == ent_shapes[0] for h in ent_shapes)  # hidden carrier: thickness-independent
-    non_shapes = shape(non)
-    assert non_shapes[0] != non_shapes[-1]  # detector artifact: tail changes with thickness
+    tails = lambda r: [x["tail_fraction"] for x in r["summaries"]]  # noqa: E731
+    # Hidden carrier: same shape at every thickness, but independent noise per thickness.
+    ent_hist = [x["histogram"] for x in ent["summaries"]]
+    assert len({tuple(h) for h in ent_hist}) > 1
+    assert max(tails(ent)) - min(tails(ent)) < 0.03
+    # Detector artifact: the energy-loss tail grows with thickness.
+    t_non = tails(non)
+    assert t_non[-1] - t_non[0] > 0.03
 
 
 def test_orbit_search_region_detects_only_for_entity(tmp_path):
@@ -261,9 +261,35 @@ def test_orbit_search_region_detects_only_for_entity(tmp_path):
     assert none["candidates"] == []
 
 
-@pytest.mark.parametrize("family", [Family.BETA, Family.ORBIT])
-def test_wrapper_contains_no_variant_info(tmp_path, family):
-    c = cfg(family, Truth.ENTITY, Stage.HISTORICAL)
+def all_16_mode2():
+    return [
+        cfg(f, t, st, seed=0, mode=2) for f in Family for t in Truth for st in Stage
+    ]
+
+
+def sample_results(c: VariantConfig) -> dict[str, dict]:
+    """One answer per query type, with the same arguments an agent would plausibly use."""
+    if c.family is Family.BETA:
+        requests = {
+            "events": {"n": 3},
+            "recoil_correlation": {"n": 20},
+            "target_thickness_scan": {},
+        }
+    else:
+        body = (build_task(c).public_files["known_bodies.csv"]).splitlines()[2].split(",")[0]
+        requests = {
+            "residuals": {"body": body, "time": [1.0, 2.0]},
+            "other_body_residuals": {"time": [1.0]},
+            "search_region": {"time": 1.0, "lon_min": 0.0, "lon_max": 360.0},
+        }
+    out = {}
+    for query_type, args in requests.items():
+        out[query_type] = answer_query(c, query_type, {**args, "_n": 0})
+    return out
+
+
+@pytest.mark.parametrize("c", all_16_mode2(), ids=lambda c: c.variant_id)
+def test_wrapper_contains_no_variant_info(tmp_path, c):
     task_dir, _ = make_mode2(tmp_path, c)
     wrapper = (task_dir / "sim").read_text()
     assert_no_truth(wrapper, c)
@@ -271,13 +297,81 @@ def test_wrapper_contains_no_variant_info(tmp_path, family):
     for path in task_dir.rglob("*"):
         if path.is_file():
             assert_no_truth(path.read_text(errors="ignore"), c)
+    assert_no_truth(query_help(c), c)
+    for query_type, result in sample_results(c).items():
+        assert_no_truth(json.dumps(result, sort_keys=True), c)
 
 
 @pytest.mark.parametrize("family", [Family.BETA, Family.ORBIT])
 def test_task_md_costs_match_charged_costs(family):
-    from abductbench.tasks import QUERY_COSTS, query_help
-
     c = cfg(family)
     text = query_help(c)
     for query_type, cost in QUERY_COSTS[family].items():
-        assert f"`{query_type}` (cost {cost:g})" in text
+        assert f"`{query_type}` (cost {cost:g}" in text
+
+
+def test_orbit_queries_capped_at_public_window(tmp_path, capsys):
+    # Public window is TIME_YR = 10 years; 10..15 years is held out for extrapolation scoring.
+    c = cfg(Family.ORBIT, Truth.ENTITY, Stage.HISTORICAL)
+    assert answer_query(c, "residuals", {"body": "Uranus", "time": [10.0], "_n": 0})
+    for query_type, args in [
+        ("residuals", {"body": "Uranus", "time": [12.0]}),
+        ("other_body_residuals", {"time": {"start": 9.0, "stop": 14.0, "n": 5}}),
+        ("search_region", {"time": 12.0, "lon_min": 0, "lon_max": 360}),
+    ]:
+        with pytest.raises(ValueError, match="must lie in"):
+            answer_query(c, query_type, {**args, "_n": 0})
+
+    task_dir, ledger_dir = make_mode2(tmp_path, c)
+    base = cli_base(task_dir, ledger_dir)
+    rc = sim_main([*base, "measure", "residuals", "--arg", "body=Uranus", "--arg", "time=[12.0]"])
+    assert rc == 1
+    assert "error" in json.loads(capsys.readouterr().out)
+    assert len(ledger_dir.joinpath("log.jsonl").read_text().splitlines()) == 1  # nothing charged
+
+
+def test_beta_events_stay_in_public_window():
+    # Beta has no energy argument. Events are drawn only inside the public recorded window
+    # [0.1 Q, 1.2 Q], so the low extrapolation band [0.02 Q, 0.1 Q) can never appear.
+    from abductbench.tasks.beta import WINDOW, _setup
+
+    for truth in Truth:
+        c = cfg(Family.BETA, truth, Stage.HISTORICAL)
+        s = _setup(c)
+        lo, hi = WINDOW[0] * s.Q / s.scale, WINDOW[1] * s.Q / s.scale
+        rows = answer_query(c, "events", {"n": 500, "_n": 0})["rows"]
+        energies = [r[0] for r in rows]
+        assert min(energies) >= lo and max(energies) <= hi
+
+
+def test_row_pricing():
+    from abductbench.tasks import query_cost
+
+    beta = cfg(Family.BETA, Truth.ENTITY, Stage.HISTORICAL)
+    orbit = cfg(Family.ORBIT, Truth.ENTITY, Stage.HISTORICAL)
+    assert query_cost(beta, "events", {"n": 50}) == 1.0
+    assert query_cost(beta, "events", {"n": 51}) == 2.0
+    assert query_cost(beta, "events", {"n": 500}) == 10.0
+    assert query_cost(beta, "recoil_correlation", {"n": 500}) == 5.0  # fixed price
+    assert query_cost(beta, "target_thickness_scan", {}) == 8.0
+    assert query_cost(orbit, "residuals", {"body": "Uranus", "time": {"start": 0, "stop": 9, "n": 500}}) == 10.0
+    assert query_cost(orbit, "residuals", {"body": "Uranus", "time": [1.0]}) == 1.0
+    # 50 time points for three bodies is 150 rows, which is three blocks of 50.
+    assert query_cost(orbit, "other_body_residuals", {"time": {"start": 0, "stop": 9, "n": 50}}) == 6.0
+    assert query_cost(orbit, "search_region", {"time": 1.0, "lon_min": 0, "lon_max": 1}) == 8.0
+
+
+def test_budget_buys_about_2000_event_rows(tmp_path, capsys):
+    c = cfg(Family.BETA)
+    task_dir, ledger_dir = make_mode2(tmp_path, c, budget=40.0)
+    base = cli_base(task_dir, ledger_dir)
+    for _ in range(4):  # 4 x 500 rows at 10 units each
+        assert sim_main([*base, "measure", "events", "--arg", "n=500"]) == 0
+        assert len(json.loads(capsys.readouterr().out)["rows"]) == 500
+    assert json.loads(sim_main_budget(base, capsys)) == {"remaining": 0.0}
+    assert sim_main([*base, "measure", "events", "--arg", "n=1"]) == 2
+
+
+def sim_main_budget(base, capsys) -> str:
+    assert sim_main([*base, "budget"]) == 0
+    return capsys.readouterr().out
