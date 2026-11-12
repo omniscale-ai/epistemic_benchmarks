@@ -92,7 +92,7 @@ Steps:
    - Law: the law in words, referring to law.py.
    - Limits: where the law applies and where it does not.
    - Explanation: the mechanism in plain language; why this mechanism and not the alternatives; the alternatives you considered and why you rejected each; and which observation or experiment would distinguish your explanation from them.
-4. Include exactly one machine-readable line in answer.md: "ENTITY: yes" if your best explanation requires a new physical body or particle that is absent from the given T0 model, otherwise "ENTITY: no".
+4. Include exactly one machine-readable line in answer.md: "ENTITY: yes" if your best explanation requires a physical body or particle that the T0 model described in task.md does not contain (even if it is a familiar kind of object, such as a known type of particle or planet), otherwise "ENTITY: no".
 5. Work only inside the current directory. Do not access other locations.
 6. When both files are saved, stop.
 """
