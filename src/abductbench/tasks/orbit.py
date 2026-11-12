@@ -448,6 +448,7 @@ Write a Python module `law.py` that defines:
 _QUERY_TAG = {"residuals": 201, "other_body_residuals": 202, "search_region": 203}
 SEARCH_LON_SIGMA_DEG = 0.01  # longitude measurement scatter of a detection
 SEARCH_DIST_REL_SIGMA = 0.005  # relative distance scatter of a detection
+SEARCH_MAX_WIDTH_DEG = 30.0  # widest longitude window of one search_region query
 
 
 def _query_rng(cfg: VariantConfig, tag: int, call: int):
@@ -485,7 +486,9 @@ def query_help(cfg: VariantConfig) -> str:
             "series in arcseconds for each planet other than the target. One row per time point and body.",
             f"- `search_region` (cost 8): `time` (one value from 0 to {horizon:.6g} {tunit}), `lon_min` and "
             "`lon_max` (heliocentric longitude range in degrees; if `lon_min` is greater than `lon_max` the "
-            "range wraps through 0). Returns the point-like objects detected in that range at that time.",
+            f"range wraps through 0); the window must be at most {SEARCH_MAX_WIDTH_DEG:g} degrees wide, wider "
+            "queries are rejected and not charged. Returns the point-like objects detected in that range "
+            "at that time.",
             "Pricing: `residuals` costs 1 unit per block of 50 rows, or part of a block; "
             "`other_body_residuals` costs 2 units per block of 50 rows, or part of a block. "
             "50 or fewer rows cost the base amount, and 500 residual time points cost 10 units. "
@@ -534,7 +537,14 @@ def query(cfg: VariantConfig, query_type: str, args: dict) -> dict:
         if not 0.0 <= t <= horizon:
             raise ValueError(f"argument 'time' must lie in [0, {horizon:.6g}] in {tunit}")
         lon_min, lon_max = float_arg(args, "lon_min"), float_arg(args, "lon_max")
-        full_circle = lon_max - lon_min >= 360.0
+        width = lon_max - lon_min
+        if width < 0.0:
+            width %= 360.0  # wrapping window
+        if width > SEARCH_MAX_WIDTH_DEG:
+            raise ValueError(
+                f"search_region longitude window is {width:g} degrees wide; the maximum is "
+                f"{SEARCH_MAX_WIDTH_DEG:g} degrees"
+            )
         lo, hi = lon_min % 360.0, lon_max % 360.0
         candidates = []
         if cfg.truth is Truth.ENTITY:
@@ -543,7 +553,7 @@ def query(cfg: VariantConfig, query_type: str, args: dict) -> dict:
             lon_spl = CubicSpline(grid, np.unwrap(np.arctan2(d[:, 1], d[:, 0])))
             r_spl = CubicSpline(grid, np.hypot(d[:, 0], d[:, 1]))
             lon = float(np.degrees(lon_spl(t)) % 360.0)
-            if full_circle or _in_range(lon, lo, hi):
+            if _in_range(lon, lo, hi):
                 candidates.append(
                     {
                         "longitude_deg": float((lon + rng.normal(0.0, SEARCH_LON_SIGMA_DEG)) % 360.0),

@@ -239,13 +239,7 @@ def test_beta_thickness_scan_differs_by_truth(tmp_path):
 
 
 def test_orbit_search_region_detects_only_for_entity(tmp_path):
-    full = answer_query(
-        cfg(Family.ORBIT, Truth.ENTITY), "search_region",
-        {"lon_min": 0.0, "lon_max": 360.0, "time": 5.0, "_n": 0},
-    )
-    cands = full["candidates"]
-    assert len(cands) == 1
-    lon = cands[0]["longitude_deg"]
+    lon = hidden_longitude(cfg(Family.ORBIT, Truth.ENTITY), 5.0)
 
     # A one-degree sector centred on the opposite side of the sky must be empty.
     far = answer_query(
@@ -256,9 +250,47 @@ def test_orbit_search_region_detects_only_for_entity(tmp_path):
 
     none = answer_query(
         cfg(Family.ORBIT, Truth.NO_ENTITY), "search_region",
-        {"lon_min": 0.0, "lon_max": 360.0, "time": 5.0, "_n": 0},
+        {"lon_min": (lon - 10.0) % 360.0, "lon_max": (lon + 10.0) % 360.0, "time": 5.0, "_n": 0},
     )
     assert none["candidates"] == []
+
+
+def hidden_longitude(c, t):
+    """Probe with 30-degree windows (the cap) to locate the hidden body of an entity variant."""
+    for lo in range(0, 360, 30):
+        r = answer_query(c, "search_region", {"lon_min": float(lo), "lon_max": float(lo + 30), "time": t, "_n": 0})
+        if r["candidates"]:
+            return r["candidates"][0]["longitude_deg"]
+    raise AssertionError("hidden body not found")
+
+
+def test_search_region_width_cap(tmp_path, capsys):
+    c = cfg(Family.ORBIT, Truth.ENTITY, Stage.HISTORICAL)
+    lon = hidden_longitude(c, 5.0)
+    inside = {"lon_min": (lon - 14.0) % 360.0, "lon_max": (lon + 15.0) % 360.0, "time": 5.0, "_n": 0}
+    assert len(answer_query(c, "search_region", inside)["candidates"]) == 1  # width 29, hit
+    exact = {"lon_min": (lon - 15.0) % 360.0, "lon_max": (lon + 15.0) % 360.0, "time": 5.0, "_n": 0}
+    assert len(answer_query(c, "search_region", exact)["candidates"]) == 1  # width 30 accepted (wraps ok)
+    outside = {"lon_min": (lon + 20.0) % 360.0, "lon_max": (lon + 50.0) % 360.0, "time": 5.0, "_n": 0}
+    assert answer_query(c, "search_region", outside)["candidates"] == []  # window not containing it
+    for lo, hi in [(0.0, 31.0), (0.0, 360.0), (350.0, 21.0), (-10.0, 30.5)]:
+        with pytest.raises(ValueError, match="maximum is 30") as exc:
+            answer_query(c, "search_region", {"lon_min": lo, "lon_max": hi, "time": 5.0, "_n": 0})
+        assert "entity" not in str(exc.value).lower()
+    assert "30 degrees wide" in query_help(c)
+
+    c2 = cfg(Family.ORBIT, Truth.ENTITY, Stage.HISTORICAL, mode=2)
+    task_dir, ledger_dir = make_mode2(tmp_path, c2)
+    base = cli_base(task_dir, ledger_dir)
+    n_before = len(ledger_dir.joinpath("log.jsonl").read_text().splitlines())
+    rc = sim_main([*base, "measure", "search_region", "--arg", "time=5", "--arg", "lon_min=0", "--arg", "lon_max=31"])
+    assert rc == 1
+    assert "error" in json.loads(capsys.readouterr().out)
+    assert len(ledger_dir.joinpath("log.jsonl").read_text().splitlines()) == n_before  # uncharged
+    rc = sim_main([*base, "measure", "search_region", "--arg", "time=5", "--arg", "lon_min=0", "--arg", "lon_max=30"])
+    assert rc == 0
+    capsys.readouterr()
+    assert len(ledger_dir.joinpath("log.jsonl").read_text().splitlines()) == n_before + 1
 
 
 def all_16_mode2():
@@ -280,7 +312,7 @@ def sample_results(c: VariantConfig) -> dict[str, dict]:
         requests = {
             "residuals": {"body": body, "time": [1.0, 2.0]},
             "other_body_residuals": {"time": [1.0]},
-            "search_region": {"time": 1.0, "lon_min": 0.0, "lon_max": 360.0},
+            "search_region": {"time": 1.0, "lon_min": 0.0, "lon_max": 30.0},
         }
     out = {}
     for query_type, args in requests.items():
