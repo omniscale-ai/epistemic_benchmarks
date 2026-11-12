@@ -141,7 +141,6 @@ def test_build_task_dispatches_beta():
     assert b.rubric_id == "beta-entity-a"
 
 
-def test_build_task_orbit_not_implemented_yet():
+def test_build_task_dispatches_orbit():
     orbit = VariantConfig(family=Family.ORBIT, truth=Truth.ENTITY, stage=Stage.HISTORICAL, seed=0, mode=1)
-    with pytest.raises(NotImplementedError):
-        build_task(orbit)
+    assert build_task(orbit).rubric_id == "orbit-entity-a"
