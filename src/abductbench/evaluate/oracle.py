@@ -4,7 +4,7 @@ Each stage gets an oracle that knows the functional family of its true law and
 fits only the constants that are not given in the public files. The oracle
 receives ``bundle.public_files`` and the evaluation points; it never calls
 ``bundle.truth_law`` and never reads generator parameters. Its family structure
-(which shape the stage uses, the fixed exponent of the orbit correction force)
+(which shape the stage uses)
 is passed in by the generator as keyword arguments at construction time.
 
 Two entry points:
@@ -24,7 +24,8 @@ weight fixed at 1, tail/shelf weights and tail width free) to the same events.
 Orbit: the T0 integrator is the public ``t0_model.py``, executed as source. The
 entity oracle fits the outer body (mass ratio, semi-major axis, phase) with a
 batched grid search and Levenberg-Marquardt. The no-entity oracle fits the
-correction strength k with the exponent n of the stage (a fixed stage constant).
+correction amplitude and the exponent n (bounded 1.5 to 5, two starts) from the public data;
+it is given no stage constant.
 """
 
 from __future__ import annotations
@@ -48,6 +49,9 @@ from abductbench.evaluate.law_eval import LawResult, score_predictions
 # the generating law almost exactly must not turn tiny agent errors into huge ratios.
 NOISE_FLOOR = 1e-2
 ALPHA = 1.0 / 137.036
+FIT_MAX_NFEV = 100
+N_BOUNDS = (1.5, 5.0)  # bounds on the fitted correction-force exponent
+N_STARTS = (2.5, 4.0)  # restarts for the exponent
 ARCSEC_PER_RAD = 180.0 * 3600.0 / math.pi
 
 
@@ -291,6 +295,7 @@ def _accel_correction(ns, X, mu, k, n):
     dr = X - X[:, :1, :]
     rr = np.sqrt(np.einsum("bik,bik->bi", dr, dr))
     rr[:, 0] = 1.0
+    n = np.asarray(n, dtype=float).reshape(-1, 1, 1)  # scalar or one exponent per batch row
     ext = -k[:, None, None] * dr * rr[..., None] ** (-(n + 1.0))
     ext[:, 0] = 0.0
     A = A + ext
@@ -322,8 +327,10 @@ def _residual_rows(ns, mu, elem, k, n, t_eval, tgt) -> np.ndarray:
     return CubicSpline(grid, R, axis=0)(np.asarray(t_eval, dtype=float)).T[1:]
 
 
-def _fit_lm(sim, x0: np.ndarray, t_obs: np.ndarray, obs_res: np.ndarray) -> np.ndarray:
-    """Levenberg-Marquardt with a batched finite-difference Jacobian (one integration per step)."""
+def _fit_lm(sim, x0: np.ndarray, t_obs: np.ndarray, obs_res: np.ndarray, bounds=None) -> np.ndarray:
+    """Least squares with a batched finite-difference Jacobian (one integration per step).
+
+    Levenberg-Marquardt without bounds, trust-region reflective with bounds."""
     p = len(x0)
     h = 1e-4
     cache: dict[tuple, tuple[np.ndarray, np.ndarray]] = {}
@@ -337,8 +344,9 @@ def _fit_lm(sim, x0: np.ndarray, t_obs: np.ndarray, obs_res: np.ndarray) -> np.n
             cache[key] = (R[0], J)
         return cache[key]
 
-    sol = least_squares(lambda x: batch(x)[0], x0, jac=lambda x: batch(x)[1], method="lm",
-                        xtol=1e-7, ftol=1e-7, gtol=1e-7, max_nfev=25)
+    kw = {"method": "lm"} if bounds is None else {"method": "trf", "bounds": bounds}
+    sol = least_squares(lambda x: batch(x)[0], x0, jac=lambda x: batch(x)[1],
+                        xtol=1e-7, ftol=1e-7, gtol=1e-7, max_nfev=FIT_MAX_NFEV, **kw)
     return sol.x
 
 
@@ -362,20 +370,53 @@ def _entity_sim(ns, tgt, X, t_eval):
     return _residual_rows(ns, mu, elem, np.zeros(B + 1), None, t_eval, tgt)
 
 
-def _noentity_sim(ns, tgt, n_corr, X, t_eval):
-    """Correction-force model: X rows are (log k,), exponent n fixed by the stage."""
+def _noentity_sim(ns, tgt, X, t_eval):
+    """Correction-force model: X rows are (log A, n); the force is A (r / a_t)^-n about the star.
+
+    A is the force at the target's semi-major axis a_t, so A and n are nearly decorrelated."""
     gms = float(ns["GM_STAR"])
     gm4 = np.array(ns["GM_PLANETS"], dtype=float)
     elem4 = np.array(ns["ELEMENTS"], dtype=float)
+    a_t = float(elem4[tgt, 0])
     B = X.shape[0]
     mu = np.tile(np.concatenate([[gms], gm4]), (B + 1, 1))
     elem = np.tile(elem4, (B + 1, 1, 1))
-    k = np.concatenate([[0.0], np.exp(X[:, 0])])
-    return _residual_rows(ns, mu, elem, k, n_corr, t_eval, tgt)
+    n = np.concatenate([[3.0], X[:, 1]])
+    k = np.concatenate([[0.0], np.exp(X[:, 0]) * a_t ** X[:, 1]])
+    return _residual_rows(ns, mu, elem, k, n, t_eval, tgt)
 
 
-def orbit_oracle(public_files, eval_x, *, truth: Truth, n_corr: float | None) -> np.ndarray:
-    """Oracle prediction of the target residual (arcsec) at eval_x (public time units)."""
+def fit_orbit_noentity(public_files) -> dict[str, float]:
+    """Fit the correction amplitude A (at a_t) and the exponent n from the public data only."""
+    ns = _load_t0(public_files)
+    tgt, t_obs, obs_res = _orbit_obs(public_files, ns)
+    return _fit_noentity(ns, tgt, t_obs, obs_res)[1]
+
+
+def _fit_noentity(ns, tgt, t_obs, obs_res):
+    sim = partial(_noentity_sim, ns, tgt)
+    lo = np.array([-30.0, N_BOUNDS[0]])
+    hi = np.array([30.0, N_BOUNDS[1]])
+    # Coarse grid over log A (amplitude is almost linear in the residual) at each starting exponent.
+    logA = np.linspace(-9.0, 4.0, 14) * math.log(10.0) / 3.0
+    best = None
+    for n0 in N_STARTS:
+        grid = np.stack([logA, np.full_like(logA, n0)], axis=1)
+        R = sim(grid, t_obs)
+        sse = ((R - obs_res) ** 2).sum(axis=1)
+        i = int(np.argmin(sse))
+        x_fit = _fit_lm(sim, grid[i], t_obs, obs_res, bounds=(lo, hi))
+        cost = float(((sim(x_fit[None], t_obs)[0] - obs_res) ** 2).sum())
+        if best is None or cost < best[0]:
+            best = (cost, x_fit)
+    x = best[1]
+    return sim, {"A": float(math.exp(x[0])), "n": float(x[1]), "x": x}
+
+
+def orbit_oracle(public_files, eval_x, *, truth: Truth) -> np.ndarray:
+    """Oracle prediction of the target residual (arcsec) at eval_x (public time units).
+
+    No stage-specific constant is passed in: the no-entity oracle fits the exponent too."""
     ns = _load_t0(public_files)
     tgt, t_obs, obs_res = _orbit_obs(public_files, ns)
     x_eval = np.asarray(eval_x, dtype=float)
@@ -397,12 +438,5 @@ def orbit_oracle(public_files, eval_x, *, truth: Truth, n_corr: float | None) ->
         x_fit = _fit_lm(sim, x0, t_obs, obs_res)
         return sim(x_fit[None], x_eval)[0]
 
-    if n_corr is None:
-        raise ValueError("no-entity oracle needs the stage exponent n_corr")
-    sim = partial(_noentity_sim, ns, tgt, n_corr)
-    grid = np.linspace(-9.0, -1.0, 9) * math.log(10.0)
-    R = sim(grid[:, None], t_obs)
-    sse = ((R - obs_res) ** 2).sum(axis=1)
-    x0 = grid[[int(np.argmin(sse))]]
-    x_fit = _fit_lm(sim, x0, t_obs, obs_res)
-    return sim(x_fit[None], x_eval)[0]
+    sim, fit = _fit_noentity(ns, tgt, t_obs, obs_res)
+    return sim(fit["x"][None], x_eval)[0]

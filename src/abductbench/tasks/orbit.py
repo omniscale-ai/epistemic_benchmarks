@@ -399,7 +399,7 @@ def build_orbit(cfg: VariantConfig) -> TaskBundle:
         entity=truth is Truth.ENTITY,
         rubric_id=f"orbit-{truth.value}-{cfg.stage.value}",
         discriminating_queries=frozenset({"search_region", "other_body_residuals"}),
-        oracle_family=partial(orbit_oracle, truth=truth, n_corr=_SPECS[cfg.stage].n_corr),
+        oracle_family=partial(orbit_oracle, truth=truth),
     )
 
 

@@ -80,7 +80,7 @@ def test_oracle_beats_wrong_family():
     ocfg = vcfg(ORBIT, ENT, Stage.HISTORICAL)
     right_o = cached_scores(ocfg).nrmse_in
     wrong_o_in, _ = _wrong_stage_scores(ocfg, lambda files, x: oracle_mod.orbit_oracle(
-        files, x, truth=NOENT, n_corr=3.0))
+        files, x, truth=NOENT))
     assert right_o < wrong_o_in
 
 
@@ -167,3 +167,25 @@ def test_beta_entity_true_law_scores_rel_le_one_and_unsmeared_is_worse(stage):
     assert u_in + u_ex >= o.nrmse_in + o.nrmse_extrap
     # Corrected oracle is close to the smeared truth (observed values in the report).
     assert o.nrmse_in < 0.02 and o.nrmse_extrap < 0.03
+
+
+@pytest.mark.parametrize("stage", [Stage.HISTORICAL, Stage.COUNTERFACTUAL])
+def test_orbit_noentity_oracle_fits_exponent(stage):
+    from abductbench.tasks.orbit import _SPECS
+
+    cfg = vcfg(ORBIT, NOENT, stage)
+    fit = oracle_mod.fit_orbit_noentity(build_task(cfg).public_files)
+    true_n = _SPECS[stage].n_corr  # test-side check only
+    # Observed at seed 0 mode 1: see final-fix-report.md; tolerance is a few times the observed error.
+    assert fit["n"] == pytest.approx(true_n, abs=0.25)
+
+
+def test_orbit_oracle_receives_no_stage_constants():
+    import inspect
+
+    cfg = vcfg(ORBIT, NOENT, Stage.COUNTERFACTUAL)
+    bundle = build_task(cfg)
+    assert isinstance(bundle.oracle_family, functools.partial)
+    assert bundle.oracle_family.args == ()
+    assert set(bundle.oracle_family.keywords) == {"truth"}
+    assert set(inspect.signature(oracle_mod.orbit_oracle).parameters) == {"public_files", "eval_x", "truth"}
