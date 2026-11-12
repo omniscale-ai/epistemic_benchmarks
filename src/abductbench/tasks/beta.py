@@ -129,7 +129,31 @@ def _integrate(f: np.ndarray, x: np.ndarray) -> float:
     return float(np.sum((f[1:] + f[:-1]) * np.diff(x)) / 2.0)
 
 
+def _gauss(d: np.ndarray, sigma: float) -> np.ndarray:
+    return np.exp(-0.5 * (d / sigma) ** 2) / (sigma * math.sqrt(2 * math.pi))
+
+
+def _smeared_entity_table(s: _Setup, n_t: int = 4001, n_x: int = 6001) -> tuple[np.ndarray, np.ndarray]:
+    """Detector-seen entity density (raw spectrum convolved with the public Gaussian) on a grid.
+
+    This is exactly the density of the generated events: T_true is drawn from the raw spectrum on
+    its full support [0, Q] and T_obs = T_true + N(0, sigma). Returned in MeV, unnormalised.
+    """
+    t = np.linspace(0.0, s.Q, n_t)
+    w = np.full(n_t, t[1] - t[0])
+    w[0] = w[-1] = w[0] / 2.0
+    ft = _raw_entity(t, s) * w
+    x = np.linspace(-6.0 * s.sigma, s.Q + 6.0 * s.sigma, n_x)
+    dens = np.empty(n_x)
+    for i in range(0, n_x, 500):
+        dens[i : i + 500] = _gauss(x[i : i + 500, None] - t[None, :], s.sigma) @ ft
+    return x, dens
+
+
 def _normalisation(truth: Truth, s: _Setup) -> float:
+    if truth is Truth.ENTITY:
+        x, dens = _smeared_entity_table(s)
+        return _integrate(dens, x)
     grid = np.linspace(0.0, 1.5 * s.Q, GRID)
     return _integrate(_raw(truth, grid, s), grid)
 
@@ -142,6 +166,15 @@ def _domain_mev(truth: Truth, s: _Setup) -> tuple[float, float]:
 
 def _make_truth_law(truth: Truth, s: _Setup):
     norm = _normalisation(truth, s)
+    if truth is Truth.ENTITY:
+        # Detector-seen density: raw spectrum convolved with the public resolution (as the events).
+        xt, dt = _smeared_entity_table(s)
+
+        def law_entity(T):
+            T = np.asarray(T, dtype=float)
+            return np.interp(T * s.scale, xt, dt, left=0.0, right=0.0) / norm * s.scale
+
+        return law_entity
 
     def law(T):
         T = np.asarray(T, dtype=float)
@@ -153,6 +186,9 @@ def _make_truth_law(truth: Truth, s: _Setup):
 
 def _sample_truth_mev(truth: Truth, s: _Setup, rng, n: int, thickness: float = 1.0) -> np.ndarray:
     lo, hi = WINDOW[0] * s.Q, WINDOW[1] * s.Q
+    if truth is Truth.ENTITY:
+        # Full support: events outside the window are smeared in and truncated after smearing.
+        lo, hi = 0.0, s.Q
     grid = np.linspace(lo, hi, GRID)
     f = _raw(truth, grid, s, thickness)
     cdf = np.concatenate([[0.0], np.cumsum((f[1:] + f[:-1]) * np.diff(grid) / 2.0)])

@@ -134,10 +134,10 @@ def test_normalize_floor():
 
     # Oracle at (almost) zero: the denominator is the noise floor, not the oracle value.
     tiny = OracleScores(nrmse_in=1e-7, nrmse_extrap=2e-3)
-    assert NOISE_FLOOR == pytest.approx(1e-3)
-    n = normalize(LawResult(status="ok", nrmse_in=1e-3, nrmse_extrap=4e-3), tiny)
-    assert n.rel_in == pytest.approx(1.0)  # 1e-3 / max(1e-7, 1e-3)
-    assert n.rel_extrap == pytest.approx(2.0)  # 4e-3 / max(2e-3, 1e-3)
+    assert NOISE_FLOOR == pytest.approx(1e-2)
+    n = normalize(LawResult(status="ok", nrmse_in=1e-2, nrmse_extrap=4e-2), tiny)
+    assert n.rel_in == pytest.approx(1.0)  # 1e-2 / max(1e-7, 1e-2)
+    assert n.rel_extrap == pytest.approx(4.0)  # 4e-2 / max(2e-3, 1e-2)
 
 
 @pytest.mark.parametrize("status", ["crash", "timeout", "bad_shape", "nonfinite", "missing"])
@@ -145,3 +145,25 @@ def test_normalize_none_when_failed(status):
     oracle = OracleScores(nrmse_in=0.05, nrmse_extrap=0.2)
     n = normalize(LawResult(status=status, detail="x"), oracle)
     assert n.rel_in is None and n.rel_extrap is None
+
+
+@pytest.mark.parametrize("stage", list(Stage))
+def test_beta_entity_true_law_scores_rel_le_one_and_unsmeared_is_worse(stage):
+    cfg = vcfg(BETA, ENT, stage)
+    bundle = build_task(cfg)
+    ep = bundle.eval_points()
+    # An agent law equal to the true detector-seen density scores 0 and rel <= 1.
+    s_in, s_ex = score_predictions(bundle, bundle.truth_law(ep.in_range), bundle.truth_law(ep.extrapolation))
+    assert s_in == pytest.approx(0.0, abs=1e-9) and s_ex == pytest.approx(0.0, abs=1e-9)
+    o = cached_scores(cfg)
+    res = normalize(LawResult(status="ok", nrmse_in=s_in, nrmse_extrap=s_ex), o)
+    assert res.rel_in <= 1.0 and res.rel_extrap <= 1.0
+    # A plain unsmeared law (the oracle's raw shape) is not better than the smeared one.
+    pub = oracle_mod._beta_public(bundle.public_files)
+    fit = oracle_mod.fit_beta_constants(bundle.public_files, truth=ENT, stage=stage)
+    p = fit.get("m_X", fit.get("k"))
+    raw = lambda x: oracle_mod._entity_shape(np.asarray(x, float), pub, stage, p)  # noqa: E731
+    u_in, u_ex = score_predictions(bundle, raw(ep.in_range), raw(ep.extrapolation))
+    assert u_in + u_ex >= o.nrmse_in + o.nrmse_extrap
+    # Corrected oracle is close to the smeared truth (observed values in the report).
+    assert o.nrmse_in < 0.02 and o.nrmse_extrap < 0.03

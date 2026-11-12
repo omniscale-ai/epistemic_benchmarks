@@ -43,7 +43,10 @@ from scipy.optimize import least_squares, minimize, minimize_scalar
 from abductbench.config import Stage, Truth, VariantConfig
 from abductbench.evaluate.law_eval import LawResult, score_predictions
 
-NOISE_FLOOR = 1e-3
+# Floor on the oracle nrmse used to normalise agent scores. It is tied to finite-sample noise:
+# with ~1000 events the best achievable nrmse is a few 1e-3 to 1e-2, so an oracle that matches
+# the generating law almost exactly must not turn tiny agent errors into huge ratios.
+NOISE_FLOOR = 1e-2
 ALPHA = 1.0 / 137.036
 ARCSEC_PER_RAD = 180.0 * 3600.0 / math.pi
 
@@ -167,7 +170,8 @@ class _Smearing:
     """Precomputed Gaussian resolution kernels on the public window."""
 
     def __init__(self, pub: _BetaPublic, n_t: int = 801, n_grid: int = 401):
-        self.t = np.linspace(pub.lo, pub.hi, n_t)
+        # True (pre-resolution) energies span the full support [0, Q]; only observations are windowed.
+        self.t = np.linspace(0.0, pub.Q, n_t)
         h = self.t[1] - self.t[0]
         self.w = np.full(n_t, h)
         self.w[0] = self.w[-1] = h / 2.0
@@ -234,6 +238,19 @@ def fit_beta_constants(public_files, *, truth: Truth, stage: Stage) -> dict[str,
     return {"a2": a2, "a3": a3, "lam": lam}
 
 
+def _smear_entity(x: np.ndarray, pub: _BetaPublic, stage: Stage, p: float | None) -> np.ndarray:
+    """Detector-seen entity density at x: the shape convolved with the public Gaussian resolution."""
+    t = np.linspace(0.0, pub.Q, 4001)
+    w = np.full(t.size, t[1] - t[0])
+    w[0] = w[-1] = w[0] / 2.0
+    ft = _entity_shape(t, pub, stage, p) * w
+    flat = x.ravel()
+    out = np.empty(flat.size)
+    for i in range(0, flat.size, 500):
+        out[i : i + 500] = _gauss(flat[i : i + 500, None] - t[None, :], pub.sigma) @ ft
+    return out.reshape(x.shape)
+
+
 def beta_oracle(public_files, eval_x, *, truth: Truth, stage: Stage) -> np.ndarray:
     """Oracle prediction of the detector-seen density at eval_x (public units)."""
     x = np.asarray(eval_x, dtype=float)
@@ -241,7 +258,7 @@ def beta_oracle(public_files, eval_x, *, truth: Truth, stage: Stage) -> np.ndarr
     fit = fit_beta_constants(public_files, truth=truth, stage=stage)
     if truth is Truth.ENTITY:
         p = fit.get("m_X", fit.get("k"))
-        return _entity_shape(x, pub, stage, p)
+        return _smear_entity(x, pub, stage, p)
     return _noentity_shape(x, pub, fit["a2"], fit["a3"], fit["lam"])
 
 
