@@ -8,7 +8,7 @@ items:
     criterion: "Identifies the detector response of the synthetic world, naming the endpoint peak, the energy-loss tail and the backscatter shelf, as the cause of the apparent anomaly."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives from an invented hidden particle, a violation of the synthetic conservation rule, and a different spectral law, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternatives that are NOT the real cause, such as an invented hidden particle or a violation of the synthetic conservation rule, and gives a specific reason for rejecting each one listed."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a measurement that changes the target thickness or the detector angle and checks whether the tail follows the setup, which a hidden particle's spectrum would not do."

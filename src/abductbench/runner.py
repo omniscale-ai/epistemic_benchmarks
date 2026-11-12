@@ -17,6 +17,7 @@ against ``claude --help`` (Claude Code CLI of this environment). Choices:
   be denied instead of hanging.
 - ``--disallowedTools WebSearch,WebFetch,Task``: no network tools, no subagents.
 - ``--setting-sources ""``, ``--disable-slash-commands``, ``--no-session-persistence``.
+- ``--max-budget-usd``: spend cap per run (``MAX_BUDGET_USD``, overridable via the argument).
 - No turn cap: ``claude --help`` lists no ``--max-turns`` option, so the only limit is the
   wall-clock ``timeout_s``. Nothing bypasses permissions (no ``--dangerously-skip-permissions``).
 - The output is ``stream-json`` (requires ``--verbose``) and is stored as the transcript.
@@ -57,6 +58,7 @@ from abductbench.workspace import DEFAULT_BUDGET, INDEX_NAME, make_workspace
 
 AGENT_MODEL = "sonnet"
 AGENT_TIMEOUT_S = 3600
+MAX_BUDGET_USD = 5.0  # per-run API spend cap passed as --max-budget-usd
 AGENT_ALLOWED_TOOLS = "Read,Write,Edit,Bash"
 AGENT_DISALLOWED_TOOLS = "WebSearch,WebFetch,Task"
 
@@ -75,7 +77,7 @@ _PROMPT_BODY = """You are solving a scientific inference task. Everything you ne
 
 Steps:
 1. Read task.md. It describes the observations, the required signature of law(...) and the keys of DOMAIN.
-2. Write law.py. It must define law(...) with exactly the signature given in task.md, and a module-level dict DOMAIN with exactly the keys named in task.md; every DOMAIN value is a (lo, hi) tuple of numbers. law.py must be deterministic, must not read files or use the network, and must run quickly. It may import helper modules that you save in this directory.
+2. Write law.py. It must define law(...) with exactly the signature given in task.md, and a module-level dict DOMAIN with exactly the keys named in task.md; every DOMAIN value is a (lo, hi) tuple of numbers. law.py must be deterministic, must not read files or use the network, and must run quickly. The evaluator imports law.py and calls law(...) twice (once on points inside DOMAIN, once on extrapolation points) in an environment with only numpy and scipy; the total time limit for importing and both calls is 20 seconds. It may import helper modules that you save in this directory (they stay importable next to law.py).
 3. Write answer.md with exactly three markdown sections, in this order: "## Law", "## Limits", "## Explanation".
    - Law: the law in words, referring to law.py.
    - Limits: where the law applies and where it does not.
@@ -93,8 +95,10 @@ def build_agent_prompt(cfg: VariantConfig) -> str:
     return _PROMPT_BODY + "\n" + MODE_NOTES[cfg.mode] + "\n"
 
 
-def _agent_command(prompt: str, workspace: Path) -> list[str]:
-    """argv for one non-interactive agent run (cwd is set by the caller). See module docstring."""
+def _agent_command(prompt: str, workspace: Path, max_budget_usd: float = MAX_BUDGET_USD) -> list[str]:
+    """argv for one non-interactive agent run (cwd is set by the caller). See module docstring.
+
+    ``--max-budget-usd`` caps the API spend of the run (default ``MAX_BUDGET_USD``)."""
     return [
         "claude",
         "-p",
@@ -121,6 +125,8 @@ def _agent_command(prompt: str, workspace: Path) -> list[str]:
         "",
         "--no-session-persistence",
         "--disable-slash-commands",
+        "--max-budget-usd",
+        f"{max_budget_usd:g}",
     ]
 
 

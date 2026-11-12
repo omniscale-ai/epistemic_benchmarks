@@ -184,6 +184,9 @@ def test_agent_command_flags(tmp_path):
     disallowed = argv[argv.index("--disallowedTools") + 1]
     assert "WebSearch" in disallowed and "WebFetch" in disallowed and "Task" in disallowed
     assert "--max-turns" not in argv
+    assert argv[argv.index("--max-budget-usd") + 1] == "5"
+    assert float(argv[argv.index("--max-budget-usd") + 1]) == runner.MAX_BUDGET_USD
+    assert _agent_command(prompt, tmp_path, max_budget_usd=2.5)[-1] == "2.5"
     joined = " ".join(argv)
     assert "dangerously-skip-permissions" not in joined
 
@@ -260,3 +263,10 @@ def test_launch_paths_and_wrapper_do_not_leak_variant(tmp_path, family, truth, s
         assert not re.search(r"-[abcd]-s\d+|-s\d+-m[12]", low)
     record = json.loads((runs / c.variant_id / "record.json").read_text())
     assert record["variant_id"] == c.variant_id
+
+
+def test_prompt_states_evaluator_limits():
+    text = build_agent_prompt(cfg())
+    assert "twice" in text and "20 seconds" in text
+    assert "numpy and scipy" in text and "helper modules" in text
+    assert build_agent_prompt(cfg(mode=1)).split("Note:")[0] == build_agent_prompt(cfg(mode=2)).split("Note:")[0]

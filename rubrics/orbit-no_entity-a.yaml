@@ -8,7 +8,7 @@ items:
     criterion: "Identifies the cause as a modification of the central gravitational force law acting on the bodies, an extra radial term, and not an unseen body and not an observation error alone."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives from an unseen perturbing body, an observation or ephemeris error, and a modified force law, and gives a specific reason for rejecting each one listed, including why one hidden body would not fit the other inner planets."
+    criterion: "Lists at least two alternatives that are NOT the real cause, such as an unseen perturbing body or an observation or ephemeris error, and gives a specific reason for rejecting each one listed, including why one hidden body would not fit the other inner planets."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a test that separates a law modification from a hidden body, such as checking whether the other inner planets precess at the rate the same modified law predicts, or a targeted search in the predicted region that is expected to come up empty."

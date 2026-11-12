@@ -146,6 +146,7 @@ def _audit_command(prompt: str) -> list[str]:
 
     Mirrors ``evaluate.judge._judge_command``: ``-p`` takes the prompt positionally, and the
     variadic ``--tools`` option comes after it so it cannot swallow the prompt.
+    ``--setting-sources ""`` keeps user-level CLAUDE.md, settings, hooks and MCP servers out of the process.
     """
     return [
         "claude",
@@ -157,6 +158,8 @@ def _audit_command(prompt: str) -> list[str]:
         "text",
         "--system-prompt",
         AUDIT_SYSTEM_PROMPT,
+        "--setting-sources",
+        "",
         "--tools",
         "",
         "--no-session-persistence",

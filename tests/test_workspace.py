@@ -108,6 +108,32 @@ def test_no_truth_strings_in_public_files(config):
                 )
 
 
+@pytest.mark.parametrize("mode", [1, 2])
+@pytest.mark.parametrize("config", all_16_configs(), ids=lambda c: c.variant_id)
+def test_no_truth_strings_in_written_workspace_tree(tmp_path_factory, config, mode):
+    config = cfg(family=config.family, truth=config.truth, stage=config.stage, seed=0, mode=mode)
+    # neutral base dirs: pytest's per-test tmp_path embeds the test id, which would be a false hit
+    root = tmp_path_factory.mktemp("w")
+    state = tmp_path_factory.mktemp("s") if mode == 2 else None
+    ws = make_workspace(config, root, state_root=state)
+    seen = 0
+    for path in ws.rglob("*"):
+        rel = path.relative_to(ws).as_posix()
+        texts = [("path", rel)]
+        if path.is_file():
+            texts.append(("content", path.read_bytes().decode("utf-8", errors="ignore")))
+        for label, value in texts:
+            lowered = value.lower()
+            for token in FORBIDDEN:
+                assert token.lower() not in lowered, (
+                    f"{config.variant_id}: forbidden token {token!r} in {label} of {rel!r}"
+                )
+        seen += path.is_file()
+    assert seen >= 4
+    assert config.variant_id not in "".join(p.name for p in ws.parents)
+    assert (ws / "sim").exists() == (mode == 2)
+
+
 def test_workspace_dir_name_does_not_reveal_variant(tmp_path):
     c = cfg(family=Family.ORBIT, truth=Truth.NO_ENTITY, stage=Stage.COUNTERFACTUAL)
     task_dir = make_workspace(c, tmp_path)

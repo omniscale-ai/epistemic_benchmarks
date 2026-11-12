@@ -71,3 +71,25 @@ def test_smoke_runner_never_leaks_truth_into_workspace(oracle_result):
     cfg = next(c for c in all_variants(seeds=[0], modes=(1,)) if c.variant_id == row["variant_id"])
     public = set(build_task(cfg).public_files)
     assert listing == public | {"law.py", "answer.md"}
+
+
+FORBIDDEN_WORDS = ["entity", "neutrino", "neptune", "vulcan", "truth"]
+
+
+def test_smoke_all_16_workspaces_have_no_truth_words(oracle_result):
+    runs = oracle_result["runs"]
+    assert len(runs) == 16
+    for _, row in runs.iterrows():
+        workspace = Path(row["workspace"])
+        cfg = next(c for c in all_variants(seeds=[0], modes=(1,)) if c.variant_id == row["variant_id"])
+        public = set(build_task(cfg).public_files)
+        for path in workspace.rglob("*"):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(workspace).as_posix()
+            if rel in public:  # untouched public file: also text-scanned
+                text = path.read_bytes().decode("utf-8", errors="ignore").lower()
+                for word in FORBIDDEN_WORDS:
+                    assert word not in text, (row["variant_id"], rel, word)
+            for word in FORBIDDEN_WORDS:
+                assert word not in rel.lower(), (row["variant_id"], rel, word)

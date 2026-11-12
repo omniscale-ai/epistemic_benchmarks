@@ -260,6 +260,18 @@ def test_judge_command_uses_print_model_and_no_web_tools():
     assert JUDGE_MODEL in cmd
     assert cmd[cmd.index("--model") + 1] == JUDGE_MODEL
     assert cmd[cmd.index("--tools") + 1] == ""
+    assert cmd[cmd.index("--setting-sources") + 1] == ""
+    assert cmd.index("--setting-sources") < cmd.index("--tools")  # variadic --tools goes last
     joined = " ".join(cmd)
     assert "WebFetch" not in joined and "WebSearch" not in joined
     assert "PROMPT TEXT" in cmd
+
+
+@pytest.mark.parametrize("stage", ["a", "b", "c", "d"])
+@pytest.mark.parametrize("family", ["beta", "orbit"])
+def test_no_entity_alternatives_criterion_never_offers_the_cause(family, stage):
+    rubric = load_rubric(f"{family}-no_entity-{stage}")
+    item = next(i for i in rubric.items if i.id == "alternatives_rejected_with_reason")
+    assert "NOT the real cause" in item.criterion
+    low = item.criterion.lower()
+    assert "detector artifact" not in low and "modified force law" not in low and "force-law modification" not in low

@@ -8,7 +8,7 @@ items:
     criterion: "Identifies the detector response as the cause, and does not attribute the spectrum to a hidden particle of any mass or to the textbook massless spectrum."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives from a massive hidden particle, a massless hidden particle, and energy non-conservation, and gives a specific reason for rejecting each one, such as the momentum balance or the shape of the endpoint region."
+    criterion: "Lists at least two alternatives that are NOT the real cause, such as a massive hidden particle, a massless hidden particle, or energy non-conservation, and gives a specific reason for rejecting each one, such as the momentum balance or the shape of the endpoint region."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a measurement that changes the target thickness or the detector angle and checks whether the endpoint peak and the tail follow the setup, which a heavy particle's spectrum would not do."

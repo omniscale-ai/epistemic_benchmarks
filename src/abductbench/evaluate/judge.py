@@ -42,6 +42,7 @@ def _judge_command(prompt: str) -> list[str]:
 
     ``-p`` takes the prompt positionally, so the prompt directly follows it; the
     variadic ``--tools`` option comes after it so it cannot swallow the prompt.
+    ``--setting-sources ""`` keeps user-level CLAUDE.md, settings, hooks and MCP servers out of the process.
     """
     return [
         "claude",
@@ -53,6 +54,8 @@ def _judge_command(prompt: str) -> list[str]:
         "text",
         "--system-prompt",
         JUDGE_SYSTEM_PROMPT,
+        "--setting-sources",
+        "",
         "--tools",
         "",
         "--no-session-persistence",

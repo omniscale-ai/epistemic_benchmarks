@@ -112,6 +112,8 @@ def test_audit_command_flags():
     assert argv[argv.index("--model") + 1] == AUDIT_MODEL == "sonnet"
     assert argv[argv.index("--output-format") + 1] == "text"
     assert argv[argv.index("--tools") + 1] == ""
+    assert argv[argv.index("--setting-sources") + 1] == ""
+    assert argv.index("--setting-sources") < argv.index("--tools")  # variadic --tools goes last
     assert "--no-session-persistence" in argv
     assert "--disable-slash-commands" in argv
     assert "--system-prompt" in argv
