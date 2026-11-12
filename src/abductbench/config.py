@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
@@ -52,6 +53,27 @@ def all_variants(seeds=range(5), modes=(1, 2)) -> list[VariantConfig]:
         for seed in seeds
         for m in modes
     ]
+
+
+_VARIANT_ID_RE = re.compile(r"(beta|orbit)-(entity|no_entity)-([abcd])-s(\d+)-m([12])")
+
+
+def cfg_from_variant_id(variant_id: str) -> VariantConfig:
+    """Inverse of ``VariantConfig.variant_id``: 'beta-no_entity-c-s3-m2' -> VariantConfig.
+
+    Uses the default noise and n_points. Raises ValueError for any other string.
+    """
+    m = _VARIANT_ID_RE.fullmatch(variant_id) if isinstance(variant_id, str) else None
+    if m is None:
+        raise ValueError(f"invalid variant id: {variant_id!r}")
+    family, truth, stage, seed, mode = m.groups()
+    return VariantConfig(
+        family=Family(family),
+        truth=Truth(truth),
+        stage=Stage(stage),
+        seed=int(seed),
+        mode=int(mode),
+    )
 
 
 def pair_id_of(variant_id: str) -> str:

@@ -1,0 +1,59 @@
+---
+title: "Abduction benchmark: results"
+format: html
+execute:
+  echo: false
+  warning: false
+---
+
+## How to read these tables
+
+- **No single headline score.** Results are split by family (beta, orbit), truth (entity, no_entity), stage (a historical, b obfuscated, c counterfactual, d synthetic) and mode (1 = data tables only, 2 = interactive simulator with a budget). Compare cells, not one total.
+- **Normalized by the oracle.** `rel_in` and `rel_extrap` are the agent's NRMSE divided by a reference solver's NRMSE on the same points (1.0 means "as good as the oracle", lower is better). Medians are taken over seeds.
+- **Judge errors are excluded.** A rubric verdict that the judge could not return is never counted as a pass. It is excluded from the rubric mean and reported in its own column. Answers that did not parse are skipped by the judge and do not enter the rubric mean; `answer_ok_rate` shows how often that happened.
+- **Mode 1 vs mode 2.** Mode 2 adds `median_discriminating_fraction`: the share of the measurement budget spent on queries that distinguish the hypotheses. It is empty for mode 1.
+- **Pair ENTITY rate** counts a seed only when both the entity and no_entity variants are present and both answered correctly.
+
+```{python}
+#| tags: [parameters]
+results_path = "results.parquet"
+```
+
+```{python}
+from pathlib import Path
+
+import pandas as pd
+
+results_file = Path(results_path)
+base = results_file.parent
+runs = pd.read_parquet(results_file)
+summary = pd.read_parquet(base / f"{results_file.stem}.summary.parquet")
+pairs = pd.read_parquet(base / f"{results_file.stem}.pairs.parquet")
+gaps = pd.read_parquet(base / f"{results_file.stem}.gaps.parquet")
+
+FMT = lambda x: "" if pd.isna(x) else f"{x:.3f}"  # noqa: E731
+```
+
+## Per stage and variant
+
+```{python}
+#| output: asis
+print(f"<p>{len(runs)} runs in total.</p>")
+print(summary.to_html(index=False, float_format=FMT, border=0))
+```
+
+## Pair-level ENTITY rate
+
+```{python}
+#| output: asis
+print(pairs.to_html(index=False, float_format=FMT, border=0))
+```
+
+## Stage gaps against stage a
+
+Differences are stage c minus stage a and stage d minus stage a. A negative rubric difference or a positive `rel_in` difference means the later stage does worse. Empty cells mean the stage was not run.
+
+```{python}
+#| output: asis
+print(gaps.to_html(index=False, float_format=FMT, border=0))
+```
