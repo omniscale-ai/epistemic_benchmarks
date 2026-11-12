@@ -15,6 +15,9 @@ import pytest
 from abductbench.config import Family, Stage, Truth, VariantConfig, all_variants
 from abductbench.config import cfg_from_variant_id
 from abductbench.evaluate.aggregate import (
+    AGG_COLUMNS,
+    GAP_COLUMNS,
+    PAIR_COLUMNS,
     RUN_COLUMNS,
     RunScores,
     aggregate,
@@ -24,7 +27,7 @@ from abductbench.evaluate.aggregate import (
     write_results,
 )
 from abductbench.evaluate.oracle import OracleScores
-from abductbench.runner import RunRecord
+from abductbench.runner import LEDGER_COPY_NAME, RunRecord
 
 REPORT = Path(__file__).resolve().parents[1] / "report" / "report.qmd"
 
@@ -61,6 +64,7 @@ def score(family="beta", truth="entity", stage="a", seed=0, mode=1, **over) -> R
         discriminating_fraction=None,
         timed_out=False,
         returncode=0,
+        error=None,
     )
     base.update(over)
     return RunScores(**base)
@@ -412,3 +416,160 @@ def test_cli_end_to_end_with_fake_runs(tmp_path, monkeypatch, capsys):
     assert (results.parent / "results.summary.parquet").is_file()
     assert (results.parent / "results.pairs.parquet").is_file()
     assert (results.parent / "results.gaps.parquet").is_file()
+
+
+def _cli_run_dir(runs: Path, cfg: VariantConfig) -> Path:
+    d = runs / cfg.variant_id
+    d.mkdir(parents=True)
+    return d
+
+
+def test_evaluate_run_oracle_exception_is_recorded(tmp_path, monkeypatch):
+    import abductbench.evaluate.aggregate as agg
+
+    cfg = vcfg()
+    law = write_law(tmp_path / "ws", CONSTANT_SOURCE)
+
+    def boom(c):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(agg, "oracle_scores", boom)
+    s = evaluate_run(cfg, record_for(cfg, law_path=law), oracle_cache={}, use_judge=False)
+    assert s.law_status == "ok"
+    assert s.nrmse_in is not None
+    assert s.rel_in is None and s.rel_extrap is None
+    assert s.error is not None and "boom" in s.error
+    json.dumps(dataclasses.asdict(s))
+
+
+def test_mode2_ledger_reading(tmp_path):
+    cfg = vcfg(mode=2)
+    run = tmp_path / "run"
+    run.mkdir()
+    # Budget line, then 1.0 on a non-discriminating type and 5.0 on a discriminating one.
+    (run / LEDGER_COPY_NAME).write_text(
+        json.dumps({"budget": 100.0}) + "\n"
+        + json.dumps({"query_type": "events", "cost": 1.0, "args": {}, "remaining": 99.0}) + "\n"
+        + json.dumps({"query_type": "recoil_correlation", "cost": 5.0, "args": {}, "remaining": 94.0}) + "\n",
+        encoding="utf-8",
+    )
+    s = evaluate_run(cfg, record_for(cfg), use_judge=False, run_dir=run)
+    assert s.discriminating_fraction == pytest.approx(5.0 / 6.0)
+
+    # Missing ledger in a mode-2 run counts as 0.0, not as a dropped row.
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    s_missing = evaluate_run(cfg, record_for(cfg), use_judge=False, run_dir=empty)
+    assert s_missing.discriminating_fraction == 0.0
+
+    # Unreadable ledger also counts as 0.0.
+    broken = tmp_path / "broken"
+    broken.mkdir()
+    (broken / LEDGER_COPY_NAME).write_text("{not json\n", encoding="utf-8")
+    s_broken = evaluate_run(cfg, record_for(cfg), use_judge=False, run_dir=broken)
+    assert s_broken.discriminating_fraction == 0.0
+
+    # Mode 1 never has a discriminating fraction.
+    cfg1 = vcfg(mode=1)
+    s1 = evaluate_run(cfg1, record_for(cfg1), use_judge=False, run_dir=run)
+    assert s1.discriminating_fraction is None
+
+
+def test_aggregate_visibility_columns():
+    scores = [
+        score(mode=1, seed=0, timed_out=True),
+        score(mode=1, seed=1, timed_out=False, judge_status="judge_error", rubric_pass_rate=None),
+        score(mode=1, seed=2, timed_out=False, rubric_pass_rate=0.4),
+        score(mode=2, seed=0, discriminating_fraction=0.5),
+        score(mode=2, seed=1, discriminating_fraction=None),
+    ]
+    df = aggregate(scores)
+    m1 = df[(df["mode"] == 1)].iloc[0]
+    assert m1["timeout_rate"] == pytest.approx(1 / 3)
+    assert m1["n_judged"] == 2
+    assert m1["n_with_discriminating_fraction"] == 0
+    m2 = df[(df["mode"] == 2)].iloc[0]
+    assert m2["n_with_discriminating_fraction"] == 1
+    assert m2["median_discriminating_fraction"] == pytest.approx(0.5)
+
+
+def test_stage_gap_table_law_and_answer_rates():
+    scores = [
+        score(stage="a", seed=0, law_status="ok", answer_status="ok"),
+        score(stage="a", seed=1, law_status="crash", answer_status="ok", rel_in=None),
+        score(stage="c", seed=0, law_status="ok", answer_status="missing", entity_pred=None),
+        score(stage="d", seed=0, law_status="ok", answer_status="ok"),
+    ]
+    gt = stage_gap_table(scores)
+    row = gt.iloc[0]
+    assert row["law_ok_rate_a"] == pytest.approx(0.5)
+    assert row["law_ok_rate_c"] == pytest.approx(1.0)
+    assert row["law_ok_rate_c_minus_a"] == pytest.approx(0.5)
+    assert row["answer_ok_rate_c"] == pytest.approx(0.0)
+    assert row["answer_ok_rate_c_minus_a"] == pytest.approx(-1.0)
+    assert row["answer_ok_rate_d_minus_a"] == pytest.approx(0.0)
+
+
+def test_cli_skips_bad_runs_and_writes_the_rest(tmp_path, monkeypatch, capsys):
+    import abductbench.evaluate.aggregate as agg
+    from abductbench.evaluate import cli
+
+    monkeypatch.setattr(agg, "oracle_scores", lambda c: OracleScores(nrmse_in=1.0, nrmse_extrap=1.0))
+    runs = tmp_path / "runs"
+    good_cfg = VariantConfig(family=Family.BETA, truth=Truth.ENTITY, stage=Stage.HISTORICAL, seed=0, mode=1)
+    good = _cli_run_dir(runs, good_cfg)
+    (good / "law.py").write_text(CONSTANT_SOURCE, encoding="utf-8")
+    RunRecord(variant_id=good_cfg.variant_id, workspace=tmp_path, law_path=good / "law.py",
+              answer_path=None, transcript_path=None, returncode=0, timed_out=False).save(good / "record.json")
+    # Malformed JSON.
+    bad_json = runs / "beta-entity-a-s1-m1"
+    bad_json.mkdir()
+    (bad_json / "record.json").write_text("{not json", encoding="utf-8")
+    # Bad variant id inside a valid record.
+    bad_id = runs / "bad-id-run"
+    bad_id.mkdir()
+    RunRecord(variant_id="gamma-entity-a-s0-m1", workspace=tmp_path, law_path=None, answer_path=None,
+              transcript_path=None, returncode=0, timed_out=False).save(bad_id / "record.json")
+
+    results = tmp_path / "out" / "results.parquet"
+    rc = cli.main([str(runs), str(results), "--no-judge"])
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "beta-entity-a-s1-m1" in captured.err
+    assert "bad-id-run" in captured.err
+    assert "skipped 2" in captured.out
+    df = pd.read_parquet(results)
+    assert list(df["variant_id"]) == [good_cfg.variant_id]
+
+
+def test_cli_nonzero_exit_when_nothing_evaluated(tmp_path, capsys):
+    from abductbench.evaluate import cli
+
+    runs = tmp_path / "runs"
+    (runs / "x").mkdir(parents=True)
+    (runs / "x" / "record.json").write_text("{not json", encoding="utf-8")
+    results = tmp_path / "out" / "results.parquet"
+    rc = cli.main([str(runs), str(results), "--no-judge"])
+    assert rc != 0
+    assert "x" in capsys.readouterr().err
+    assert results.is_file()
+    assert len(pd.read_parquet(results)) == 0
+
+
+def test_empty_scores_everywhere(tmp_path):
+    assert aggregate([]).empty and list(aggregate([]).columns) == AGG_COLUMNS
+    assert pair_table([]).empty and list(pair_table([]).columns) == PAIR_COLUMNS
+    gt = stage_gap_table([])
+    assert gt.empty and list(gt.columns) == GAP_COLUMNS
+    results = tmp_path / "results.parquet"
+    write_results([], results)
+    assert list(pd.read_parquet(results).columns) == RUN_COLUMNS
+    assert list(pd.read_parquet(tmp_path / "results.summary.parquet").columns) == AGG_COLUMNS
+    assert list(pd.read_parquet(tmp_path / "results.pairs.parquet").columns) == PAIR_COLUMNS
+    assert list(pd.read_parquet(tmp_path / "results.gaps.parquet").columns) == GAP_COLUMNS
+    source = REPORT.read_text(encoding="utf-8").replace(
+        'results_path = "results.parquet"', f"results_path = {str(results)!r}"
+    )
+    ns, out = _run_report_cells(source)
+    assert len(ns["runs"]) == 0 and len(ns["summary"]) == 0
+    assert "<table" in out

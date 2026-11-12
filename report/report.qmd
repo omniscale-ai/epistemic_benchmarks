@@ -51,6 +51,8 @@ print(pairs.to_html(index=False, float_format=FMT, border=0))
 
 ## Stage gaps against stage a
 
+**Caveat: gaps compare surviving subsets.** Each stage's medians use only the runs that finished in that stage, so a gap can reflect which runs failed as well as how well the ones that ran did. The `law_ok_rate_*` and `answer_ok_rate_*` columns show how many failures sit behind each gap.
+
 Differences are stage c minus stage a and stage d minus stage a. A negative rubric difference or a positive `rel_in` difference means the later stage does worse. Empty cells mean the stage was not run.
 
 ```{python}

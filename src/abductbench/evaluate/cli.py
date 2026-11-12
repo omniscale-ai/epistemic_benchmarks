@@ -9,6 +9,7 @@ rubric columns are left empty and ``judge_status`` is 'skipped'.
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from abductbench.config import cfg_from_variant_id
@@ -39,24 +40,33 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     scores = []
+    skipped = 0
     oracle_cache: dict = {}
-    for record_path in sorted(args.runs_dir.glob("*/record.json")):
+    record_paths = sorted(args.runs_dir.glob("*/record.json"))
+    if not record_paths:
+        print(f"warning: no record.json files under {args.runs_dir}", file=sys.stderr)
+    for record_path in record_paths:
         run_dir = record_path.parent
-        record = _rebase(RunRecord.load(record_path), run_dir)
-        cfg = cfg_from_variant_id(record.variant_id)
-        scores.append(
-            evaluate_run(
-                cfg,
-                record,
-                oracle_cache=oracle_cache,
-                use_judge=not args.no_judge,
-                run_dir=run_dir,
+        try:
+            record = _rebase(RunRecord.load(record_path), run_dir)
+            cfg = cfg_from_variant_id(record.variant_id)
+            scores.append(
+                evaluate_run(
+                    cfg,
+                    record,
+                    oracle_cache=oracle_cache,
+                    use_judge=not args.no_judge,
+                    run_dir=run_dir,
+                )
             )
-        )
+        except Exception as exc:  # one bad run must not abort the batch
+            skipped += 1
+            print(f"warning: skipped run {run_dir}: {type(exc).__name__}: {exc}", file=sys.stderr)
     args.results.parent.mkdir(parents=True, exist_ok=True)
     write_results(scores, args.results)
-    print(f"evaluated {len(scores)} runs -> {args.results}")
-    return 0
+    print(f"evaluated {len(scores)} runs, skipped {skipped} -> {args.results}")
+    # Nonzero only when no run could be evaluated at all.
+    return 0 if scores else 1
 
 
 if __name__ == "__main__":

@@ -68,11 +68,28 @@ class RunScores:
     discriminating_fraction: float | None  # mode 2 only
     timed_out: bool
     returncode: int | None
+    error: str | None = None  # evaluator-side failure text (e.g. oracle); None when clean
 
 
 RUN_COLUMNS = [f.name for f in fields(RunScores)]
 GROUP_KEYS = ["family", "truth", "stage", "mode"]
-STAGES = ("a", "b", "c", "d")
+AGG_COLUMNS = GROUP_KEYS + [
+    "n_runs", "law_ok_rate", "answer_ok_rate", "median_rel_in", "median_rel_extrap",
+    "median_domain_score", "rubric_pass_rate_mean", "n_judged", "judge_error_count",
+    "entity_correct_rate", "timeout_rate", "median_discriminating_fraction",
+    "n_with_discriminating_fraction",
+]
+PAIR_COLUMNS = ["family", "stage", "mode", "n_pairs", "n_incomplete_pairs", "pair_entity_rate"]
+GAP_METRICS = {
+    "rel_in": "median_rel_in",
+    "rubric": "rubric_pass_rate_mean",
+    "entity": "entity_correct_rate",
+    "law_ok_rate": "law_ok_rate",
+    "answer_ok_rate": "answer_ok_rate",
+}
+GAP_COLUMNS = ["family", "truth", "mode"] + [
+    f"{m}_{s}" for m in GAP_METRICS for s in ("a", "c", "d")
+] + [f"{m}_{s}_minus_a" for m in GAP_METRICS for s in ("c", "d")]
 
 
 def _dir_of(record: RunRecord) -> Path | None:
@@ -108,8 +125,13 @@ def evaluate_run(
     bundle = build_task(cfg)
 
     law = evaluate_law(bundle, record.law_path if record.law_path is not None else _NO_LAW)
+    error = None
     if law.status == "ok":
-        norm = normalize(law, _oracle(cfg, oracle_cache))
+        try:
+            norm = normalize(law, _oracle(cfg, oracle_cache))
+        except Exception as exc:  # oracle failure is not agent output, but must not abort a batch
+            error = f"oracle failed: {type(exc).__name__}: {exc}"
+            norm = NormalizedScores(rel_in=None, rel_extrap=None)
     else:
         norm = NormalizedScores(rel_in=None, rel_extrap=None)
 
@@ -135,13 +157,16 @@ def evaluate_run(
 
     disc = None
     if cfg.mode == 2:
+        # A mode-2 run with a missing or unreadable ledger counts as 0.0, so it cannot silently
+        # drop out of the median.
+        disc = 0.0
         base = Path(run_dir) if run_dir is not None else _dir_of(record)
         ledger = None if base is None else base / LEDGER_COPY_NAME
         if ledger is not None and ledger.is_file():
             try:
                 disc = discriminating_fraction(ledger, bundle.discriminating_queries)
-            except (OSError, ValueError, KeyError):
-                disc = None
+            except (OSError, ValueError, KeyError, TypeError):
+                disc = 0.0
 
     return RunScores(
         variant_id=cfg.variant_id,
@@ -167,6 +192,7 @@ def evaluate_run(
         discriminating_fraction=disc,
         timed_out=bool(record.timed_out),
         returncode=record.returncode,
+        error=error,
     )
 
 
@@ -192,11 +218,7 @@ def _entity_correct(answer_status, entity_pred, entity_truth) -> list[bool]:
 def aggregate(scores) -> pd.DataFrame:
     """One row per (family, truth, stage, mode). Accepts a list of RunScores or a DataFrame."""
     df = _frame(scores)
-    columns = GROUP_KEYS + [
-        "n_runs", "law_ok_rate", "answer_ok_rate", "median_rel_in", "median_rel_extrap",
-        "median_domain_score", "rubric_pass_rate_mean", "judge_error_count",
-        "entity_correct_rate", "median_discriminating_fraction",
-    ]
+    columns = AGG_COLUMNS
     if df.empty:
         return pd.DataFrame(columns=columns)
     df = df.assign(_correct=_entity_correct(df.answer_status, df.entity_pred, df.entity_truth))
@@ -212,9 +234,12 @@ def aggregate(scores) -> pd.DataFrame:
             "median_rel_extrap": _num(g.rel_extrap).median(),
             "median_domain_score": _num(g.domain_score).median(),
             "rubric_pass_rate_mean": float(rubric.mean()) if len(rubric) else float("nan"),
+            "n_judged": int((g.judge_status == "ok").sum()),
             "judge_error_count": int((g.judge_status == "judge_error").sum()),
             "entity_correct_rate": float(g._correct.mean()),
+            "timeout_rate": float(g.timed_out.astype(bool).mean()),
             "median_discriminating_fraction": _num(g.discriminating_fraction).median(),
+            "n_with_discriminating_fraction": int(_num(g.discriminating_fraction).notna().sum()),
         })
     return pd.DataFrame(rows, columns=columns)
 
@@ -227,7 +252,7 @@ def pair_table(scores) -> pd.DataFrame:
     members parsed ok with the correct ENTITY value (``pair_entity_score``).
     """
     df = _frame(scores)
-    columns = ["family", "stage", "mode", "n_pairs", "n_incomplete_pairs", "pair_entity_rate"]
+    columns = PAIR_COLUMNS
     if df.empty:
         return pd.DataFrame(columns=columns)
     rows = []
@@ -257,37 +282,30 @@ def pair_table(scores) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=columns)
 
 
-def _diff(agg: pd.DataFrame, stage: str, base: pd.Series, column: str) -> float:
-    row = agg[agg.stage == stage]
-    if row.empty or base is None:
-        return float("nan")
-    return float(row[column].iloc[0] - base[column])
-
-
 def stage_gap_table(scores) -> pd.DataFrame:
-    """Differences against stage a, per (family, truth, mode): stage c minus a, stage d minus a.
+    """Per (family, truth, mode): each metric at stages a, c, d, and the differences c-a, d-a.
 
-    Columns are NaN when the stage (or stage a) is absent from the runs.
+    Gaps compare the runs that survived in each stage. The law_ok and answer_ok columns show
+    how many failures sit behind each gap. Values are NaN when a stage is absent.
     """
     agg = aggregate(scores)
-    columns = ["family", "truth", "mode"] + [
-        f"{metric}_{stage}_minus_a"
-        for metric in ("rel_in", "rubric", "entity")
-        for stage in ("c", "d")
-    ]
     if agg.empty:
-        return pd.DataFrame(columns=columns)
+        return pd.DataFrame(columns=GAP_COLUMNS)
     rows = []
     for (family, truth, mode), g in agg.groupby(["family", "truth", "mode"], sort=True):
-        a_rows = g[g.stage == "a"]
-        base = a_rows.iloc[0] if not a_rows.empty else None
+        values = {}
+        for stage in ("a", "c", "d"):
+            hit = g[g.stage == stage]
+            values[stage] = hit.iloc[0] if not hit.empty else None
         row = {"family": family, "truth": truth, "mode": int(mode)}
-        for stage in ("c", "d"):
-            row[f"rel_in_{stage}_minus_a"] = _diff(g, stage, base, "median_rel_in")
-            row[f"rubric_{stage}_minus_a"] = _diff(g, stage, base, "rubric_pass_rate_mean")
-            row[f"entity_{stage}_minus_a"] = _diff(g, stage, base, "entity_correct_rate")
+        for metric, column in GAP_METRICS.items():
+            for stage in ("a", "c", "d"):
+                v = values[stage]
+                row[f"{metric}_{stage}"] = float(v[column]) if v is not None else float("nan")
+            for stage in ("c", "d"):
+                row[f"{metric}_{stage}_minus_a"] = row[f"{metric}_{stage}"] - row[f"{metric}_a"]
         rows.append(row)
-    return pd.DataFrame(rows, columns=columns)
+    return pd.DataFrame(rows, columns=GAP_COLUMNS)
 
 
 def sibling_path(results_path: Path, kind: str) -> Path:
