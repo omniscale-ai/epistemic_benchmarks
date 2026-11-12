@@ -36,6 +36,11 @@ Isolation limits (best effort, not hard isolation):
 - For serious evaluation, run the agent in a container or under a separate OS user with
   no read access to the repository or to ``runs_root/_state``.
 
+Python for the agent: the agent's ``python3`` is a separate venv (``AGENT_ENV_DIR``, created by
+``ensure_agent_env``) with numpy/scipy pinned to the evaluator's numpy, put first on PATH; the
+inherited PYTHONPATH/VIRTUAL_ENV are dropped. Without that venv the agent falls back to the system
+python, which may lack numpy.
+
 Output paths: ``run_agent`` replaces ``out_dir/<variant_id>/`` on each call.
 """
 
@@ -48,7 +53,7 @@ import shutil
 import signal
 import subprocess
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -58,6 +63,9 @@ from abductbench.workspace import DEFAULT_BUDGET, INDEX_NAME, make_workspace
 
 AGENT_MODEL = "sonnet"
 AGENT_TIMEOUT_S = 3600
+# Separate interpreter for the agent: numpy/scipy only (same numpy as the evaluator), no abductbench.
+AGENT_ENV_DIR = Path(__file__).resolve().parents[2] / ".agent-venv"
+AGENT_ENV_PACKAGES = ("numpy", "scipy")
 MAX_BUDGET_USD = 5.0  # per-run API spend cap passed as --max-budget-usd
 AGENT_ALLOWED_TOOLS = "Read,Write,Edit,Bash"
 AGENT_DISALLOWED_TOOLS = "WebSearch,WebFetch,Task"
@@ -214,8 +222,53 @@ def _kill_group(proc: subprocess.Popen) -> None:
     proc.wait()
 
 
-def _launch(argv: Sequence[str], workspace: Path, transcript: Path, timeout_s: int) -> tuple[int | None, bool]:
-    env = {**os.environ, "ABDUCTBENCH_AGENT": "1"}
+def default_agent_env() -> Path | None:
+    """The agent venv if it has been created (see ``ensure_agent_env``), else None."""
+    return AGENT_ENV_DIR if (AGENT_ENV_DIR / "bin" / "python").exists() else None
+
+
+def ensure_agent_env(env_dir: Path = AGENT_ENV_DIR) -> Path:
+    """Create (if missing) a venv with numpy and scipy only, pinned to the evaluator's numpy.
+
+    The agent's ``python3`` then matches what the evaluator will run law.py with, so the agent
+    can test its own code. The venv deliberately does not contain ``abductbench``.
+    Requires ``uv`` on PATH.
+    """
+    import numpy as np
+
+    env_dir = Path(env_dir)
+    py = env_dir / "bin" / "python"
+    if not py.exists():
+        subprocess.run(["uv", "venv", "-q", "--python", "3.11", str(env_dir)], check=True)
+        pins = [f"numpy=={np.__version__}" if n == "numpy" else n for n in AGENT_ENV_PACKAGES]
+        subprocess.run(["uv", "pip", "install", "-q", "--python", str(py), *pins], check=True)
+    return env_dir
+
+
+def _agent_environ(base: Mapping[str, str] | None = None, agent_env: Path | None = None) -> dict[str, str]:
+    """Environment for the agent process: neutral Python setup, agent venv first on PATH.
+
+    Drops PYTHONPATH/PYTHONHOME/VIRTUAL_ENV inherited from the benchmark process so that the
+    benchmark package is not importable by accident.
+    """
+    env = dict(os.environ if base is None else base)
+    for name in ("PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV"):
+        env.pop(name, None)
+    env["ABDUCTBENCH_AGENT"] = "1"
+    if agent_env is not None:
+        env["VIRTUAL_ENV"] = str(agent_env)
+        env["PATH"] = f"{agent_env / 'bin'}{os.pathsep}{env.get('PATH', '')}"
+    return env
+
+
+def _launch(
+    argv: Sequence[str],
+    workspace: Path,
+    transcript: Path,
+    timeout_s: int,
+    agent_env: Path | None = None,
+) -> tuple[int | None, bool]:
+    env = _agent_environ(agent_env=agent_env)
     with transcript.open("wb") as log:
         try:
             proc = subprocess.Popen(
@@ -247,6 +300,7 @@ def run_agent(
     out_dir: Path,
     agent_cmd: Sequence[str] | None = None,
     timeout_s: int = AGENT_TIMEOUT_S,
+    agent_env: Path | None = None,
 ) -> RunRecord:
     """Run the agent in ``workspace`` and collect its outputs into ``out_dir/<variant_id>/``.
 
@@ -266,7 +320,7 @@ def run_agent(
         shutil.rmtree(dest)
     dest.mkdir(parents=True)
     transcript = dest / TRANSCRIPT_NAME
-    returncode, timed_out = _launch(argv, workspace, transcript, timeout_s)
+    returncode, timed_out = _launch(argv, workspace, transcript, timeout_s, agent_env or default_agent_env())
 
     law_path = _collect(workspace / LAW_NAME, dest / LAW_NAME)
     answer_path = _collect(workspace / ANSWER_NAME, dest / ANSWER_NAME)
@@ -298,6 +352,7 @@ def make_run(
     agent_cmd: Sequence[str] | None = None,
     timeout_s: int = AGENT_TIMEOUT_S,
     budget: float = DEFAULT_BUDGET,
+    agent_env: Path | None = None,
 ) -> RunRecord:
     """Build a fresh workspace, run the agent, and write ``record.json`` (and the ledger).
 
@@ -320,7 +375,7 @@ def make_run(
     # The index maps the neutral task dir back to the variant id; the agent must not read it.
     (work_root / INDEX_NAME).unlink(missing_ok=True)
 
-    record = run_agent(cfg, workspace, runs_root, agent_cmd=agent_cmd, timeout_s=timeout_s)
+    record = run_agent(cfg, workspace, runs_root, agent_cmd=agent_cmd, timeout_s=timeout_s, agent_env=agent_env)
     dest = runs_root / cfg.variant_id
     if state_root is not None:
         ledger_src = state_root / workspace.name / LOG_NAME

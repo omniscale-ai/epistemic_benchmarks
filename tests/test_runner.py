@@ -270,3 +270,35 @@ def test_prompt_states_evaluator_limits():
     assert "twice" in text and "20 seconds" in text
     assert "numpy and scipy" in text and "helper modules" in text
     assert build_agent_prompt(cfg(mode=1)).split("Note:")[0] == build_agent_prompt(cfg(mode=2)).split("Note:")[0]
+
+
+def test_agent_environ_prepends_agent_venv_and_drops_python_vars(tmp_path):
+    from abductbench.runner import _agent_environ
+
+    venv = tmp_path / "av"
+    base = {"PATH": "/usr/bin", "PYTHONPATH": "/repo/src", "VIRTUAL_ENV": "/repo/.venv", "PYTHONHOME": "/x"}
+    env = _agent_environ(base, venv)
+    assert env["PATH"].split(os.pathsep)[0] == str(venv / "bin")
+    assert env["VIRTUAL_ENV"] == str(venv)
+    assert "PYTHONPATH" not in env and "PYTHONHOME" not in env
+    assert env["ABDUCTBENCH_AGENT"] == "1"
+    bare = _agent_environ(base, None)
+    assert "VIRTUAL_ENV" not in bare and bare["PATH"] == "/usr/bin"
+
+
+def test_launch_uses_agent_env_on_path(tmp_path):
+    venv = tmp_path / "av"
+    (venv / "bin").mkdir(parents=True)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    script = tmp_path / "probe.py"
+    script.write_text(
+        "import os, pathlib\n"
+        "pathlib.Path('probe.txt').write_text(os.environ['PATH'].split(os.pathsep)[0] + '|' + os.environ.get('PYTHONPATH', 'none'))\n"
+    )
+    from abductbench.runner import _launch
+
+    rc, timed_out = _launch([sys.executable, str(script)], ws, tmp_path / "t.log", 30, venv)
+    assert rc == 0 and not timed_out
+    first, pp = (ws / "probe.txt").read_text().split("|")
+    assert first == str(venv / "bin") and pp == "none"
