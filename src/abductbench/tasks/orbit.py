@@ -45,7 +45,7 @@ _PLANETS = (
     (19.19126, 0.047168, 4.3627e-5),
 )
 _HIDDEN_A = 24.0  # AU, optional outer body (base value, scaled by stage and seed)
-_HIDDEN_E = 0.01
+_HIDDEN_E = 0.0  # circular, coplanar optional body
 _HIDDEN_Q = 6.0e-4  # mass / solar mass, base value
 _K_BASE = 8.0e-6  # AU^(n+1) / yr^2, correction strength for stage (a)
 
@@ -54,6 +54,8 @@ _K_BASE = 8.0e-6  # AU^(n+1) / yr^2, correction strength for stage (a)
 class _StageSpec:
     tick_yr: float  # years per public time unit
     tunit: str
+    length_au: float  # AU per public distance unit
+    dunit: str
     mu_star_yr: float  # GM of the star in AU^3 / yr^2
     star: str
     planets: tuple[str, str, str, str]
@@ -61,16 +63,19 @@ class _StageSpec:
     hidden_dist: float  # multiplier on the base optional-body distance
     n_corr: float  # exponent of the correction force k / r^n
     k_corr: float  # multiplier on _K_BASE
+    jitter: bool  # per-seed invented system (elements and masses); stages b and d
 
 
 _REAL = ("Mercury", "Venus", "Earth", "Uranus")
 _SPECS = {
-    Stage.HISTORICAL: _StageSpec(1.0, "year", 4 * math.pi**2, "Sun", _REAL, 1.0, 1.0, 3.0, 1.0),
-    Stage.OBFUSCATED: _StageSpec(0.5, "tick", 4 * math.pi**2, "primary",
-                                 ("body 1", "body 2", "body 3", "body 4"), 1.0, 1.0, 3.0, 1.0),
-    Stage.COUNTERFACTUAL: _StageSpec(1.0, "year", 4 * math.pi**2, "Sun", _REAL, 1.6, 1.1, 2.5, 0.6),
-    Stage.SYNTHETIC: _StageSpec(1.0, "cycle", 9.0, "Vael",
-                                ("Kessa", "Doru", "Ilin", "Brenn"), 0.7, 1.25, 4.0, 0.3),
+    Stage.HISTORICAL: _StageSpec(1.0, "year", 1.0, "AU", 4 * math.pi**2, "Sun", _REAL,
+                                 1.0, 1.0, 3.0, 1.0, False),
+    Stage.OBFUSCATED: _StageSpec(0.5, "tick", 2.0, "unit L", 4 * math.pi**2, "primary",
+                                 ("body 1", "body 2", "body 3", "body 4"), 2.5, 1.0, 3.0, 1.0, True),
+    Stage.COUNTERFACTUAL: _StageSpec(1.0, "year", 1.0, "AU", 4 * math.pi**2, "Sun", _REAL,
+                                     1.6, 1.1, 2.5, 0.6, False),
+    Stage.SYNTHETIC: _StageSpec(1.0, "cycle", 1.5, "unit D", 9.0, "Vael",
+                                ("Kessa", "Doru", "Ilin", "Brenn"), 4.0, 1.0, 4.0, 0.3, True),
 }
 
 
@@ -111,8 +116,8 @@ def _initial_state(mu, elements):
     return X, V
 
 
-def _accel(X, mu, k, n):
-    """Accelerations for a batch X (B, N, 2): pairwise gravity plus k / r^n about body 0."""
+def _accel_grav(X, mu):
+    """Pairwise Newtonian accelerations for a batch X (B, N, 2) with GM values mu (B, N)."""
     N = X.shape[1]
     idx = np.arange(N)
     d = X[:, None, :, :] - X[:, :, None, :]  # d[b, i, j] = x_j - x_i
@@ -120,7 +125,12 @@ def _accel(X, mu, k, n):
     r2[:, idx, idx] = 1.0
     w = mu[:, None, :] * r2**-1.5
     w[:, idx, idx] = 0.0
-    A = np.einsum("bij,bijk->bik", w, d)
+    return np.einsum("bij,bijk->bik", w, d)
+
+
+def _accel(X, mu, k, n):
+    """Truth accelerations: gravity plus the extra radial force k / r^n about body 0."""
+    A = _accel_grav(X, mu)
     dr = X - X[:, :1, :]
     rr = np.sqrt(np.einsum("bik,bik->bi", dr, dr))
     rr[:, 0] = 1.0
@@ -131,7 +141,7 @@ def _accel(X, mu, k, n):
     return A
 
 
-def _integrate(mu, x0, v0, k, n, dt, n_steps):
+def _integrate(accel, x0, v0, dt, n_steps):
     """Yoshida 4th-order symplectic integrator. Returns X, V of shape (n_steps + 1, B, N, 2)."""
     w1 = 1.0 / (2.0 - 2.0 ** (1.0 / 3.0))
     w0 = -(2.0 ** (1.0 / 3.0)) / (2.0 - 2.0 ** (1.0 / 3.0))
@@ -145,10 +155,15 @@ def _integrate(mu, x0, v0, k, n, dt, n_steps):
     for s in range(1, n_steps + 1):
         for c, dd in zip(cs[:3], ds):
             X = X + c * dt * V
-            V = V + dd * dt * _accel(X, mu, k, n)
+            V = V + dd * dt * accel(X)
         X = X + cs[3] * dt * V
         Xs[s], Vs[s] = X, V
     return Xs, Vs
+
+
+def _run(mu, x0, v0, k, n, dt, n_steps):
+    """Truth-side integration for batch rows with GM mu (B, N) and correction strength k (B,)."""
+    return _integrate(lambda X: _accel(X, mu, k, n), x0, v0, dt, n_steps)
 
 
 def _longitudes(X):
@@ -205,21 +220,36 @@ def _universe(cfg: VariantConfig) -> _Universe:
     k_jit = rng.uniform(0.8, 1.2)
     m_jit = rng.uniform(0.8, 1.25)
     a_jit = rng.uniform(0.95, 1.05)
+    a_yr = np.array([a for a, _, _ in _PLANETS])
+    e = np.array([e for _, e, _ in _PLANETS])
+    q = np.array([q for _, _, q in _PLANETS])
+    if spec.jitter:
+        # Invented system: per-seed semi-major axes, eccentricities and masses, with the
+        # planets kept in order and well separated.
+        a_yr = a_yr * rng.uniform(0.6, 1.6, size=4)
+        for i in range(1, 4):
+            a_yr[i] = max(a_yr[i], 1.3 * a_yr[i - 1])
+        e = np.clip(e * rng.uniform(0.5, 1.5, size=4), 0.0, 0.3)
+        q = q * rng.uniform(0.5, 2.0, size=4)
 
-    tick = spec.tick_yr
-    mu_star = spec.mu_star_yr * tick**2
+    tick, L = spec.tick_yr, spec.length_au
+
+    def gm(gm_yr):  # public GM from GM in AU^3/yr^2
+        return gm_yr * tick**2 / L**3
+
     hidden_a = _HIDDEN_A * spec.hidden_dist * a_jit
+    if spec.jitter:
+        hidden_a = max(hidden_a, 1.3 * a_yr[3])  # keep the optional body outside the outermost planet
     hidden_q = _HIDDEN_Q * spec.hidden_mass * m_jit
-    mu = [mu_star] + [spec.mu_star_yr * q * tick**2 for _, _, q in _PLANETS]
-    mu.append(spec.mu_star_yr * hidden_q * tick**2)
-    el = [[a, e, phases[i, 0], phases[i, 1]] for i, (a, e, _) in enumerate(_PLANETS)]
-    el.append([hidden_a, _HIDDEN_E, phases[4, 0], phases[4, 1]])
+    mu = [gm(spec.mu_star_yr)] + [gm(spec.mu_star_yr * qi) for qi in q] + [gm(spec.mu_star_yr * hidden_q)]
+    el = [[a / L, ei, phases[i, 0], phases[i, 1]] for i, (a, ei) in enumerate(zip(a_yr, e))]
+    el.append([hidden_a / L, _HIDDEN_E, phases[4, 0], phases[4, 1]])
     return _Universe(
         spec=spec,
         names=(spec.star,) + spec.planets,
         mu_base=np.array(mu),
         elements=np.array(el),
-        k=_K_BASE * spec.k_corr * k_jit * tick**2,
+        k=_K_BASE * spec.k_corr * k_jit * tick**2 / L ** (spec.n_corr + 1.0),
         n=spec.n_corr,
         dt=DT_YR / tick,
         tick=tick,
@@ -239,10 +269,11 @@ def _truth_batch(u: _Universe, truth: Truth):
 
 
 def _t0_source(u: _Universe) -> str:
-    funcs = (_state_from_elements, _initial_state, _accel, _integrate, _longitudes)
+    funcs = (_state_from_elements, _initial_state, _accel_grav, _integrate, _longitudes)
     core = "\n\n".join(inspect.getsource(f) for f in funcs)
     consts = (
         f"TUNIT = {u.spec.tunit!r}\n"
+        f"DUNIT = {u.spec.dunit!r}\n"
         f"DT = {u.dt!r}\n"
         f"STAR = {u.names[0]!r}\n"
         f"PLANETS = {list(u.names[1:])!r}\n"
@@ -255,7 +286,7 @@ def _t0_source(u: _Universe) -> str:
 predict_longitudes(t) integrates the star and the known planets listed in
 known_bodies.csv from their elements at t = 0. It returns, for each planet, the
 predicted heliocentric longitude in degrees (0 to 360) at the times t. Time is
-in the public time unit (TUNIT), distance in AU, GM in AU^3 per TUNIT^2.
+in the public time unit (TUNIT) and distance unit (DUNIT); GM is in DUNIT^3 per TUNIT^2.
 """
 
 import math
@@ -271,7 +302,7 @@ def predict_longitudes(t):
     n_steps = max(1, int(math.ceil(float(np.max(t)) / DT)))
     mu = np.array([[GM_STAR] + GM_PLANETS])
     x0, v0 = _initial_state(mu[0], np.array(ELEMENTS))
-    X, _ = _integrate(mu, x0[None], v0[None], np.zeros(1), 3.0, DT, n_steps)
+    X, _ = _integrate(lambda Y: _accel_grav(Y, mu), x0[None], v0[None], DT, n_steps)
     lam = np.unwrap(_longitudes(X)[:, 0, :], axis=0)
     grid = np.arange(n_steps + 1) * DT
     return {name: np.degrees(CubicSpline(grid, lam[:, j])(t)) % 360.0 for j, name in enumerate(PLANETS)}
@@ -302,7 +333,7 @@ def build_orbit(cfg: VariantConfig) -> TaskBundle:
     mu, k = _truth_batch(u, truth)
     x0, v0 = _initial_state(u.mu_base, u.elements)
     n_steps = u.n_steps(EXT_YR)
-    X, _ = _integrate(mu, np.stack([x0, x0]), np.stack([v0, v0]), k, u.n, u.dt, n_steps)
+    X, _ = _run(mu, np.stack([x0, x0]), np.stack([v0, v0]), k, u.n, u.dt, n_steps)
     lam = _longitudes(X)  # (S, 2, 4)
     res = _residuals(lam)[:, 0, :]  # (S, 4) arcsec
     lam0 = np.unwrap(lam[:, 0, :], axis=0)
@@ -362,13 +393,14 @@ def build_orbit(cfg: VariantConfig) -> TaskBundle:
 
 def _task_md(u: _Universe, target: str, t_window, radius_range) -> str:
     tunit = u.spec.tunit
+    dunit = u.spec.dunit
     star = u.names[0]
     planets = ", ".join(u.names[1:])
     return f"""# Task: longitude residuals of a target body
 
 A planar Newtonian system: a central star ({star}) and four known bodies ({planets}).
-Positions are heliocentric ecliptic longitudes. Units: time in {tunit}; distance in AU;
-GM (gravitational parameter) in AU^3 per {tunit}^2.
+Positions are heliocentric ecliptic longitudes. Units: time in {tunit}; distance in {dunit};
+GM (gravitational parameter) in {dunit}^3 per {tunit}^2.
 
 The predicted motion, T0, is Newtonian gravity between the star and the known bodies in
 `known_bodies.csv`, with the orbital elements given there at epoch t = 0. `t0_model.py`
@@ -388,7 +420,7 @@ Files:
 Write a Python module `law.py` that defines:
 
 - `DOMAIN = {{"time_range": (lo, hi), "radius_range": (lo, hi)}}`: the time interval, in {tunit},
-  and the range of heliocentric distances, in AU, over which your law describes the residuals
+  and the range of heliocentric distances, in {dunit}, over which your law describes the residuals
   of {target}.
 - `law(t: np.ndarray) -> np.ndarray`: the longitude residual of {target} relative to T0, in
   arcseconds, at times `t` (in {tunit}). It accepts an array of any shape and returns an array

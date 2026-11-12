@@ -3,6 +3,7 @@ import functools
 import io
 
 import numpy as np
+import pytest
 
 from abductbench.config import Family, Stage, Truth, VariantConfig
 from abductbench.tasks import build_task
@@ -10,9 +11,9 @@ from abductbench.tasks.orbit import (
     DT_YR,
     _energy,
     _initial_state,
-    _integrate,
     _longitudes,
     _residuals,
+    _run,
     _universe,
     build_orbit,
 )
@@ -139,7 +140,7 @@ def test_energy_conserved_to_1e6():
         mu[0, 5] = 0.0  # the optional perturber is not part of the energy check here
         x0, v0 = _initial_state(u.mu_base, u.elements)
         k = np.array([u.k if truth is Truth.NO_ENTITY else 0.0])
-        X, V = _integrate(mu, x0[None], v0[None], k, u.n, u.dt, u.n_steps(10.0))
+        X, V = _run(mu, x0[None], v0[None], k, u.n, u.dt, u.n_steps(10.0))
         E = _energy(mu, k, u.n, X, V)[:, 0]
         assert np.max(np.abs(E - E[0])) / abs(E[0]) < 1e-6
 
@@ -151,7 +152,7 @@ def _series(u, mus, ks, n_steps, elements_rows=None):
         x0, v0 = _initial_state(mu, el)
         x0s.append(x0)
         v0s.append(v0)
-    X, _ = _integrate(np.stack(mus), np.stack(x0s), np.stack(v0s), np.asarray(ks, float), u.n, u.dt, n_steps)
+    X, _ = _run(np.stack(mus), np.stack(x0s), np.stack(v0s), np.asarray(ks, float), u.n, u.dt, n_steps)
     return _residuals(_longitudes(X))
 
 
@@ -192,3 +193,65 @@ def test_no_entity_single_perturber_fails_crosscheck():
     fit_k = (g_t * target_res).sum() / (g_t * g_t).sum()
     assert np.sqrt(np.mean((fit_k * g_v - other_obs) ** 2)) < 2 * NOISE
     assert np.sqrt(np.mean((fit_k * g_t - target_res) ** 2)) < 2 * NOISE
+
+
+def test_public_t0_model_is_gravity_only():
+    """The shipped T0 must not expose the correction law (no k, n, or r^n text)."""
+    for stage in Stage:
+        src = _bundle(Truth.NO_ENTITY, stage).public_files["t0_model.py"]
+        lowered = src.lower()
+        for token in ["k / r", "r^n", "r**n", "correction", "power", "exponent", " k,", "n=3", "n = 3"]:
+            assert token not in lowered, (stage, token)
+        assert "k / r^n" not in src and "correction" not in lowered
+
+
+def _outer_family(u, t_idx, target_res):
+    """Single circular outer perturber, mass linear, on a coarse (distance, phase) grid.
+
+    Returns residuals (T, B, 4), the least-squares mass scale per candidate, and the
+    target misfit per candidate, where B is the number of candidates.
+    """
+    base = u.mu_base.copy()
+    base[5] = 0.0
+    a_t = u.elements[u.target_planet, 0]
+    cands = [(a, p) for a in a_t * np.geomspace(1.1, 3.0, 7) for p in np.arange(8) * np.pi / 4]
+    mus = [base] + [np.where(np.arange(6) == 5, 1e-6, base) for _ in cands]
+    els = [u.elements] + [np.vstack([u.elements[:4], [[a, 0.0, p, p]]]) for a, p in cands]
+    res = _series(u, mus, np.zeros(len(mus)), u.n_steps(10.0), els)[t_idx]
+    f_t = res[:, :, u.target_planet]
+    scale = (f_t * target_res[:, None]).sum(0) / (f_t * f_t).sum(0)
+    misfit = _misfit(res, u.target_planet, target_res)
+    return res, scale, misfit
+
+
+def _misfit(res, tgt, target_res):
+    """RMS misfit of the best linear mass scale per candidate, res shape (T, B, 4)."""
+    f_t = res[:, :, tgt]
+    scale = (f_t * target_res[:, None]).sum(0) / (f_t * f_t).sum(0)
+    return np.sqrt(np.mean((scale * f_t - target_res[:, None]) ** 2, axis=0))
+
+
+@pytest.mark.parametrize("stage", list(Stage))
+def test_entity_other_residuals_significant_and_consistent(stage):
+    b = _bundle(Truth.ENTITY, stage)
+    u = _universe(cfg(Truth.ENTITY, stage))
+    t_obs, _ = _target_data(b)
+    t_idx = np.round(t_obs / u.dt).astype(int)
+    target_res = b.truth_law(t_obs)
+    rows = _rows(b, "other_residuals.csv")
+    others = [j for j in range(4) if j != u.target_planet]
+    obs = {j: np.array([float(r["residual_arcsec"]) for r in rows if r["body"] == u.names[1 + j]]) for j in others}
+    # (a) significant: the nearest other body (in semi-major axis to the target) is well above noise
+    near = min(others, key=lambda j: abs(u.elements[j, 0] - u.elements[u.target_planet, 0]))
+    assert np.sqrt(np.mean(obs[near] ** 2)) > 5 * NOISE
+    # (b) consistent: single outer perturbers that fit the target within 3 sigma include one
+    # that also predicts every other body within 3 sigma. The target-only family is broad in
+    # distance (the target series alone does not fix it), so the check is over the family.
+    assert np.sqrt(np.mean(target_res**2)) > 5 * NOISE
+    res, scale, misfit = _outer_family(u, t_idx, target_res)
+    ok = np.flatnonzero(misfit <= 3 * NOISE)
+    assert len(ok) > 0, (stage, "no single perturber fits the target")
+    consistent = [
+        c for c in ok if all(np.sqrt(np.mean((scale[c] * res[:, c, j] - obs[j]) ** 2)) < 3 * NOISE for j in others)
+    ]
+    assert consistent, (stage, "no fitting single perturber predicts the other bodies")
