@@ -18,7 +18,8 @@ from abductbench.evaluate.oracle import beta_oracle
 
 ALPHA = 1.0 / 137.036
 N_EVENTS = 1000
-WINDOW = (0.1, 1.2)  # recorded kinetic-energy window, fraction of Q
+WINDOW = (0.25, 1.2)  # public recorded kinetic-energy window, fraction of Q
+EXT_BAND = (0.02, 1.5)  # held-out evaluation range, fraction of Q: [0.02, WINDOW[0]) and (WINDOW[1], 1.5]
 GRID = 20001
 NO_ENTITY_WEIGHTS = (0.8, 0.1, 0.1)  # resolution peak, energy-loss tail, backscatter shelf
 
@@ -150,7 +151,7 @@ def _smeared_entity_table(s: _Setup, n_t: int = 4001, n_x: int = 6001) -> tuple[
     w = np.full(n_t, t[1] - t[0])
     w[0] = w[-1] = w[0] / 2.0
     ft = _raw_entity(t, s) * w
-    x = np.linspace(-6.0 * s.sigma, s.Q + 6.0 * s.sigma, n_x)
+    x = np.linspace(-6.0 * s.sigma, max(s.Q + 6.0 * s.sigma, EXT_BAND[1] * s.Q), n_x)
     dens = np.empty(n_x)
     for i in range(0, n_x, 500):
         dens[i : i + 500] = _gauss(x[i : i + 500, None] - t[None, :], s.sigma) @ ft
@@ -167,7 +168,7 @@ def _normalisation(truth: Truth, s: _Setup) -> float:
 
 def _domain_mev(truth: Truth, s: _Setup) -> tuple[float, float]:
     if truth is Truth.ENTITY:
-        return (0.1 * s.Q, s.Q)  # low-energy (Fermi/Coulomb) cut up to endpoint Q
+        return (WINDOW[0] * s.Q, s.Q)  # public-window start up to endpoint Q
     return (s.Q - 3 * s.sigma, s.Q + 3 * s.sigma)  # resolution window around Q
 
 
@@ -285,6 +286,16 @@ Write a Python module `law.py` that defines:
 - `law(T: np.ndarray) -> np.ndarray`: the detector-seen energy density of the {n["light"]} at
   kinetic energies `T` (in {n["unit"]}). It must accept a numpy array of any shape and return a
   non-negative array of the same shape.
+- `MECHANISM`: a module-level dict with your hypothesis about the cause of the observed spectrum.
+  Its `kind` must be exactly one of:
+  - `"hidden_carriers"`, with keys `n_carriers` (integer: how many unobserved light particles share
+    the decay energy) and `mass` (rest energy of each such particle, in {n["unit"]});
+  - `"detector_response"`, with no other keys (the observed shape is produced by the measurement
+    apparatus, not by unobserved particles);
+  - `"other"`, with key `description` (free text).
+
+`MECHANISM` is checked automatically. The points at which `law` is scored include energies outside
+the recorded window (below it and above it), so `law` must be defined there too.
 """
 
 
@@ -311,13 +322,22 @@ def _detector_md(s: _Setup) -> str:
 
 
 def _eval_points(truth: Truth, s: _Setup, n: int) -> EvalPoints:
-    lo, hi = _domain_mev(truth, s)
-    scale = s.scale
-    in_range = np.linspace(lo, hi, n) / scale
-    q = s.Q
-    low = np.linspace(0.02 * q, lo, n // 4, endpoint=False) / scale
-    high = np.linspace(hi, WINDOW[1] * q, n // 4 + 1)[1:] / scale
+    # in_range: the public recorded window. extrapolation: the held-out bands below and above it,
+    # which are neither in events.csv nor reachable by any query.
+    q, scale = s.Q, s.scale
+    in_range = np.linspace(WINDOW[0] * q, WINDOW[1] * q, n) / scale
+    low = np.linspace(EXT_BAND[0] * q, WINDOW[0] * q, n // 4, endpoint=False) / scale
+    high = np.linspace(WINDOW[1] * q, EXT_BAND[1] * q, n // 4 + 1)[1:] / scale
     return EvalPoints(in_range=in_range, extrapolation=np.concatenate([low, high]))
+
+
+def _true_mechanism(truth: Truth, s: _Setup) -> dict:
+    """Ground-truth mechanism in public energy units."""
+    if truth is Truth.NO_ENTITY:
+        return {"kind": "detector_response"}
+    if s.stage is Stage.SYNTHETIC:
+        return {"kind": "hidden_carriers", "n_carriers": s.k, "mass": 0.0}
+    return {"kind": "hidden_carriers", "n_carriers": 1, "mass": float(s.m_X / s.scale)}
 
 
 def build_beta(cfg: VariantConfig) -> TaskBundle:
@@ -342,6 +362,7 @@ def build_beta(cfg: VariantConfig) -> TaskBundle:
         rubric_id=f"beta-{truth.value}-{cfg.stage.value}",
         discriminating_queries=frozenset({"recoil_correlation", "target_thickness_scan"}),
         oracle_family=partial(beta_oracle, truth=truth, stage=cfg.stage),
+        true_mechanism=_true_mechanism(truth, s),
     )
 
 

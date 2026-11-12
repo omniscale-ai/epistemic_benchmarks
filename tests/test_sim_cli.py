@@ -366,7 +366,7 @@ def test_orbit_queries_capped_at_public_window(tmp_path, capsys):
 
 def test_beta_events_stay_in_public_window():
     # Beta has no energy argument. Events are drawn only inside the public recorded window
-    # [0.1 Q, 1.2 Q], so the low extrapolation band [0.02 Q, 0.1 Q) can never appear.
+    # [0.25 Q, 1.2 Q], so the held-out bands [0.02 Q, 0.25 Q) and (1.2 Q, 1.5 Q] can never appear.
     from abductbench.tasks.beta import WINDOW, _setup
 
     for truth in Truth:

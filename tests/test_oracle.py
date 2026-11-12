@@ -62,11 +62,12 @@ def test_beta_entity_constants_match_truth(stage):
     cfg = vcfg(BETA, ENT, stage)
     fit = oracle_mod.fit_beta_constants(build_task(cfg).public_files, truth=ENT, stage=stage)
     setup = beta_gen._setup(cfg)  # test-side check only; the oracle never sees this
-    # Observed: m_X off by -1.9 %, k off by +0.04 (seed 0 mode 1).
+    # Observed with the 0.25 Q-1.2 Q public window (seed 0 mode 1): k off by +0.15 (was +0.04 with the
+    # wider 0.1 Q window; less low-energy data); oracle nrmse_in/extrap stay below 0.03 for all stages.
     if stage is Stage.COUNTERFACTUAL:
         assert fit["m_X"] == pytest.approx(setup.m_X, rel=0.05)
     else:
-        assert fit["k"] == pytest.approx(setup.k, abs=0.1)
+        assert fit["k"] == pytest.approx(setup.k, abs=0.25)
 
 
 def test_oracle_beats_wrong_family():
