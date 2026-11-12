@@ -1,0 +1,97 @@
+n_benchmarks_cited,year,arxiv,citation_count,title,cites
+6,2026,2609.01552,2,Can LLMs Discover Scientific Laws in Real and Parallel Worlds?,ai-feynman;discoverybench;discoveryworld;llm-srbench;newtonbench;physgym
+6,2026,2610.00492,2,EurekaBench: Measuring Agentic Ability to Discover New Scientific Insights,discoverphysics;discoverybench;discoveryworld;llm-srbench;newtonbench;physgym
+6,2026,2611.03713,0,Unsatz: Evaluating Scientific Discovery Without a Given Ansatz,ai-feynman;discoverphysics;discoveryworld;llm-srbench;newtonbench;physgym
+5,2026,2605.26087,15,DiscoverPhysics: Benchmarking LLMs for Out-of-the-Box Scientific Thinking,discoverybench;discoveryworld;llm-srbench;newtonbench;physgym
+4,2026,2610.07620,0,"Explore, Then Commit: Measurement-Efficient Scientific Law Discovery with Language Models",ai-feynman;discoveryworld;llm-srbench;newtonbench
+4,2026,2609.36726,0,Can AI Scientists Change Their Minds? Prior-Evidence Conflict in Synthetic Universes,ai-feynman;discoverybench;llm-srbench;newtonbench
+4,2026,2610.11253,0,LLM-IDEA: Identifiability-Driven Experimental Agent for Autonomous Discovery of Mechanistic World Models,discoverphysics;llm-srbench;newtonbench;physgym
+4,2026,2610.37649,0,Can LLMs Uncover Hidden Physical Laws through Free Exploration?,discoverphysics;discoveryworld;newtonbench;physgym
+4,2026,2610.14381,0,ACED-Bench: Evaluating How LLM Agents Acquire and Act on Causal Evidence,discoverybench;discoveryworld;newtonbench;physgym
+4,2026,2610.03092,0,"ULTRADISCOVERY: Abductive Exploration in an Interconnected, Epistemically Open Universe",discoverphysics;discoveryworld;newtonbench;physgym
+3,2026,,13,The Hitchhiker’s Guide to Autonomous Research: A Survey of Scientific Agents,discoverybench;discoveryworld;llm-srbench
+3,2026,2605.24043,11,LLM-AutoSciLab: Closed-Loop Scientific Discovery via Active Experimentation with LLMs,ai-feynman;llm-srbench;newtonbench
+3,2026,2605.11269,8,gwBenchmarks: Stress-Testing LLM Agents on High-Precision Gravitational Wave Astronomy,discoverphysics;discoverybench;newtonbench
+3,2026,2609.19134,7,ScienceIDE: Turning World's Scientific Codebase into Agent Learnable Environments,ai-feynman;discoverybench;discoveryworld
+3,2026,2610.18938,4,Beyond Equation Search: Conjecture-Guided Discovery with SCOPE and ClosureBench,ai-feynman;llm-srbench;newtonbench
+3,2026,2608.12593,4,DiG-bench: Discovery in Games,discoveryworld;newtonbench;physgym
+3,2026,2605.14033,2,Sheaf-Theoretic Transport and Obstruction for Detecting Scientific Theory Shift in AI Agents,ai-feynman;discoverybench;discoveryworld
+3,2026,2610.35385,1,EmbodiedLab: Benchmarking Embodied Agents That Act to Know,discoveryworld;newtonbench;physgym
+3,2026,2609.27490,1,WhatWorkedBench: Benchmarking Experimental Understanding in AI Agents,discoverphysics;discoverybench;discoveryworld
+3,2026,2611.03157,0,"Toward Knowledge-Centric AI: Discovering, Internalizing, and Using Explicit Knowledge Across Agents and Generations",ai-feynman;discoverybench;llm-srbench
+3,2026,2610.41939,0,Observable-Specific Validity Tests for Scientific AI: Controlled Approximations and Intervention Response,ai-feynman;llm-srbench;physgym
+3,2026,2610.07627,0,Learning to Outgrow a Theory: Experimental Discovery Beyond the Initial Hypothesis Space,ai-feynman;discoverphysics;llm-srbench
+3,2026,2606.09276,0,ERBench: A Benchmark and Testsuite for Equation Discovery Algorithms,ai-feynman;llm-srbench;physgym
+3,2025,2508.17380,7,Mimicking the Physicist's Eye:A VLM-centric Approach for Physics Formula Discovery,ai-feynman;discoverybench;llm-srbench
+3,2023,2305.02251,30,Automated Scientific Discovery: From Equation Discovery to Autonomous Discovery Systems,ai-feynman;discoverybench;discoveryworld
+2,2026,2602.12259,23,Think like a Scientist: Physics-guided LLM Agent for Equation Discovery,ai-feynman;llm-srbench
+2,2026,2603.01203,15,How Well Does Agent Development Reflect Real-World Work?,discoverybench;discoveryworld
+2,2026,2604.09554,15,LABBench2: An Improved Benchmark for AI Systems Performing Biology Research,discoverybench;discoveryworld
+2,2026,2605.23204,10,AutoResearch AI: Towards AI-Powered Research Automation for Scientific Discovery,ai-feynman;discoverybench
+2,2026,2608.17271,9,ASI-Bench: At the Dawn of Artificial Superintelligence,discoverybench;discoveryworld
+2,2026,,7,Science-Gym: a simple testbed for AI-driven scientific discovery,ai-feynman;discoveryworld
+2,2026,2609.15973,5,Discovery Foundation Models: Toward Open-Ended Discovery Intelligence,ai-feynman;discoverybench
+2,2026,2606.25039,5,LLM-ACES: Closed-Loop Discovery of Dynamical Systems with LLM-Guided Adaptive Search,ai-feynman;llm-srbench
+2,2026,2610.16812,4,DASS: A Solver-Adaptable Dynamic Auxiliary Search Strategy for Symbolic Regression,ai-feynman;llm-srbench
+2,2026,2610.16966,4,Learning to Design SR Solvers: Harness Optimization for Symbolic Regression,ai-feynman;llm-srbench
+2,2026,2604.27977,4,D3-Gym: Constructing Real-World Verifiable Environments for Data-Driven Discovery,discoverybench;llm-srbench
+2,2026,2610.24535,3,From Score to Diagnosis: Search-Independent Post-Diagnosis for Symbolic Regression,ai-feynman;llm-srbench
+2,2026,2609.05079,3,TruthInsightBench: An Evidence-Grounded Benchmark for Automated Evaluation of Open-Ended Scientific Discovery Agents,discoverybench;discoveryworld
+2,2026,2605.04922,3,Evolving Idea Graphs with Learnable Edits-and-Commits for Multi-Agent Scientific Ideation,discoverybench;discoveryworld
+2,2026,2602.13021,2,Prior-Guided Symbolic Regression: Towards Scientific Consistency in Equation Discovery,ai-feynman;llm-srbench
+2,2026,2606.22610,2,PaperClaw: Harnessing Agents for Autonomous Research and Human-in-the-Loop Refinement,discoverybench;discoveryworld
+2,2026,2610.03947,1,Synthesizing Physics Formulae with Transformers,ai-feynman;llm-srbench
+2,2026,2609.35515,1,MechBench: Can AI Scientific Agents Discover Mechanisms Beyond Phenomenal Laws?,ai-feynman;llm-srbench
+2,2026,2606.07704,1,FunctionEvolve: Structure-Guided Symbolic Regression with LLMs,ai-feynman;llm-srbench
+2,2026,2605.03101,1,Programmatic Context Augmentation for LLM-based Symbolic Regression,ai-feynman;llm-srbench
+2,2026,2604.13201,1,"InfiniteScienceGym: An Unbounded, Procedurally-Generated Benchmark for Scientific Analysis",discoverybench;llm-srbench
+2,2026,2609.30199,1,ExplorationBench: Measuring AI Systems' Exploration in Verifiable Alien Worlds,discoveryworld;newtonbench
+2,2026,2608.10792,1,ChemWorld: Programmable Chemical Worlds for Controlled and Replayable Agent Experimentation,discoveryworld;newtonbench
+2,2026,2611.03100,1,LUCA: A Synthetic World for Experimental Reasoning,discoverybench;discoveryworld
+2,2026,,0,Evidence-Gated Symbolic Correction for Data-Limited Geomechanical Models,ai-feynman;llm-srbench
+2,2026,2610.37880,0,Interpretable neural equation learning for high-dimensional materials data,ai-feynman;llm-srbench
+2,2026,2610.33465,0,LegoSR: A Unified Framework for Self-improving Agent-Guided Scientific Discovery,ai-feynman;llm-srbench
+2,2026,2610.33880,0,DIGEST: Discovery-Guided LLM Tuning for Symbolic Regression,ai-feynman;llm-srbench
+2,2026,2610.20685,0,L2G-SR: Learning to Guide LLM-based Symbolic Regression,ai-feynman;llm-srbench
+2,2026,2610.11387,0,RISR: Residual-Informed Scientific Equation Discovery with Large Language Models,ai-feynman;llm-srbench
+2,2026,2609.04639,0,SMILE: Bridging Continuous Optimization and Discrete Symbolic Recovery,ai-feynman;llm-srbench
+2,2026,2609.02766,0,"Do Tabular Foundation Models Know Physics? Contamination, Units, and the Deterministic Limit",ai-feynman;llm-srbench
+2,2026,2608.16876,0,AutoSR: Automatic Symbolic Regression by Searching Research States,ai-feynman;llm-srbench
+2,2026,2607.23753,0,On the post-hoc Evaluation of PDE Discovery: A Multifaceted Challenge of Scientific Advancement,ai-feynman;llm-srbench
+2,2026,2607.13608,0,Automatic Ordinary Differential Equations Discovery For Biological Systems Using Large Language Model Powered Agentic System,ai-feynman;llm-srbench
+2,2026,2606.07915,0,EditSR: Enhancing Neural Symbolic Regression via Edit-based Rectification,ai-feynman;llm-srbench
+2,2026,,0,Feynman Explanation Prompting: A Pedagogically Grounded Framework for Large Language Models,ai-feynman;llm-srbench
+2,2026,2610.29303,0,ExpEvolve: Structuring and Reusing Experience for Open-Ended Discovery,discoverybench;llm-srbench
+2,2026,2610.05197,0,From Scientific Observations to Mechanisms: Benchmarking Hypothesis Generation by AI Scientists,discoverybench;llm-srbench
+2,2026,2610.02525,0,Learning What to Investigate Next: Meta-Reasoning for Long-Horizon Research Agents,discoverphysics;llm-srbench
+2,2026,2609.35501,0,SRHarness: A Harness for Agentic Symbolic Regression,llm-srbench;newtonbench
+2,2026,2608.03600,0,Large language models for partial differential equation workflows,discoverphysics;llm-srbench
+2,2026,2606.13020,0,SciR: A Controllable Benchmark for Scientific Reasoning in LLMs,discoverybench;llm-srbench
+2,2026,2610.41025,0,ReplayRCA: Measuring Post-hoc Diagnosis and Live Oversight of Agent Failures by Counterfactual Replay,discoveryworld;newtonbench
+2,2026,2607.00276,0,Testing Frontier Large Language Models' Physics Literacy in Parallel Physical Worlds,discoverphysics;newtonbench
+2,2026,2610.39744,0,PAPERBENCHX: Can AI Reproduce Science Across Disciplines?,discoverybench;discoveryworld
+2,2025,2505.13259,132,From Automation to Autonomy: A Survey on Large Language Models in Scientific Discovery,ai-feynman;discoveryworld
+2,2025,2504.10415,98,LLM-SRBench: A New Benchmark for Scientific Equation Discovery with Large Language Models,ai-feynman;discoverybench
+2,2025,2503.18102,83,AgentRxiv: Towards Collaborative Autonomous Research,discoverybench;discoveryworld
+2,2025,2506.04282,35,DrSR: LLM based Scientific Equation Discovery with Dual Reasoning from Data and Experience,ai-feynman;llm-srbench
+2,2025,2504.12976,34,Sparks of Science: Hypothesis Generation Using Structured Paper Data,discoverybench;discoveryworld
+2,2025,,24,Discovering network dynamics with neural symbolic regression,ai-feynman;llm-srbench
+2,2025,2507.15550,21,PhysGym: Benchmarking LLMs in Interactive Physics Discovery with Controlled Priors,discoveryworld;llm-srbench
+2,2025,2502.15224,18,Auto-Discovery-Bench: Diagnosing Structured State Tracking in Oracle-Guided Discovery,discoveryworld;physgym
+2,2025,2510.12088,15,One Life to Learn: Inferring Symbolic World Models for Stochastic Environments from Unguided Exploration,discoveryworld;physgym
+2,2025,2507.11810,15,"Evolving Roles of LLMs in Scientific Innovation: Assistant, Collaborator, Scientist, and Evaluator",discoverybench;discoveryworld
+2,2025,2507.21184,13,Can Language Models Discover Scaling Laws?,ai-feynman;llm-srbench
+2,2025,2508.21484,12,Data-driven discovery of digital twins in biomedical research,ai-feynman;llm-srbench
+2,2025,2506.08140,12,AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists,discoverybench;llm-srbench
+2,2025,2510.23045,10,A Survey of AI Scientists,ai-feynman;discoverybench
+2,2025,2509.01398,7,The Need for Verification in AI-Driven Scientific Discovery,ai-feynman;llm-srbench
+2,2025,2506.08800,7,Measuring Data Science Automation: A Survey of Evaluation Tools for AI Assistants and Agents,discoverybench;discoveryworld
+2,2025,2505.12083,6,Discovering Symbolic Differential Equations with Symmetry Invariants,ai-feynman;llm-srbench
+2,2025,2512.17838,5,ReX-MLE: The Autonomous Agent Benchmark for Medical Imaging Challenges,discoveryworld;llm-srbench
+2,2025,2510.17491,5,"Empowering Real-World: A Survey on the Technology, Practice, and Evaluation of LLM-driven Industry Agents",discoveryworld;physgym
+2,2025,2509.19849,4,Analyzing Generalization in Pre-Trained Symbolic Regression,ai-feynman;llm-srbench
+2,2025,2509.25946,3,Automated Model Discovery via Multi-modal & Multi-step Pipeline,ai-feynman;discoverybench
+2,2025,2511.10833,2,SURFACEBENCH: A Geometry-Aware Benchmark for Symbolic Surface Discovery,ai-feynman;llm-srbench
+2,2025,2509.21780,1,Beyond Accuracy and Complexity: The Effective Information Criterion for Structurally Stable Symbolic Regression,ai-feynman;llm-srbench
+2,2025,,1,EvoSLD: Automated Neural Scaling Law Discovery With Large Language Models,ai-feynman;llm-srbench
+2,,,0,C ONTEXT A UGMENTATION FOR LLM-BASED,ai-feynman;llm-srbench
