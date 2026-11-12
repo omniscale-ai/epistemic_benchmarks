@@ -335,9 +335,10 @@ def _true_mechanism(truth: Truth, s: _Setup) -> dict:
     """Ground-truth mechanism in public energy units."""
     if truth is Truth.NO_ENTITY:
         return {"kind": "detector_response"}
+    tol = {"mass_abs": 0.1 * float(s.Q / s.scale)}  # 0.1 Q in public energy units
     if s.stage is Stage.SYNTHETIC:
-        return {"kind": "hidden_carriers", "n_carriers": s.k, "mass": 0.0}
-    return {"kind": "hidden_carriers", "n_carriers": 1, "mass": float(s.m_X / s.scale)}
+        return {"kind": "hidden_carriers", "n_carriers": s.k, "mass": 0.0, "tolerance": tol}
+    return {"kind": "hidden_carriers", "n_carriers": 1, "mass": float(s.m_X / s.scale), "tolerance": tol}
 
 
 def build_beta(cfg: VariantConfig) -> TaskBundle:

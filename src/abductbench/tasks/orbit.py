@@ -407,8 +407,9 @@ def build_orbit(cfg: VariantConfig) -> TaskBundle:
 def _true_mechanism(u: _Universe, truth: Truth) -> dict:
     """Ground-truth mechanism in public units (GM as in known_bodies.csv; k, n as in task.md)."""
     if truth is Truth.ENTITY:
-        return {"kind": "hidden_body", "a": float(u.elements[PERT - 1, 0]), "mass": float(u.mu_base[PERT])}
-    return {"kind": "force_law", "n": float(u.n), "k": float(u.k)}
+        return {"kind": "hidden_body", "a": float(u.elements[PERT - 1, 0]), "mass": float(u.mu_base[PERT]),
+                "tolerance": {"a_factor": 1.3}}
+    return {"kind": "force_law", "n": float(u.n), "k": float(u.k), "tolerance": {"n_abs": 0.25, "k_rel": 0.3}}
 
 
 def _task_md(u: _Universe, target: str, t_window, radius_range) -> str:

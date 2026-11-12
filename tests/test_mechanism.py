@@ -1,0 +1,103 @@
+import numpy as np
+import pytest
+
+from abductbench.evaluate.mechanism import score_mechanism
+
+HB = {"kind": "hidden_body", "a": 10.0, "mass": 1e-3, "tolerance": {"a_factor": 1.3}}
+FL = {"kind": "force_law", "n": 3.0, "k": 2.0, "tolerance": {"n_abs": 0.25, "k_rel": 0.3}}
+HC = {"kind": "hidden_carriers", "n_carriers": 2, "mass": 0.3, "tolerance": {"mass_abs": 0.1}}
+DR = {"kind": "detector_response"}
+
+
+def test_missing():
+    r = score_mechanism(HB, None)
+    assert (r.status, r.kind_ok, r.params_ok, r.declared_kind) == ("missing", False, None, None)
+
+
+@pytest.mark.parametrize(
+    "declared",
+    [
+        "hidden_body",
+        {"a": 1, "mass": 1},
+        {"kind": 3},
+        {"kind": "hidden_body", "a": 10.0},
+        {"kind": "hidden_body", "a": "10", "mass": 1.0},
+        {"kind": "hidden_body", "a": True, "mass": 1.0},
+        {"kind": "hidden_body", "a": float("nan"), "mass": 1.0},
+        {"kind": "hidden_body", "a": -5.0, "mass": 1.0},
+    ],
+)
+def test_bad(declared):
+    r = score_mechanism(HB, declared)
+    assert r.status == "bad" and r.kind_ok is False and r.params_ok is None
+
+
+def test_bad_for_wrong_truth_kind_still_bad():
+    # required keys of a known declared kind are checked even when the truth has another kind
+    assert score_mechanism(FL, {"kind": "hidden_body", "a": 1.0}).status == "bad"
+
+
+def test_wrong_kind():
+    r = score_mechanism(HB, {"kind": "force_law", "n": 3.0, "k": 2.0})
+    assert (r.status, r.kind_ok, r.params_ok, r.declared_kind) == ("ok", False, None, "force_law")
+    r = score_mechanism(DR, {"kind": "hidden_carriers", "n_carriers": 1, "mass": 0.0})
+    assert r.kind_ok is False and r.params_ok is None
+
+
+def test_unknown_kind_is_wrong_not_bad():
+    r = score_mechanism(HB, {"kind": "aliens"})
+    assert (r.status, r.kind_ok, r.params_ok) == ("ok", False, None)
+
+
+def test_other_is_never_ok():
+    for truth in (HB, FL, HC, DR):
+        r = score_mechanism(truth, {"kind": "other", "description": "x"})
+        assert (r.status, r.kind_ok, r.params_ok) == ("ok", False, None)
+
+
+def test_hidden_body_params():
+    ok = score_mechanism(HB, {"kind": "hidden_body", "a": 12.9, "mass": 5.0, "extra": 1})
+    assert ok.kind_ok and ok.params_ok is True and ok.param_errors["a"] == pytest.approx(1.29)
+    assert score_mechanism(HB, {"kind": "hidden_body", "a": 10 / 1.29, "mass": 0}).params_ok is True
+    assert score_mechanism(HB, {"kind": "hidden_body", "a": 13.1, "mass": 0}).params_ok is False
+    low = score_mechanism(HB, {"kind": "hidden_body", "a": 7.0, "mass": 0})
+    assert low.params_ok is False and low.param_errors["a"] == pytest.approx(10 / 7)
+    assert "mass" not in ok.param_errors
+
+
+def test_force_law_params():
+    assert score_mechanism(FL, {"kind": "force_law", "n": 3.2, "k": 2.5}).params_ok is True
+    r = score_mechanism(FL, {"kind": "force_law", "n": 3.3, "k": 2.0})
+    assert r.params_ok is False and r.param_errors["n"] == pytest.approx(0.3)
+    r = score_mechanism(FL, {"kind": "force_law", "n": 3.0, "k": 3.0})
+    assert r.params_ok is False and r.param_errors["k"] == pytest.approx(0.5)
+    assert score_mechanism(FL, {"kind": "force_law", "n": 3.0, "k": 1.5}).params_ok is True
+    assert score_mechanism(FL, {"kind": "force_law", "n": 3.0, "k": -2.0}).params_ok is False
+
+
+def test_hidden_carriers_params():
+    assert score_mechanism(HC, {"kind": "hidden_carriers", "n_carriers": 2.0, "mass": 0.35}).params_ok is True
+    r = score_mechanism(HC, {"kind": "hidden_carriers", "n_carriers": 3, "mass": 0.3})
+    assert r.kind_ok and r.params_ok is False and r.param_errors["n_carriers"] == 1.0
+    assert score_mechanism(HC, {"kind": "hidden_carriers", "n_carriers": 2, "mass": 0.45}).params_ok is False
+    assert score_mechanism(HC, {"kind": "hidden_carriers", "n_carriers": 2.5, "mass": 0.3}).params_ok is False
+
+
+def test_detector_response():
+    r = score_mechanism(DR, {"kind": "detector_response", "foo": "bar"})
+    assert (r.status, r.kind_ok, r.params_ok, r.param_errors) == ("ok", True, None, {})
+
+
+def test_default_tolerances_when_truth_has_none():
+    r = score_mechanism({"kind": "hidden_body", "a": 10.0, "mass": 1.0}, {"kind": "hidden_body", "a": 12.0, "mass": 1})
+    assert r.params_ok is True
+    r = score_mechanism({"kind": "force_law", "n": 3.0, "k": 2.0}, {"kind": "force_law", "n": 3.2, "k": 2.5})
+    assert r.params_ok is True
+
+
+def test_numpy_numbers_accepted_bool_rejected():
+    r = score_mechanism(HB, {"kind": "hidden_body", "a": np.float64(10.5), "mass": np.float32(1.0)})
+    assert r.params_ok is True
+    r = score_mechanism(HC, {"kind": "hidden_carriers", "n_carriers": np.int64(2), "mass": np.float64(0.3)})
+    assert r.params_ok is True
+    assert score_mechanism(HC, {"kind": "hidden_carriers", "n_carriers": True, "mass": 0.3}).status == "bad"

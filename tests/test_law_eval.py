@@ -276,3 +276,79 @@ def test_sys_exit_at_import_is_crash(tmp_path):
     law = write_law(tmp_path, "import sys\nsys.exit(0)\ndef law(t):\n    return t\n")
     r = evaluate_law(b, law)
     assert r.status == "crash", r.detail
+
+
+def test_per_region_normalisation_orbit():
+    from abductbench.evaluate.law_eval import score_predictions
+
+    b = bundle_for(Family.ORBIT)
+    ep = b.eval_points()
+    t_in, t_ex = b.truth_law(ep.in_range), b.truth_law(ep.extrapolation)
+    r_in, r_ex = np.ptp(t_in), np.ptp(t_ex)
+    assert r_in > 0 and r_ex > 0 and abs(r_in - r_ex) > 1e-6 * r_in
+    d = 0.1 * r_in
+    # Constant offset d in the window only: NRMSE_in = d / range_in exactly, NRMSE_ex = 0.
+    a_in, a_ex = score_predictions(b, t_in + d, t_ex)
+    assert a_in == pytest.approx(d / r_in) and a_ex == pytest.approx(0.0, abs=1e-12)
+    # Same offset only in the extrapolation region: NRMSE_ex = d / range_ex, in-window untouched.
+    b_in, b_ex = score_predictions(b, t_in, t_ex + d)
+    assert b_in == pytest.approx(0.0, abs=1e-12) and b_ex == pytest.approx(d / r_ex)
+    # Inflating the extrapolation error leaves NRMSE_in unchanged (no shared scale).
+    c_in, _ = score_predictions(b, t_in + d, t_ex + 1000 * r_ex)
+    assert c_in == pytest.approx(a_in)
+
+
+def test_beta_range_ex_floor_and_density_normalisation():
+    from abductbench.evaluate.law_eval import EX_RANGE_FLOOR, score_predictions
+
+    b = bundle_for(Family.BETA)
+    ep = b.eval_points()
+    # A prediction equal to the truth scaled by 3 is renormalised: it scores 0 in both regions.
+    s_in, s_ex = score_predictions(b, 3 * b.truth_law(ep.in_range), 3 * b.truth_law(ep.extrapolation))
+    assert s_in == pytest.approx(0.0, abs=1e-9) and s_ex == pytest.approx(0.0, abs=1e-9)
+
+    # Flat truth in the extrapolation region: range_ex is floored at 0.05 * range_in.
+    x_in, x_ex = np.asarray(ep.in_range), np.asarray(ep.extrapolation)
+    t_in = np.sin(x_in * 3.0) + 2.0
+    t_ex = np.full(len(x_ex), 0.5)
+    stub = dataclasses.replace(b, truth_law=lambda x: np.where(np.isin(x, x_in), np.sin(x * 3.0) + 2.0, 0.5))
+
+    def area(y_in, y_ex):
+        xs = np.concatenate([x_in, x_ex])
+        o = np.argsort(xs, kind="stable")
+        ys = np.concatenate([y_in, y_ex])[o]
+        return float(np.sum(0.5 * (ys[1:] + ys[:-1]) * np.diff(xs[o])))
+
+    p_in, p_ex = t_in * 1.1, t_ex + 0.2
+    a_t, a_p = area(t_in, t_ex), area(p_in, p_ex)
+    rng_in = np.ptp(t_in / a_t)
+    expected_ex = np.sqrt(np.mean((p_ex / a_p - t_ex / a_t) ** 2)) / (EX_RANGE_FLOOR * rng_in)
+    expected_in = np.sqrt(np.mean((p_in / a_p - t_in / a_t) ** 2)) / rng_in
+    s_in2, s_ex2 = score_predictions(stub, p_in, p_ex)
+    assert s_ex2 == pytest.approx(expected_ex) and s_in2 == pytest.approx(expected_in)
+    assert EX_RANGE_FLOOR == 0.05
+
+
+def test_mechanism_read_through_sandbox(tmp_path):
+    b = bundle_for(Family.ORBIT)
+    src = zeros_source(
+        "import numpy as np\n"
+        "MECHANISM = {'kind': 'hidden_body', 'a': np.float64(9.5), 'mass': np.float32(0.5), "
+        "'extra': np.array([1, 2]), 'n': np.int64(3)}"
+    )
+    r = evaluate_law(b, write_law(tmp_path, src))
+    assert r.status == "ok"
+    assert r.mechanism == {"kind": "hidden_body", "a": 9.5, "mass": 0.5, "extra": [1, 2], "n": 3}
+    assert isinstance(r.mechanism["a"], float) and isinstance(r.mechanism["n"], int)
+
+
+def test_mechanism_missing_is_none_and_law_still_ok(tmp_path):
+    r = evaluate_law(bundle_for(Family.ORBIT), write_law(tmp_path, zeros_source()))
+    assert r.status == "ok" and r.mechanism is None and r.nrmse_in is not None
+
+
+@pytest.mark.parametrize("bad", ["[1, 2]", "'hidden_body'", "{'kind': object()}", "{1: 2}", "{'a': float('nan')}"])
+def test_mechanism_malformed_keeps_law_ok(tmp_path, bad):
+    r = evaluate_law(bundle_for(Family.ORBIT), write_law(tmp_path, zeros_source(f"MECHANISM = {bad}")))
+    assert r.status == "ok" and r.nrmse_in is not None
+    assert r.mechanism == {"__malformed__": True}

@@ -47,14 +47,13 @@ def wrong_family_nrmse(cfg: VariantConfig) -> tuple[float, float]:
     ids=["beta-entity-a", "orbit-entity-a", "orbit-no_entity-a"],
 )
 def test_oracle_recovers_constants(cfg):
-    # Observed at seed 0 mode 1: oracle nrmse_in 1.6e-9 (beta a), 1.2e-3 (orbit entity a),
-    # 4e-5 (orbit no_entity a); opposite-truth law 1.21, 3.15, 0.27. Thresholds keep a wide margin.
+    # Per-region NRMSE (each region over its own truth range). Observed at seed 0 mode 1: oracle
+    # nrmse_in 5e-8 (beta a), 2.9e-3 (orbit entity a), 2e-4 (orbit no_entity a); opposite-truth law
+    # nrmse_in 1.42, 7.6, 0.40 (nrmse_ex 0.48, 0.65, 1.38). Thresholds keep a wide margin.
     s = cached_scores(cfg)
     wrong_in, wrong_ex = wrong_family_nrmse(cfg)
     assert s.nrmse_in < 0.1
-    # The 40-year orbit horizon enlarges the shared NRMSE scale, so the opposite-truth law's in-window
-    # error shrinks (0.055, 0.099 for orbit); judge it over both windows (wrong_ex 0.65, 1.19).
-    assert max(wrong_in, wrong_ex) > 0.1
+    assert wrong_in > 0.1 and wrong_ex > 0.1
 
 
 @pytest.mark.parametrize("stage", [Stage.COUNTERFACTUAL, Stage.SYNTHETIC])
@@ -168,8 +167,9 @@ def test_beta_entity_true_law_scores_rel_le_one_and_unsmeared_is_worse(stage):
     raw = lambda x: oracle_mod._entity_shape(np.asarray(x, float), pub, stage, p)  # noqa: E731
     u_in, u_ex = score_predictions(bundle, raw(ep.in_range), raw(ep.extrapolation))
     assert u_in + u_ex >= o.nrmse_in + o.nrmse_extrap
-    # Corrected oracle is close to the smeared truth (observed values in the report).
-    assert o.nrmse_in < 0.02 and o.nrmse_extrap < 0.03
+    # Corrected oracle is close to the smeared truth. Observed (seed 0, per-region normalisation):
+    # a/b 5e-8; c in 3.7e-3, ex 2.4e-3; d in 1.7e-2, ex 2.7e-2 (the worst stage).
+    assert o.nrmse_in < 0.03 and o.nrmse_extrap < 0.05
 
 
 @pytest.mark.parametrize("stage", [Stage.HISTORICAL, Stage.COUNTERFACTUAL])

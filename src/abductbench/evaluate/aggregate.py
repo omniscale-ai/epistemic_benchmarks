@@ -33,6 +33,7 @@ from abductbench.config import VariantConfig, pair_id_of
 from abductbench.evaluate.answer import ParsedAnswer, pair_entity_score, parse_answer
 from abductbench.evaluate.judge import build_judge_prompt, run_judge
 from abductbench.evaluate.law_eval import evaluate_law
+from abductbench.evaluate.mechanism import score_mechanism
 from abductbench.evaluate.oracle import NormalizedScores, OracleScores, normalize, oracle_scores
 from abductbench.evaluate.rubric import load_rubric
 from abductbench.ledger import discriminating_fraction
@@ -69,6 +70,11 @@ class RunScores:
     timed_out: bool
     returncode: int | None
     error: str | None = None  # evaluator-side failure text (e.g. oracle); None when clean
+    mech_status: str = "missing"  # 'ok' | 'missing' | 'bad'
+    mech_declared_kind: str | None = None
+    mech_kind_ok: bool = False
+    mech_params_ok: bool | None = None  # None: not scored (wrong kind, parameterless kind)
+    mech_param_errors: str | None = None  # JSON dict of measured parameter errors
 
 
 RUN_COLUMNS = [f.name for f in fields(RunScores)]
@@ -78,6 +84,7 @@ AGG_COLUMNS = GROUP_KEYS + [
     "median_domain_score", "rubric_pass_rate_mean", "n_judged", "judge_error_count",
     "entity_correct_rate", "timeout_rate", "median_discriminating_fraction",
     "n_with_discriminating_fraction",
+    "mechanism_kind_rate", "mechanism_params_rate", "n_params_scored",
 ]
 PAIR_COLUMNS = ["family", "stage", "mode", "n_pairs", "n_incomplete_pairs", "pair_entity_rate"]
 GAP_METRICS = {
@@ -86,6 +93,7 @@ GAP_METRICS = {
     "entity": "entity_correct_rate",
     "law_ok_rate": "law_ok_rate",
     "answer_ok_rate": "answer_ok_rate",
+    "mechanism_kind_rate": "mechanism_kind_rate",
 }
 GAP_COLUMNS = ["family", "truth", "mode"] + [
     f"{m}_{s}" for m in GAP_METRICS for s in ("a", "c", "d")
@@ -168,6 +176,12 @@ def evaluate_run(
             except (OSError, ValueError, KeyError, TypeError):
                 disc = 0.0
 
+    if law.status == "ok":
+        mech = score_mechanism(bundle.true_mechanism, law.mechanism)
+    else:
+        mech = score_mechanism(bundle.true_mechanism, None)
+    mech_errors = json.dumps(mech.param_errors, sort_keys=True) if mech.param_errors else None
+
     return RunScores(
         variant_id=cfg.variant_id,
         family=cfg.family.value,
@@ -193,6 +207,11 @@ def evaluate_run(
         timed_out=bool(record.timed_out),
         returncode=record.returncode,
         error=error,
+        mech_status=mech.status,
+        mech_declared_kind=mech.declared_kind,
+        mech_kind_ok=bool(mech.kind_ok),
+        mech_params_ok=mech.params_ok,
+        mech_param_errors=mech_errors,
     )
 
 
@@ -215,16 +234,27 @@ def _entity_correct(answer_status, entity_pred, entity_truth) -> list[bool]:
     ]
 
 
+def _flag(v) -> bool | None:
+    """Bool or None from a possibly NaN/None parquet cell."""
+    if v is None or (isinstance(v, float) and math.isnan(v)) or v is pd.NA:
+        return None
+    return bool(v)
+
+
 def aggregate(scores) -> pd.DataFrame:
     """One row per (family, truth, stage, mode). Accepts a list of RunScores or a DataFrame."""
     df = _frame(scores)
     columns = AGG_COLUMNS
     if df.empty:
         return pd.DataFrame(columns=columns)
-    df = df.assign(_correct=_entity_correct(df.answer_status, df.entity_pred, df.entity_truth))
+    df = df.assign(
+        _correct=_entity_correct(df.answer_status, df.entity_pred, df.entity_truth),
+        _kind_ok=[_flag(v) is True for v in df.mech_kind_ok],
+    )
     rows = []
     for key, g in df.groupby(GROUP_KEYS, sort=True):
         rubric = _num(g.rubric_pass_rate[g.judge_status == "ok"]).dropna()
+        scored = [_flag(v) for v in g.mech_params_ok if _flag(v) is not None]
         rows.append({
             **dict(zip(GROUP_KEYS, key)),
             "n_runs": len(g),
@@ -240,6 +270,9 @@ def aggregate(scores) -> pd.DataFrame:
             "timeout_rate": float(g.timed_out.astype(bool).mean()),
             "median_discriminating_fraction": _num(g.discriminating_fraction).median(),
             "n_with_discriminating_fraction": int(_num(g.discriminating_fraction).notna().sum()),
+            "mechanism_kind_rate": float(g._kind_ok.mean()),
+            "mechanism_params_rate": float(np.mean(scored)) if scored else float("nan"),
+            "n_params_scored": len(scored),
         })
     return pd.DataFrame(rows, columns=columns)
 

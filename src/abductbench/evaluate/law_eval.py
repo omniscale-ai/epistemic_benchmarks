@@ -43,9 +43,44 @@ import numpy as np
 law_path, in_dir, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
 
 
-def write(status, detail="", domain=None):
+def write(status, detail="", domain=None, mechanism=None):
     with open(os.path.join(out_dir, "result.json"), "w", encoding="utf-8") as f:
-        json.dump({"status": status, "detail": detail, "domain": domain}, f)
+        json.dump({"status": status, "detail": detail, "domain": domain, "mechanism": mechanism}, f)
+
+
+def _plain(v):
+    if isinstance(v, dict):
+        if not all(isinstance(k, str) for k in v):
+            raise TypeError("non-string key")
+        return {k: _plain(x) for k, x in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [_plain(x) for x in v]
+    if isinstance(v, np.ndarray):
+        return _plain(v.tolist())
+    if isinstance(v, np.generic):
+        return _plain(v.item())
+    if v is None or isinstance(v, (bool, int, str)):
+        return v
+    if isinstance(v, float):
+        if v != v or v in (float("inf"), float("-inf")):
+            raise ValueError("nonfinite")
+        return v
+    raise TypeError(type(v).__name__)
+
+
+def read_mechanism(mod):
+    """None: no MECHANISM. {"__malformed__": True}: present but not a JSON-able dict."""
+    if not hasattr(mod, "MECHANISM"):
+        return None
+    try:
+        raw = mod.MECHANISM
+        if not isinstance(raw, dict):
+            raise TypeError("not a dict")
+        out = _plain(raw)
+        json.dumps(out)
+        return out
+    except Exception:
+        return {"__malformed__": True}
 
 
 def read_domain(mod):
@@ -81,9 +116,10 @@ def main():
         write("crash", traceback.format_exc())
         return
     domain = read_domain(mod)
+    mechanism = read_mechanism(mod)
     fn = getattr(mod, "law", None)
     if not callable(fn):
-        write("crash", "law.py does not define a callable `law`", domain)
+        write("crash", "law.py does not define a callable `law`", domain, mechanism)
         return
     preds = {}
     for name in ("in_range", "extrapolation"):
@@ -91,23 +127,23 @@ def main():
         try:
             out = fn(x.copy())
         except BaseException:
-            write("crash", traceback.format_exc(), domain)
+            write("crash", traceback.format_exc(), domain, mechanism)
             return
         try:
             arr = np.asarray(out)
             if arr.dtype.kind not in "biuf" or arr.shape != x.shape:
                 raise ValueError
         except Exception:
-            write("bad_shape", f"law({name}) returned shape/type unsuitable for input shape {x.shape}", domain)
+            write("bad_shape", f"law({name}) returned shape/type unsuitable for input shape {x.shape}", domain, mechanism)
             return
         arr = arr.astype(float)
         if not np.all(np.isfinite(arr)):
-            write("nonfinite", f"law({name}) returned NaN or inf", domain)
+            write("nonfinite", f"law({name}) returned NaN or inf", domain, mechanism)
             return
         preds[name] = arr
     for name, arr in preds.items():
         np.save(os.path.join(out_dir, "pred_" + name + ".npy"), arr)
-    write("ok", "ok", domain)
+    write("ok", "ok", domain, mechanism)
 
 
 main()
@@ -132,6 +168,9 @@ class LawResult:
     n_params_proxy: int | None = None
     domain_score: float | None = None
     detail: str = ""
+    # Declared MECHANISM as plain JSON data. None = law.py defines none (or the law did not run).
+    # {"__malformed__": True} = defined but not a JSON-serialisable dict.
+    mechanism: dict | None = None
 
 
 def _trim(text: str) -> str:
@@ -210,14 +249,29 @@ def _trapz(y: np.ndarray, x: np.ndarray) -> float:
     return float(np.sum(0.5 * (y[1:] + y[:-1]) * np.diff(x)))
 
 
+EX_RANGE_FLOOR = 0.05  # range_ex is at least this fraction of range_in
+
+
+def _range_or_one(y: np.ndarray) -> float:
+    rng = float(np.max(y) - np.min(y)) if len(y) else float("nan")
+    return rng if math.isfinite(rng) and rng > 0 else 1.0
+
+
 def score_predictions(bundle: TaskBundle, pred_in, pred_ex) -> tuple[float, float]:
-    """NRMSE on in-range and extrapolation points.
+    """NRMSE on in-range and extrapolation points, each normalised by its own truth range.
 
     Family rule: a bundle whose true_domain has an "energy_range" key is the BETA family
     (decay density). Its truth and prediction are both normalized so that the trapezoid
     integral over the sorted union of evaluated points is 1. Otherwise (ORBIT family)
-    values are compared raw. Both metrics use the truth range over the union, so
-    in-range and extrapolation errors share one scale. A zero range falls back to 1.
+    values are compared raw.
+
+    ``NRMSE_in = rms(pred - truth over in_range) / range_in`` and
+    ``NRMSE_ex = rms(pred - truth over extrapolation) / range_ex``, with
+    ``range_* = max(truth) - min(truth)`` over that region only (so a large extrapolation
+    signal does not compress the in-window metric). A non-finite or zero range falls back to
+    1.0 (``range_in``). ``range_ex`` is floored at ``EX_RANGE_FLOOR * range_in`` (0.05): for beta the truth in
+    the held-out energy bands can be nearly flat, and a near-zero range would blow the metric up.
+    (A zero or non-finite ``range_ex`` is thus replaced by the floor, not by 1.0.)
     """
     ep = bundle.eval_points()
     x_in = np.asarray(ep.in_range, dtype=float)
@@ -227,25 +281,24 @@ def score_predictions(bundle: TaskBundle, pred_in, pred_ex) -> tuple[float, floa
     p_in = np.asarray(pred_in, dtype=float)
     p_ex = np.asarray(pred_ex, dtype=float)
 
-    x = np.concatenate([x_in, x_ex])
-    t = np.concatenate([t_in, t_ex])
-    p = np.concatenate([p_in, p_ex])
     if "energy_range" in bundle.true_domain:
+        x = np.concatenate([x_in, x_ex])
+        t = np.concatenate([t_in, t_ex])
+        p = np.concatenate([p_in, p_ex])
         order = np.argsort(x, kind="stable")
         xs = x[order]
         area_t = _trapz(t[order], xs)
         area_p = _trapz(p[order], xs)
         if math.isfinite(area_t) and area_t > 0:
-            t = t / area_t
+            t_in, t_ex = t_in / area_t, t_ex / area_t
         if math.isfinite(area_p) and area_p > 0:
-            p = p / area_p
-    rng = float(np.max(t) - np.min(t))
-    denom = rng if math.isfinite(rng) and rng > 0 else 1.0
+            p_in, p_ex = p_in / area_p, p_ex / area_p
 
-    n_in = len(x_in)
-    e = p - t
-    nrmse_in = float(np.sqrt(np.mean(e[:n_in] ** 2)) / denom)
-    nrmse_ex = float(np.sqrt(np.mean(e[n_in:] ** 2)) / denom)
+    range_in = _range_or_one(t_in)
+    rng_ex = float(np.max(t_ex) - np.min(t_ex)) if len(t_ex) else 0.0
+    range_ex = max(rng_ex if math.isfinite(rng_ex) else 0.0, EX_RANGE_FLOOR * range_in)
+    nrmse_in = float(np.sqrt(np.mean((p_in - t_in) ** 2)) / range_in)
+    nrmse_ex = float(np.sqrt(np.mean((p_ex - t_ex) ** 2)) / range_ex)
     return nrmse_in, nrmse_ex
 
 
@@ -295,6 +348,7 @@ def evaluate_law(bundle: TaskBundle, law_path: Path, timeout_s: float = 20.0) ->
                 n_params_proxy=_n_params_proxy(source),
                 domain_score=_domain_score(bundle, result["domain"]),
                 detail="ok",
+                mechanism=result.get("mechanism"),
             )
     except SyntaxError as exc:
         return _fail("crash", f"cannot parse law.py: {exc}")

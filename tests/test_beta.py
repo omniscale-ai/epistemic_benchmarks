@@ -184,6 +184,7 @@ def test_true_mechanism_matches_generator(stage, seed):
         assert m["n_carriers"] == 1 and m["mass"] == pytest.approx(0.3 * q_of(build_beta(c)))
     else:
         assert m["n_carriers"] == 1 and m["mass"] == 0.0
+    assert m["tolerance"] == {"mass_abs": pytest.approx(0.1 * q_of(build_beta(c)))}
     assert build_beta(cfg(Truth.NO_ENTITY, stage, seed=seed)).true_mechanism == {"kind": "detector_response"}
 
 

@@ -12,6 +12,7 @@ execute:
 - **Normalized by the oracle.** `rel_in` and `rel_extrap` are the agent's NRMSE divided by a reference solver's NRMSE on the same points (1.0 means "as good as the oracle", lower is better). Medians are taken over seeds.
 - **Judge errors are excluded.** A rubric verdict that the judge could not return is never counted as a pass. It is excluded from the rubric mean and reported in its own column. Answers that did not parse are skipped by the judge and do not enter the rubric mean; `answer_ok_rate` shows how often that happened.
 - **Mode 1 vs mode 2.** Mode 2 adds `median_discriminating_fraction`: the share of the measurement budget spent on queries that distinguish the hypotheses. It is empty for mode 1.
+- **Mechanism.** `mechanism_kind_rate` is the share of runs (missing or malformed declarations count as wrong) whose declared `MECHANISM` has the true `kind`. `mechanism_params_rate` is the share with parameters within tolerance among the `n_params_scored` runs where parameters are scored (right kind, kind with parameters).
 - **Pair ENTITY rate** counts a seed only when both the entity and no_entity variants are present and both answered correctly.
 
 ```{python}
@@ -53,7 +54,7 @@ print(pairs.to_html(index=False, float_format=FMT, border=0))
 
 **Caveat: gaps compare surviving subsets.** Each stage's medians use only the runs that finished in that stage, so a gap can reflect which runs failed as well as how well the ones that ran did. The `law_ok_rate_*` and `answer_ok_rate_*` columns show how many failures sit behind each gap.
 
-Differences are stage c minus stage a and stage d minus stage a. A negative rubric difference or a positive `rel_in` difference means the later stage does worse. Empty cells mean the stage was not run.
+Differences are stage c minus stage a and stage d minus stage a. A negative rubric difference or a positive `rel_in` difference means the later stage does worse. Mechanism kind accuracy is scored on the declared `MECHANISM` in `law.py` (`mechanism_kind_rate_*`); a positive c-a or d-a difference means the later stage identifies the mechanism more often. Empty cells mean the stage was not run.
 
 ```{python}
 #| output: asis

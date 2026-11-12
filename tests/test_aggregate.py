@@ -89,6 +89,7 @@ def perfect_source(bundle) -> str:
         f"_Y = np.array({json.dumps(y.tolist())})\n"
         "def law(t):\n"
         "    return np.interp(np.asarray(t, dtype=float), _X, _Y)\n"
+        f"MECHANISM = {json.dumps({k: v for k, v in bundle.true_mechanism.items() if k != 'tolerance'})}\n"
     )
 
 
@@ -554,6 +555,69 @@ def test_cli_nonzero_exit_when_nothing_evaluated(tmp_path, capsys):
     assert "x" in capsys.readouterr().err
     assert results.is_file()
     assert len(pd.read_parquet(results)) == 0
+
+
+def test_mechanism_fields_end_to_end(tmp_path):
+    cfg = vcfg()
+    from abductbench.tasks import build_task
+
+    bundle = build_task(cfg)
+    law = write_law(tmp_path / "ok", perfect_source(bundle))
+    s = evaluate_run(cfg, record_for(cfg, law_path=law), oracle_cache={}, use_judge=False)
+    assert s.mech_status == "ok" and s.mech_declared_kind == "hidden_carriers"
+    assert s.mech_kind_ok is True and s.mech_params_ok is True
+    assert set(json.loads(s.mech_param_errors)) == {"n_carriers", "mass"}
+
+    # No MECHANISM: law metrics intact, mechanism missing.
+    s = evaluate_run(cfg, record_for(cfg, law_path=write_law(tmp_path / "nomech", CONSTANT_SOURCE)),
+                     oracle_cache={}, use_judge=False)
+    assert s.law_status == "ok" and s.mech_status == "missing"
+    assert s.mech_kind_ok is False and s.mech_params_ok is None and s.mech_param_errors is None
+
+    # Wrong kind / malformed / crashed law / no law.
+    wrong = CONSTANT_SOURCE + "MECHANISM = {'kind': 'detector_response'}\n"
+    s = evaluate_run(cfg, record_for(cfg, law_path=write_law(tmp_path / "w", wrong)), oracle_cache={}, use_judge=False)
+    assert (s.mech_status, s.mech_kind_ok, s.mech_params_ok, s.mech_declared_kind) == ("ok", False, None, "detector_response")
+    bad = CONSTANT_SOURCE + "MECHANISM = [1]\n"
+    s = evaluate_run(cfg, record_for(cfg, law_path=write_law(tmp_path / "b", bad)), oracle_cache={}, use_judge=False)
+    assert s.law_status == "ok" and s.mech_status == "bad" and s.mech_kind_ok is False
+    crash = "MECHANISM = {'kind': 'hidden_carriers', 'n_carriers': 1, 'mass': 0.0}\ndef law(t):\n    raise ValueError\n"
+    s = evaluate_run(cfg, record_for(cfg, law_path=write_law(tmp_path / "c", crash)), oracle_cache={}, use_judge=False)
+    assert s.law_status == "crash" and s.mech_status == "missing" and s.mech_kind_ok is False
+    s = evaluate_run(cfg, record_for(cfg), oracle_cache={}, use_judge=False)
+    assert s.mech_status == "missing" and s.mech_kind_ok is False
+    json.dumps(dataclasses.asdict(s))
+
+
+def test_aggregate_and_gap_mechanism_columns(tmp_path):
+    rows = [
+        score(stage="a", seed=0, mech_status="ok", mech_kind_ok=True, mech_params_ok=True),
+        score(stage="a", seed=1, mech_status="ok", mech_kind_ok=True, mech_params_ok=False),
+        score(stage="a", seed=2, mech_status="ok", mech_kind_ok=False, mech_params_ok=None),
+        score(stage="a", seed=3, mech_status="missing", mech_kind_ok=False),
+        score(stage="c", seed=0, mech_status="ok", mech_kind_ok=True, mech_params_ok=True),
+        score(stage="c", seed=1, mech_status="ok", mech_kind_ok=True, mech_params_ok=True),
+        score(stage="d", seed=0, mech_status="bad", mech_kind_ok=False),
+    ]
+    agg = aggregate(rows).set_index("stage")
+    assert agg.loc["a", "mechanism_kind_rate"] == pytest.approx(0.5)
+    assert agg.loc["a", "mechanism_params_rate"] == pytest.approx(0.5) and agg.loc["a", "n_params_scored"] == 2
+    assert agg.loc["c", "mechanism_kind_rate"] == 1.0 and agg.loc["c", "mechanism_params_rate"] == 1.0
+    assert agg.loc["d", "mechanism_kind_rate"] == 0.0
+    assert math.isnan(agg.loc["d", "mechanism_params_rate"]) and agg.loc["d", "n_params_scored"] == 0
+    gaps = stage_gap_table(rows).iloc[0]
+    assert gaps.mechanism_kind_rate_a == pytest.approx(0.5)
+    assert gaps.mechanism_kind_rate_c_minus_a == pytest.approx(0.5)
+    assert gaps.mechanism_kind_rate_d_minus_a == pytest.approx(-0.5)
+    # Parquet round trip, including None params_ok and the DataFrame input path.
+    results = tmp_path / "results.parquet"
+    write_results(rows, results)
+    df = pd.read_parquet(results)
+    assert list(df.columns) == RUN_COLUMNS
+    again = aggregate(df).set_index("stage")
+    assert again.loc["a", "mechanism_kind_rate"] == pytest.approx(0.5)
+    assert again.loc["a", "n_params_scored"] == 2
+    assert "mechanism_kind_rate" in pd.read_parquet(tmp_path / "results.summary.parquet").columns
 
 
 def test_empty_scores_everywhere(tmp_path):
