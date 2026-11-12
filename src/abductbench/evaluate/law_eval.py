@@ -210,7 +210,7 @@ def _trapz(y: np.ndarray, x: np.ndarray) -> float:
     return float(np.sum(0.5 * (y[1:] + y[:-1]) * np.diff(x)))
 
 
-def _nrmse_pair(bundle: TaskBundle, pred_in, pred_ex) -> tuple[float, float]:
+def score_predictions(bundle: TaskBundle, pred_in, pred_ex) -> tuple[float, float]:
     """NRMSE on in-range and extrapolation points.
 
     Family rule: a bundle whose true_domain has an "energy_range" key is the BETA family
@@ -249,6 +249,9 @@ def _nrmse_pair(bundle: TaskBundle, pred_in, pred_ex) -> tuple[float, float]:
     return nrmse_in, nrmse_ex
 
 
+_nrmse_pair = score_predictions  # backward-compatible private alias
+
+
 def _n_params_proxy(source: str) -> int:
     return sum(1 for _ in ast.walk(ast.parse(source)))
 
@@ -284,7 +287,7 @@ def evaluate_law(bundle: TaskBundle, law_path: Path, timeout_s: float = 20.0) ->
                 return _fail(result["status"], result["detail"])
             pred_in = np.load(out_dir / "pred_in_range.npy", allow_pickle=False)
             pred_ex = np.load(out_dir / "pred_extrapolation.npy", allow_pickle=False)
-            nrmse_in, nrmse_ex = _nrmse_pair(bundle, pred_in, pred_ex)
+            nrmse_in, nrmse_ex = score_predictions(bundle, pred_in, pred_ex)
             return LawResult(
                 status="ok",
                 nrmse_in=nrmse_in,

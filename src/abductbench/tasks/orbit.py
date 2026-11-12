@@ -20,11 +20,13 @@ from __future__ import annotations
 import inspect
 import math
 from dataclasses import dataclass
+from functools import partial
 
 import numpy as np
 from scipy.interpolate import CubicSpline
 
 from abductbench.config import EvalPoints, Stage, TaskBundle, Truth, VariantConfig
+from abductbench.evaluate.oracle import orbit_oracle
 
 ARCSEC_PER_RAD = 180.0 * 3600.0 / math.pi
 DT_YR = 0.002  # Yoshida-4 step in years; relative energy error < 1e-6 over the window
@@ -388,6 +390,7 @@ def build_orbit(cfg: VariantConfig) -> TaskBundle:
         entity=truth is Truth.ENTITY,
         rubric_id=f"orbit-{truth.value}-{cfg.stage.value}",
         discriminating_queries=frozenset({"search_region", "other_body_residuals"}),
+        oracle_family=partial(orbit_oracle, truth=truth, n_corr=_SPECS[cfg.stage].n_corr),
     )
 
 

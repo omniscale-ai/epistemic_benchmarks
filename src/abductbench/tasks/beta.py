@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from functools import partial
 
 import numpy as np
 
 from abductbench.config import EvalPoints, Stage, TaskBundle, Truth, VariantConfig
+from abductbench.evaluate.oracle import beta_oracle
 
 ALPHA = 1.0 / 137.036
 N_EVENTS = 1000
@@ -292,4 +294,5 @@ def build_beta(cfg: VariantConfig) -> TaskBundle:
         entity=truth is Truth.ENTITY,
         rubric_id=f"beta-{truth.value}-{cfg.stage.value}",
         discriminating_queries=frozenset({"recoil_correlation", "target_thickness_scan"}),
+        oracle_family=partial(beta_oracle, truth=truth, stage=cfg.stage),
     )
