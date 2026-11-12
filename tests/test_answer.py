@@ -197,3 +197,94 @@ def test_single_member_pair_scored_on_that_member():
     assert pair_entity_score({"beta-entity-a-s0-m1": ok_answer(False)}, truth) == {
         "beta-a-s0-m1": False
     }
+
+
+FENCED_LAW = """ENTITY: no
+## Law
+Code for the law:
+```python
+# comment that is not a heading
+# Limits
+ENTITY: yes
+def f(m, a):
+    return m * a
+```
+## Limits
+v << c
+## Explanation
+ok
+"""
+
+
+def test_fenced_code_does_not_create_headings_or_entity_lines(tmp_path):
+    parsed = parse_answer(write(tmp_path, FENCED_LAW))
+    assert parsed.status == "ok"
+    assert parsed.entity is False
+    assert parsed.sections["limits"] == "v << c"
+    assert "# comment that is not a heading" in parsed.sections["law"]
+    assert "# Limits" in parsed.sections["law"]
+    assert "ENTITY: yes" in parsed.sections["law"]  # fenced text stays in the body
+
+
+def test_tilde_fence_is_tracked(tmp_path):
+    body = "ENTITY: yes\n## Law\n~~~\n# not a heading\nENTITY: no\n~~~\n## Limits\nv\n## Explanation\nok\n"
+    parsed = parse_answer(write(tmp_path, body))
+    assert parsed.status == "ok"
+    assert parsed.entity is True
+    assert "# not a heading" in parsed.sections["law"]
+
+
+def test_fence_closes_only_with_matching_marker(tmp_path):
+    # a ~~~ line inside a ``` fence does not close it, so the heading after it is fenced too
+    body = "ENTITY: yes\n## Law\n```\n~~~\n## Limits\n```\nF\n## Limits\nv\n## Explanation\nok\n"
+    parsed = parse_answer(write(tmp_path, body))
+    assert parsed.status == "ok"
+    assert parsed.sections["limits"] == "v"
+
+
+def test_numbered_headings(tmp_path):
+    body = "ENTITY: yes\n## 1. Law\nF = m a\n## 2) Limits\nv\n### 3. Explanation\nok\n"
+    parsed = parse_answer(write(tmp_path, body))
+    assert parsed.status == "ok"
+    assert parsed.sections == {"law": "F = m a", "limits": "v", "explanation": "ok"}
+
+
+def test_bold_wrapped_headings(tmp_path):
+    body = "ENTITY: yes\n## **Law**\nF = m a\n**Limits**\nv\n**Explanation:**\nok\n"
+    parsed = parse_answer(write(tmp_path, body))
+    assert parsed.status == "ok"
+    assert parsed.sections == {"law": "F = m a", "limits": "v", "explanation": "ok"}
+
+
+def test_bold_non_section_line_is_not_a_boundary(tmp_path):
+    body = "ENTITY: yes\n## Law\nF = m a\n**Note**\nmore law\n## Limits\nv\n## Explanation\nok\n"
+    parsed = parse_answer(write(tmp_path, body))
+    assert parsed.status == "ok"
+    assert "**Note**" in parsed.sections["law"]
+    assert "more law" in parsed.sections["law"]
+
+
+def test_entity_line_wrappers(tmp_path):
+    cases = {
+        "**ENTITY: yes**": True,
+        "`ENTITY: no`": False,
+        "ENTITY: yes.": True,
+        "**ENTITY: no.**": False,
+    }
+    for i, (line, expected) in enumerate(cases.items()):
+        parsed = parse_answer(write(tmp_path, line + "\n" + GOOD_BODY, f"w{i}.md"))
+        assert parsed.status == "ok", line
+        assert parsed.entity is expected, line
+
+
+def test_duplicate_section_heading_keeps_first_nonempty(tmp_path):
+    body = "ENTITY: yes\n## Law\n\n## Law\nF = m a\n## Law\nlater\n## Limits\nv\n## Explanation\nok\n"
+    parsed = parse_answer(write(tmp_path, body))
+    assert parsed.status == "ok"
+    assert parsed.sections["law"] == "F = m a"
+
+
+def test_duplicate_section_heading_first_wins_when_both_nonempty(tmp_path):
+    body = "ENTITY: yes\n## Law\nA\n## Law\nB\n## Limits\nv\n## Explanation\nok\n"
+    parsed = parse_answer(write(tmp_path, body))
+    assert parsed.sections["law"] == "A"
