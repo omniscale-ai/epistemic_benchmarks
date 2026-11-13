@@ -109,7 +109,7 @@ VALID_ANSWER = (
 
 def all_pass_runner(prompt: str) -> str:
     ids = re.findall(r"^- id: (\S+)$", prompt, flags=re.MULTILINE)
-    return json.dumps({"items": {i: {"pass": True, "quote": "x"} for i in ids}})
+    return json.dumps({"items": {i: {"pass": True, "quote": "x", "reason": "ok"} for i in ids}})
 
 
 def record_for(cfg, law_path=None, answer_path=None, transcript=None) -> RunRecord:

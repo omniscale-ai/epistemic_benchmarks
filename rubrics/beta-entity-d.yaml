@@ -4,15 +4,15 @@ items:
   - id: names_hidden_object
     criterion: "Names the invented hidden particles, using the names of the synthetic world, as the carriers of the missing quantity, and states how many of them the explanation proposes."
     applies_when: always
-  - id: conservation_law_rescued
-    criterion: "Identifies the conserved quantity that the synthetic world obeys and states that the hidden particles carry it away, so the anomaly is accounted for rather than violating the rule."
+  - id: anomaly_resolved
+    criterion: "States which observed anomaly the proposed mechanism removes (what the baseline T0 model predicts versus what the data show, namely the continuous electron spectrum and the unbalanced recoil versus the two-body prediction) and what would stay unexplained without the mechanism."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives from non-conservation, a detector artifact, a single hidden particle, and an unchanged standard spectral shape, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternative explanations other than the one the answer chooses, for example from non-conservation, a detector artifact, a single hidden particle, and an unchanged standard spectral shape, each with a stated reason for rejection based on the data."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a measurement that distinguishes the number or type of hidden particles, such as how the spectral shape changes with the decay energy or with the recoil balance, rather than only confirming that an anomaly exists."
     applies_when: always
-  - id: understandable_without_formulas
-    criterion: "Explains the spectrum anomaly and the hidden-particle argument in plain words, so a reader can follow it without equations; any formula is glossed in words."
+  - id: cause_stated_plainly
+    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
     applies_when: always

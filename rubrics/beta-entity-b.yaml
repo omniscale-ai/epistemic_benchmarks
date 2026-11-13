@@ -4,15 +4,15 @@ items:
   - id: names_hidden_object
     criterion: "Names the hidden neutral light particle by its public-file label or an equivalent description, and gives it as the carrier of the missing energy and momentum."
     applies_when: always
-  - id: conservation_law_rescued
-    criterion: "States that energy and momentum conservation are kept in the decay, and that the continuous spectrum is explained by the hidden particle carrying a share of the decay energy, expressed in the public-file units."
+  - id: anomaly_resolved
+    criterion: "States which observed anomaly the proposed mechanism removes (what the baseline T0 model predicts versus what the data show, namely the continuous electron spectrum and the unbalanced recoil versus the two-body prediction) and what would stay unexplained without the mechanism."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives from energy non-conservation, a detector artifact, a unit or scale mistake, and more than one hidden particle, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternative explanations other than the one the answer chooses, for example from energy non-conservation, a detector artifact, a unit or scale mistake, and more than one hidden particle, each with a stated reason for rejection based on the data."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a concrete measurement that separates the hidden-particle hypothesis from a detector artifact, such as event-by-event momentum balance with the recoiling product or checking that no sharp line appears at the full endpoint energy."
     applies_when: always
-  - id: understandable_without_formulas
-    criterion: "Explains the spectrum anomaly and the hidden-particle argument in plain words, so a reader can follow it without equations; any formula is glossed in words."
+  - id: cause_stated_plainly
+    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
     applies_when: always

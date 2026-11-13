@@ -4,15 +4,15 @@ items:
   - id: names_hidden_object
     criterion: "Names a hidden particle that is massive, with a mass that is a sizeable fraction of the decay energy, rather than assuming a massless neutral particle."
     applies_when: always
-  - id: conservation_law_rescued
-    criterion: "States that energy and momentum conservation are kept, and that the hidden particle's mass is what reshapes the electron spectrum near the endpoint."
+  - id: anomaly_resolved
+    criterion: "States which observed anomaly the proposed mechanism removes (what the baseline T0 model predicts versus what the data show, namely the continuous electron spectrum and the unbalanced recoil versus the two-body prediction) and what would stay unexplained without the mechanism."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives from energy non-conservation, a detector artifact, a massless hidden particle, and more than one hidden particle, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternative explanations other than the one the answer chooses, for example from energy non-conservation, a detector artifact, a massless hidden particle, and more than one hidden particle, each with a stated reason for rejection based on the data."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a measurement that tests the spectral shape near the endpoint for a heavy hidden particle, such as precise fitting of the endpoint region or event-by-event recoil momentum balance, to separate it from a massless particle or a detector artifact."
     applies_when: always
-  - id: understandable_without_formulas
-    criterion: "Explains the spectrum anomaly and the heavy-particle argument in plain words, so a reader can follow it without equations; any formula is glossed in words."
+  - id: cause_stated_plainly
+    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
     applies_when: always

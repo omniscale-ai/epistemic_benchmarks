@@ -102,7 +102,7 @@ def answer_text(entity: bool) -> str:
 
 
 def _pass_all_judge(rubric: Rubric) -> Callable[[str], str]:
-    reply = json.dumps({"items": {item.id: {"pass": True, "quote": "stub"} for item in rubric.items}})
+    reply = json.dumps({"items": {item.id: {"pass": True, "quote": "stub", "reason": "stub"} for item in rubric.items}})
     return lambda prompt: reply
 
 

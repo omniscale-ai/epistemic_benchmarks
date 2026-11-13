@@ -4,15 +4,15 @@ items:
   - id: names_hidden_object
     criterion: "Names an unseen outer body with substantial mass, not a negligible test particle, and gives its location or orbit as the cause of the residual."
     applies_when: always
-  - id: conservation_law_rescued
-    criterion: "States that the known bodies still obey the standard force law, and that momentum and angular momentum are conserved once the massive hidden body is included."
+  - id: anomaly_resolved
+    criterion: "States which observed anomaly the proposed mechanism removes (what the baseline T0 model predicts versus what the data show, namely the longitude residual of the target body versus the Newtonian T0 prediction) and what would stay unexplained without the mechanism."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives from a modified force law, a standard relativistic precession term, and an observation error, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternative explanations other than the one the answer chooses, for example from a modified force law, a standard relativistic precession term, and an observation error, each with a stated reason for rejection based on the data."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a sky search at the predicted position of the massive body, or a check that the residual follows its predicted path over a long baseline, to separate it from a change in the force law."
     applies_when: always
-  - id: understandable_without_formulas
-    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+  - id: cause_stated_plainly
+    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
     applies_when: always

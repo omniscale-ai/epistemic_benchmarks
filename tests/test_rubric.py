@@ -11,6 +11,7 @@ from abductbench.evaluate.answer import ParsedAnswer, parse_answer
 from abductbench.evaluate.judge import (
     JUDGE_MODEL,
     JudgeResult,
+    _extract_json_object,
     _judge_command,
     build_judge_prompt,
     run_judge,
@@ -27,17 +28,17 @@ EXPECTED_IDS = {
 
 ENTITY_ITEMS = {
     "names_hidden_object",
-    "conservation_law_rescued",
+    "anomaly_resolved",
     "alternatives_rejected_with_reason",
     "discriminating_experiment",
-    "understandable_without_formulas",
+    "cause_stated_plainly",
 }
 NO_ENTITY_ITEMS = {
     "no_entity_posited",
     "real_cause_identified",
     "alternatives_rejected_with_reason",
     "discriminating_experiment",
-    "understandable_without_formulas",
+    "cause_stated_plainly",
 }
 
 
@@ -48,7 +49,7 @@ def _answer(**sections: str) -> ParsedAnswer:
 def _reply(item_ids, passes=None) -> str:
     passes = passes or {}
     items = {
-        i: {"pass": passes.get(i, True), "quote": "quoted text"} for i in item_ids
+        i: {"pass": passes.get(i, True), "quote": "quoted text", "reason": "because"} for i in item_ids
     }
     return json.dumps({"items": items})
 
@@ -176,7 +177,7 @@ def test_rubric_files_have_no_forbidden_numeric_constants():
         rubric = load_rubric(rubric_id)
         texts = [rubric.truth_summary] + [item.criterion for item in rubric.items]
         for text in texts:
-            assert not re.search(r"\d", text), (rubric_id, text)
+            assert not re.search(r"\d", text.replace("T0", "")), (rubric_id, text)  # "T0" names the baseline stage
 
 
 # ---- judge parsing and retries --------------------------------------------
@@ -190,7 +191,7 @@ def test_valid_json_parsed():
     assert isinstance(result, JudgeResult)
     assert result.status == "ok"
     assert set(result.items) == set(ids)
-    assert result.items["names_hidden_object"] == {"pass": True, "quote": "quoted text"}
+    assert result.items["names_hidden_object"] == {"pass": True, "quote": "quoted text", "reason": "because"}
     assert stub.calls == 1
 
 
@@ -220,7 +221,7 @@ def test_extra_items_is_judge_error():
 
 
 def test_non_bool_pass_is_error():
-    reply = json.dumps({"items": {"a": {"pass": "yes", "quote": ""}}})
+    reply = json.dumps({"items": {"a": {"pass": "yes", "quote": "", "reason": "r"}}})
     stub = _Stub(reply)
     result = run_judge("prompt", runner=stub, retries=0, expected_ids=["a"])
     assert result.status == "judge_error"
@@ -275,3 +276,76 @@ def test_no_entity_alternatives_criterion_never_offers_the_cause(family, stage):
     assert "NOT the real cause" in item.criterion
     low = item.criterion.lower()
     assert "detector artifact" not in low and "modified force law" not in low and "force-law modification" not in low
+
+
+# ---- new item ids, reasons, json extraction --------------------------------
+
+
+def test_every_rubric_has_exactly_the_expected_ids_in_order():
+    for rubric_id in EXPECTED_IDS:
+        ids = [item.id for item in load_rubric(rubric_id).items]
+        if "no_entity" in rubric_id:
+            assert ids == ["no_entity_posited", "real_cause_identified", "alternatives_rejected_with_reason",
+                           "discriminating_experiment", "cause_stated_plainly"], rubric_id
+        else:
+            assert ids == ["names_hidden_object", "anomaly_resolved", "alternatives_rejected_with_reason",
+                           "discriminating_experiment", "cause_stated_plainly"], rubric_id
+
+
+def test_no_decimal_numbers_in_criteria():
+    for rubric_id in EXPECTED_IDS:
+        for item in load_rubric(rubric_id).items:
+            assert not re.search(r"\d+\.\d+", item.criterion), (rubric_id, item.id)
+
+
+def test_alternatives_criterion_wording():
+    for rubric_id in EXPECTED_IDS:
+        item = next(i for i in load_rubric(rubric_id).items if i.id == "alternatives_rejected_with_reason")
+        assert "at least two alternative explanations" in item.criterion
+        assert "stated reason for rejection based on the data" in item.criterion
+
+
+def test_prompt_asks_for_reason():
+    prompt = build_judge_prompt(load_rubric("beta-entity-a"), _answer(explanation="x"))
+    assert '"reason"' in prompt
+    assert "anywhere in the candidate text" in prompt
+
+
+def test_missing_reason_key_retried_then_judge_error():
+    reply = json.dumps({"items": {"a": {"pass": True, "quote": "q"}}})
+    stub = _Stub(reply)
+    result = run_judge("prompt", runner=stub, retries=1, expected_ids=["a"])
+    assert stub.calls == 2
+    assert result.status == "judge_error"
+    assert result.items == {}
+
+
+def test_failed_item_with_empty_reason_is_invalid():
+    reply = json.dumps({"items": {"a": {"pass": False, "quote": "", "reason": "  "}}})
+    stub = _Stub(reply)
+    result = run_judge("prompt", runner=stub, retries=1, expected_ids=["a"])
+    assert stub.calls == 2
+    assert result.status == "judge_error"
+
+
+def test_passed_item_with_empty_reason_is_ok():
+    reply = json.dumps({"items": {"a": {"pass": True, "quote": "q", "reason": ""}}})
+    result = run_judge("prompt", runner=_Stub(reply), retries=0, expected_ids=["a"])
+    assert result.status == "ok"
+    assert result.items["a"]["reason"] == ""
+
+
+def test_failed_item_with_reason_keeps_reason():
+    reply = json.dumps({"items": {"a": {"pass": False, "quote": "", "reason": "never mentioned"}}})
+    result = run_judge("prompt", runner=_Stub(reply), retries=0, expected_ids=["a"])
+    assert result.status == "ok"
+    assert result.items["a"] == {"pass": False, "quote": "", "reason": "never mentioned"}
+
+
+def test_extract_json_object_prefers_dict_with_items():
+    text = 'noise {"foo": 1} more {"items": {"a": 1}} tail {"items": {"b": 2}}'
+    assert _extract_json_object(text) == {"items": {"a": 1}}
+
+
+def test_extract_json_object_falls_back_to_first_dict():
+    assert _extract_json_object('x {"foo": 1} {"bar": 2}') == {"foo": 1}

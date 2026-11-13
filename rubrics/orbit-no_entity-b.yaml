@@ -8,11 +8,11 @@ items:
     criterion: "Identifies a modification of the central force law, acting on every body in the system, as the cause of the inner body's residual, using the public-file labels."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives that are NOT the real cause, such as an unseen perturber or a timing or unit mistake from the rescaled quantities, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternative explanations that are NOT the real cause, such as an unseen perturber or a timing or unit mistake from the rescaled quantities, each with a stated reason for rejection based on the data."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a test that checks whether the same modified law predicts the residuals of the other bodies, or a targeted search for a hidden body that is expected to return nothing."
     applies_when: always
-  - id: understandable_without_formulas
-    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+  - id: cause_stated_plainly
+    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
     applies_when: always

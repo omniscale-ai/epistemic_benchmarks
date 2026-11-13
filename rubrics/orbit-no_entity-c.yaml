@@ -8,11 +8,11 @@ items:
     criterion: "Identifies the cause as a central force that falls off with a power of distance different from the inverse-square law, applied to every body, and does not reduce the residual to a standard relativistic correction."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives that are NOT the real cause, such as an unseen body, a standard relativistic precession term, or an observation error, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternative explanations that are NOT the real cause, such as an unseen body, a standard relativistic precession term, or an observation error, each with a stated reason for rejection based on the data."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a test that distinguishes a non-inverse-square power from a relativistic term, such as how the precession depends on orbital distance across several bodies, or a targeted search that is expected to return nothing."
     applies_when: always
-  - id: understandable_without_formulas
-    criterion: "Explains the orbital residual and the proposed cause in plain words, about bodies, pulls and orbits, so a reader can follow it without equations; any formula is glossed in words."
+  - id: cause_stated_plainly
+    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
     applies_when: always

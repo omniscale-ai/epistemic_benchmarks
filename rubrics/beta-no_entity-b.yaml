@@ -8,11 +8,11 @@ items:
     criterion: "Identifies the detector response as the cause, naming the endpoint peak, the energy-loss tail and the backscatter shelf in the public-file units."
     applies_when: always
   - id: alternatives_rejected_with_reason
-    criterion: "Lists at least two alternatives that are NOT the real cause, such as an invented particle, a unit or scale mistake from the rescaled quantities, or energy non-conservation, and gives a specific reason for rejecting each one listed."
+    criterion: "Lists at least two alternative explanations that are NOT the real cause, such as an invented particle, a unit or scale mistake from the rescaled quantities, or energy non-conservation, each with a stated reason for rejection based on the data."
     applies_when: always
   - id: discriminating_experiment
     criterion: "Proposes a measurement that changes the target thickness or the detector angle and checks whether the tail follows the setup, which a new particle would not do."
     applies_when: always
-  - id: understandable_without_formulas
-    criterion: "Explains the spectrum anomaly and the detector explanation in plain words, so a reader can follow it without equations; any formula is glossed in words."
+  - id: cause_stated_plainly
+    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
     applies_when: always
