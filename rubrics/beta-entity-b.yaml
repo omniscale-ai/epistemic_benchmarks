@@ -2,7 +2,7 @@ truth_summary: >
   Beta decay with renamed particles and rescaled units. The source decays into the product and a hidden neutral light particle, which the public files name with a label such as particle A. That hidden particle carries away the missing energy and momentum, so energy and momentum conservation hold for the three-body decay. The electron spectrum is continuous up to an endpoint, and the low-energy shape follows the same mechanism as the real-name case, only expressed in the rescaled units of the public files.
 items:
   - id: names_hidden_object
-    criterion: "Names the hidden neutral light particle by its public-file label or an equivalent description, and gives it as the carrier of the missing energy and momentum."
+    criterion: "Identifies an unobserved light particle (by its public-file label or any equivalent description) as the carrier of the missing energy and momentum; a specific name is not required."
     applies_when: always
   - id: anomaly_resolved
     criterion: "States which observed anomaly the proposed mechanism removes (what the baseline T0 model predicts versus what the data show, namely the continuous electron spectrum and the unbalanced recoil versus the two-body prediction) and what would stay unexplained without the mechanism."
@@ -14,5 +14,5 @@ items:
     criterion: "Proposes a concrete measurement that separates the hidden-particle hypothesis from a detector artifact, such as event-by-event momentum balance with the recoiling product or checking that no sharp line appears at the full endpoint energy."
     applies_when: always
   - id: cause_stated_plainly
-    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
+    criterion: "The Explanation states in plain words what the proposed cause is and what it does to the observations; numbers and formulas may accompany it, but the cause must be understandable without them."
     applies_when: always

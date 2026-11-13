@@ -2,7 +2,7 @@ truth_summary: >
   Counterfactual orbit case with a massive hidden body. The unseen outer body has a substantial mass, not the negligible mass of a test particle, and its pull and position explain the residual of the outer target. The known bodies still obey the standard force law, and momentum and angular momentum are conserved once the hidden body is included. The memorised answer, an inverse-square law with a relativistic precession term, is wrong for this variant; the correct explanation is the massive unseen body.
 items:
   - id: names_hidden_object
-    criterion: "Names an unseen outer body with substantial mass, not a negligible test particle, and gives its location or orbit as the cause of the residual."
+    criterion: "Identifies an unseen body with substantial mass, not a negligible test particle, as the cause of the residual and gives its location or orbit."
     applies_when: always
   - id: anomaly_resolved
     criterion: "States which observed anomaly the proposed mechanism removes (what the baseline T0 model predicts versus what the data show, namely the longitude residual of the target body versus the Newtonian T0 prediction) and what would stay unexplained without the mechanism."
@@ -14,5 +14,5 @@ items:
     criterion: "Proposes a sky search at the predicted position of the massive body, or a check that the residual follows its predicted path over a long baseline, to separate it from a change in the force law."
     applies_when: always
   - id: cause_stated_plainly
-    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
+    criterion: "The Explanation states in plain words what the proposed cause is and what it does to the observations; numbers and formulas may accompany it, but the cause must be understandable without them."
     applies_when: always

@@ -2,7 +2,7 @@ truth_summary: >
   Counterfactual beta decay. The hidden particle is massive, with a mass that is a sizeable fraction of the decay energy, so it takes a visible share of the energy and the electron spectrum has a different shape near the endpoint from the familiar massless form. Energy and momentum are conserved in the three-body decay, and the hidden particle's mass is what reshapes the spectrum. The memorised massless spectrum is wrong for this variant; the correct explanation is a heavy hidden particle that changes the spectral shape.
 items:
   - id: names_hidden_object
-    criterion: "Names a hidden particle that is massive, with a mass that is a sizeable fraction of the decay energy, rather than assuming a massless neutral particle."
+    criterion: "Identifies an unobserved particle as the carrier of the missing energy and momentum and indicates that it is massive, with a mass that is a sizeable fraction of the decay energy, rather than assuming a massless one."
     applies_when: always
   - id: anomaly_resolved
     criterion: "States which observed anomaly the proposed mechanism removes (what the baseline T0 model predicts versus what the data show, namely the continuous electron spectrum and the unbalanced recoil versus the two-body prediction) and what would stay unexplained without the mechanism."
@@ -14,5 +14,5 @@ items:
     criterion: "Proposes a measurement that tests the spectral shape near the endpoint for a heavy hidden particle, such as precise fitting of the endpoint region or event-by-event recoil momentum balance, to separate it from a massless particle or a detector artifact."
     applies_when: always
   - id: cause_stated_plainly
-    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
+    criterion: "The Explanation states in plain words what the proposed cause is and what it does to the observations; numbers and formulas may accompany it, but the cause must be understandable without them."
     applies_when: always

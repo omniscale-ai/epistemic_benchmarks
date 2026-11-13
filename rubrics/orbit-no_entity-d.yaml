@@ -14,5 +14,5 @@ items:
     criterion: "Proposes a test that checks whether the same law modification predicts the residuals of the other bodies, or a search for a hidden body that is expected to return nothing."
     applies_when: always
   - id: cause_stated_plainly
-    criterion: "The first paragraph of the Explanation section names the proposed cause and says in plain words what it is and what it does to the observations, before giving numbers or formulas."
+    criterion: "The Explanation states in plain words what the proposed cause is and what it does to the observations; numbers and formulas may accompany it, but the cause must be understandable without them."
     applies_when: always
