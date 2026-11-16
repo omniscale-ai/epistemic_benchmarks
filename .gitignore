@@ -4,3 +4,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 .agent-venv/
+runs_episode/
+results/
+report/episode/episode_report.html
+report/episode/episode_report_files/
