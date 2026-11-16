@@ -97,7 +97,7 @@ WORLD_HTML = r"""
 CHARTS_HTML = r"""
 <div class="vz" id="vz-ocheck">
   <svg id="vzo2-plot" viewBox="0 0 760 420" role="img" aria-label="Скрытая проверка по орбитальным эпизодам"></svg>
-  <p class="vz-note">Строка — мир и истинный механизм; точки — эпизоды агента (● меню дано, ○ без меню; наведите курсор). Метки того же мира: серая — шумовой пол, синяя — эталонный решатель, оранжевая — учебный ответ («поправка как в ОТО, тела нет»), красная — противоположный механизм. Лог-шкала, меньше — лучше.</p>
+  <p class="vz-note">Строка — мир и истинный механизм; точки — эпизоды агента (● меню, ○ без меню, <span style="color:#16a34a">■</span> меню + готовые симуляторы обеих гипотез; наведите курсор). Метки того же мира: серая — шумовой пол, синяя — эталонный решатель, оранжевая — учебный ответ («поправка как в ОТО, тела нет»), красная — противоположный механизм. Лог-шкала, меньше — лучше.</p>
 </div>
 <script>
 (function () {
@@ -119,7 +119,7 @@ CHARTS_HTML = r"""
     const lab = el('text', { x: 8, y: y + 4, 'font-size': 11 }, svg); lab.textContent = 'мир ' + seed + ' · ' + (truth === 'body' ? 'тело' : 'сила');
     const a = rs[0], mark = (v, c) => { if (v === null || v === undefined) return; el('line', { x1: X(v), x2: X(v), y1: y - rowH * 0.38, y2: y + rowH * 0.38, stroke: c, 'stroke-width': 2.5, opacity: 0.85 }, svg); };
     mark(a.floor, 'currentColor'); mark(a.ref, '#2a78d6'); mark(a.textbook, '#eb6834'); mark(a.opposite, '#dc2626');
-    rs.forEach((r, j) => { const c = el('circle', { cx: X(r.check_ed), cy: y + (j % 3 - 1) * rowH * 0.18, r: 5, fill: r.menu ? 'currentColor' : 'none', stroke: 'currentColor', 'stroke-width': 1.6, opacity: 0.85 }, svg); const tt = el('title', {}, c); tt.textContent = r.run + '\n' + (r.menu ? 'меню' : 'без меню') + '\nпроверка ' + fmt(r.check_ed) + ' (эталон ' + fmt(r.ref) + ', учебный ' + fmt(r.textbook) + ')\nитог ' + r.final_class + ', доверие к истине ' + fmt(r.final_P_true) + '\nизмерения: ' + r.meas + '\nпересмотры: ' + r.revisions.join(', '); });
+    rs.forEach((r, j) => { const cx = X(r.check_ed), cy = y + (j % 5 - 2) * rowH * 0.12; const c = r.tools ? el('rect', { x: cx - 4.5, y: cy - 4.5, width: 9, height: 9, fill: '#16a34a', stroke: 'currentColor', 'stroke-width': 1, opacity: 0.85 }, svg) : el('circle', { cx, cy, r: 5, fill: r.menu ? 'currentColor' : 'none', stroke: 'currentColor', 'stroke-width': 1.6, opacity: 0.85 }, svg); const tt = el('title', {}, c); tt.textContent = r.run + '\n' + (r.tools ? 'меню + инструменты' : r.menu ? 'меню' : 'без меню') + ', повтор ' + r.rep + '\nпроверка ' + fmt(r.check_ed) + ' (эталон ' + fmt(r.ref) + ', учебный ' + fmt(r.textbook) + ')\nитог ' + r.final_class + ', доверие к истине ' + fmt(r.final_P_true) + '\nизмерения: ' + r.meas + '\nпересмотры: ' + r.revisions.join(', '); });
   });
 })();
 </script>
@@ -175,15 +175,16 @@ def main() -> None:
     (HERE / "_anim_orbit_world.html").write_text(
         CSS + WORLD_HTML.replace("__SEED__", str(a.world_seed)).replace("__DATA__", json.dumps(wd, separators=(",", ":"))))
     rows = [r for r in collect_runs(Path(a.runs_root)) if r.get("family") == "orbit" and r["status"] == "ok"]
-    rows.sort(key=lambda r: (r["truth"], r["world_seed"], not r["menu"], r["rep"]))
-    slim = [{**{k: r.get(k) for k in ("run", "world_seed", "truth", "menu", "rep", "check_ed", "ref", "textbook", "floor",
+    rows.sort(key=lambda r: (r["truth"], r["world_seed"], bool(r.get("tools")), not r["menu"], r["rep"]))
+    slim = [{**{k: r.get(k) for k in ("run", "world_seed", "truth", "menu", "tools", "rep", "check_ed", "ref", "textbook", "floor",
                                       "opposite", "final_class", "final_P_true", "revisions")},
              "meas": "; ".join(_meas(m) for m in r["measurements"])} for r in rows]
     (HERE / "_orbit_charts.html").write_text(CHARTS_HTML.replace("__DATA__", json.dumps(slim, separators=(",", ":"), default=float)))
-    lines = ["| мир | истина | меню | измерения (B1; B2) | доля от лучшего | доверие к телу на B1 | пересмотры | итог | доверие к истине | сверхуверен. | проверка | эталон | учебный | $ |",
-             "|---:|---|---|---|---|---:|---|---|---:|---|---:|---:|---:|---:|"]
+    lines = ["| мир | истина | условие | повтор | измерения (B1; B2) | доля от лучшего | доверие к телу на B1 | пересмотры | итог | доверие к истине | сверхуверен. | проверка | эталон | учебный | $ |",
+             "|---:|---|---|---:|---|---|---:|---|---|---:|---|---:|---:|---:|---:|"]
     for r in rows:
-        lines.append("| " + " | ".join([str(r["world_seed"]), "тело" if r["truth"] == "body" else "сила", _f(r["menu"]),
+        cond = "меню + инструменты" if r.get("tools") else ("меню" if r["menu"] else "без меню")
+        lines.append("| " + " | ".join([str(r["world_seed"]), "тело" if r["truth"] == "body" else "сила", cond, str(r["rep"]),
                                          "; ".join(_meas(m) for m in r["measurements"]),
                                          ", ".join(_f(x, 2) for x in r["frac_best"]), _f(r["B1_P_body"], 2),
                                          ", ".join((v or "–").replace("_", " ") for v in r["revisions"]),

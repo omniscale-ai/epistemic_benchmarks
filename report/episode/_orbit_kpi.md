@@ -1,22 +1,22 @@
 ::: {.grid .kpi}
 ::: {.g-col-6 .g-col-md-2}
-[24]{.kpi-num}
+[48]{.kpi-num}
 [орбитальных эпизодов агента]{.kpi-label}
 :::
 ::: {.g-col-6 .g-col-md-2}
-[12/24]{.kpi-num}
+[29/48]{.kpi-num}
 [верный механизм в финале]{.kpi-label}
 :::
 ::: {.g-col-6 .g-col-md-2}
-[planet 16, extend 5, dense 2, search 1]{.kpi-num}
+[planet 30, extend 12, dense 3, search 3]{.kpi-num}
 [первое измерение]{.kpi-label}
 :::
 ::: {.g-col-6 .g-col-md-2}
-[10.0×]{.kpi-num}
+[7.6×]{.kpi-num}
 [медиана: проверка агента / эталон]{.kpi-label}
 :::
 ::: {.g-col-6 .g-col-md-2}
-[$5.99]{.kpi-num}
+[$10.76]{.kpi-num}
 [стоимость]{.kpi-label}
 :::
 :::
