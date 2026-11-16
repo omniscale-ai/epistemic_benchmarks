@@ -200,17 +200,26 @@ def main() -> None:
                                      _f(s["design_frac_menu_max_step1"], 2)]) + " |\n"
     (HERE / "_orbit_tables.md").write_text(md)
     n = len(rows)
-    ok = sum(r["final_class"] == r["truth"] for r in rows)
+    cond = lambda r: "tools" if r.get("tools") else ("menu" if r["menu"] else "free")  # noqa: E731
+    def acc(c):
+        rs = [r for r in rows if cond(r) == c]
+        return f"{sum(r['final_class'] == r['truth'] for r in rs)}/{len(rs)}" if rs else "–"
     ratios = [r["check_ed"] / r["ref"] for r in rows if r["check_ed"] and r["ref"]]
     cost = sum(r["cost_usd"] or 0 for r in rows)
+    ru = {"planet": "соседняя планета", "extend": "продление", "dense": "плотная серия", "search": "поиск"}
     first = {}
     for r in rows:
         if r["measurements"]:
-            k = r["measurements"][0]["type"]
+            k = ru[r["measurements"][0]["type"]]
             first[k] = first.get(k, 0) + 1
-    cells = [(str(n), "орбитальных эпизодов агента"), (f"{ok}/{n}", "верный механизм в финале"),
-             (", ".join(f"{k} {v}" for k, v in sorted(first.items(), key=lambda x: -x[1])) or "–", "первое измерение"),
-             (f"{np.median(ratios):.1f}×" if ratios else "–", "медиана: проверка агента / эталон"), (f"${cost:.2f}", "стоимость")]
+    top = max(first.items(), key=lambda x: x[1]) if first else ("–", 0)
+    cells = [(str(n), "орбитальных эпизодов агента"),
+             (acc("menu"), "верный механизм: меню"),
+             (acc("tools"), "верный механизм: меню + симуляторы гипотез"),
+             (acc("free"), "верный механизм: без меню"),
+             (f"{top[1]}/{n}", f"первое измерение — {top[0]}"),
+             (f"{np.median(ratios):.1f}×" if ratios else "–", "медиана: проверка агента / эталон"),
+             (f"${cost:.2f}", "стоимость")]
     kpi = "::: {.grid .kpi}\n" + "".join(f"::: {{.g-col-6 .g-col-md-2}}\n[{v}]{{.kpi-num}}\n[{l}]{{.kpi-label}}\n:::\n" for v, l in cells) + ":::\n"
     (HERE / "_orbit_kpi.md").write_text(kpi)
     print(f"orbit episodes: {n}")
