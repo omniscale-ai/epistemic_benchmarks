@@ -88,7 +88,7 @@ def cmd_run(a) -> int:
     from abductbench.episode.agent import run_episode
 
     cfg = EpisodeConfig(world_seed=a.world_seed, mechanism=a.mechanism, obs_seed=a.obs_seed, agent_rep=a.rep,
-                        condition=a.condition, menu=a.menu, family=a.family)
+                        condition=a.condition, menu=a.menu, family=a.family, tools=a.tools)
     res = run_episode(cfg, Path(a.runs_root), agent="claude", isolation="bwrap", timeout_s=a.timeout,
                       model=a.model, max_budget_usd=a.max_budget_usd, dry_run=a.dry_run)
     if a.dry_run:
@@ -227,8 +227,8 @@ def _orbit_row(d: Path, res: dict) -> dict:
     u = fin.get("uncertainty") or {}
     return {
         "run": d.name, "status": "ok", "family": "orbit", "world_seed": c["world_seed"], "truth": c["mechanism"],
-        "condition": c["condition"], "menu": c["menu"], "rep": c["agent_rep"], "category": res["instance"]["category"],
-        "measurements": [st["measurement"] for st in steps],
+        "condition": c["condition"], "menu": c["menu"], "tools": c.get("tools", False), "rep": c["agent_rep"],
+        "category": res["instance"]["category"], "measurements": [st["measurement"] for st in steps],
         "own_info": [st.get("design_info_own") for st in steps], "ref_info": [st.get("design_info_ref") for st in steps],
         "frac_best": [st.get("design_info_ref_frac_of_menu_max") for st in steps],
         "B1_P_body": steps[0]["uncertainty_before"]["agent_P_body"] if steps else None,
@@ -367,6 +367,7 @@ def main(argv=None) -> int:
     r.add_argument("--world-seed", type=int, required=True)
     r.add_argument("--mechanism", choices=("carrier", "loss", "body", "force"), required=True)
     r.add_argument("--family", choices=("decay", "orbit"), default="decay")
+    r.add_argument("--tools", action="store_true", help="orbit + menu: ship exact simulators of both hypothesis kinds")
     r.add_argument("--obs-seed", type=int, default=0)
     r.add_argument("--rep", type=int, default=0)
     r.add_argument("--condition", default="ambiguous")

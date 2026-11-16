@@ -82,3 +82,32 @@ def test_reference_policies_land_where_expected():
         assert tf["check_ed"] < 2 * tf["check_ed_floor_truth"] + 0.01 < tf["check_ed_opposite_mechanism"]
         nd = ob.run_one(("no_data", cfg(mech).to_dict()))["final"]
         assert not nd["uncertainty"]["overconfident"]
+
+
+def test_hypothesis_tools_reproduce_the_world(tmp_path):
+    """The shipped tools must reproduce the hidden worlds exactly (same conventions), for both kinds."""
+    import importlib
+    import sys
+
+    from abductbench.episode.orbitworkspace import TOOLS
+
+    s = Session(cfg("body", tools=True))
+    (tmp_path / "t0_model.py").write_text(t0_source(s))
+    (tmp_path / "hyp_tools.py").write_text(TOOLS)
+    sys.path.insert(0, str(tmp_path))
+    try:
+        H = importlib.import_module("hyp_tools")
+        a_b, ph, m, _ = ow.body_params(0)
+        t = np.array([2.0, 6.0, 10.0])
+        rb = H.residuals_body(a_b, m, ph, "Moru", t)
+        assert np.allclose(rb, ow.at(ow.body_truth(0)[0][:, 1], t), atol=0.05)
+        n, k, _ = ow.force_params(0)
+        rf = H.residuals_force(n, k, "Ithe", t)
+        assert np.allclose(rf, ow.at(ow.force_truth(0)[:, 0], t), atol=0.05)
+    finally:
+        sys.path.remove(str(tmp_path))
+        for mod in ("hyp_tools", "t0_model"):
+            sys.modules.pop(mod, None)
+    assert task_md(s) == task_md(Session(cfg("force", tools=True)))
+    with pytest.raises(ValueError):
+        EpisodeConfig(0, "body", family="orbit", tools=True, menu=False)

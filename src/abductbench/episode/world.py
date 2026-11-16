@@ -54,10 +54,13 @@ class EpisodeConfig:
     unit_scale: float = 1.0  # multiplies every public energy (unit-invariance tests)
     version: str = EPISODE_VERSION
     family: str = "decay"  # "decay" (beta world) or "orbit"
+    tools: bool = False  # orbit, menu only: ship exact simulators of both menu hypothesis kinds (workspace only)
 
     def __post_init__(self):
         if self.family not in FAMILY_MECHANISMS:
             raise ValueError(f"family must be one of {tuple(FAMILY_MECHANISMS)}")
+        if self.tools and (self.family != "orbit" or not self.menu):
+            raise ValueError("tools are defined for the orbit family with the menu only")
         mechs = FAMILY_MECHANISMS[self.family]
         if self.mechanism not in mechs:
             raise ValueError(f"mechanism must be one of {mechs}")

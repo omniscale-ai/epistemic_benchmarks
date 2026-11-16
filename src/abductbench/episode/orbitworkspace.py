@@ -60,6 +60,9 @@ No measurements can be made. Submit `./{CLIENT_NAME} final final.json` (exactly 
 will be used to predict observations you have not seen; predictions are scored with a proper scoring rule,
 so an honest mixture is not penalised against a confident guess.
 '''
+    tools = ("\n`models/hyp_tools.py` (with `models/t0_model.py`) provides exact simulators of both hypothesis kinds of the\n"
+             "menu: `residuals_body(a, gm, phase, planet, times)` and `residuals_force(n, k, planet, times)`, plus batch\n"
+             "versions for fitting. Using them is optional; fitting their parameters is up to you.\n") if s.cfg.tools else ""
     return f"""# Task: why does {tgt} drift?
 
 ## The world
@@ -105,7 +108,7 @@ Any planet and any times in [0, 15.5] may be asked. `models/t0.py` shows the int
 residuals plus noise; it does not explain the data). Models run in isolation and can import only files in
 `models/` (copy `t0_model.py` there if you want to reuse it).
 
-{menu}
+{menu}{tools}
 ## Files you submit
 
 `prereg.json` (before each measurement):
@@ -196,6 +199,86 @@ def simulate(query, n, seed):
 '''
 
 
+TOOLS = '''"""Exact simulators of the two hypothesis kinds of the menu (same integrator and conventions as the world).
+
+Both are optional helpers; using them commits you to nothing. Residuals are noise-free, observed minus T0, in
+arcsec, heliocentric (from the star). Each call integrates up to the largest requested time (step DT).
+
+- residuals_body(a, gm, phase, planet, times): an unseen body of gravitational parameter gm on a circular
+  orbit of radius a about the star, inside the target's orbit; phase = its heliocentric longitude (radians)
+  at t = 0. Star (gm_central - gm) and body orbit C; the planets' published elements are about C.
+- residuals_force(n, k, planet, times): extra radial acceleration -k r^(-n) towards the star on the planets.
+- residuals_body_batch(rows, planet, times) / residuals_force_batch(rows, n, planet, times): many parameter sets
+  at once (rows: list of (a, gm, phase) or of k), returns an array (len(rows), len(times)); much faster per row.
+"""
+
+import math
+
+import numpy as np
+
+import t0_model as T
+
+ARCSEC = 180.0 * 3600.0 / math.pi
+DT = T.DT
+
+
+def _accel(X, mu, k, n):
+    A = T._accel_grav(X, mu)
+    dr = X - X[:, :1, :]
+    rr = np.sqrt(np.einsum("bik,bik->bi", dr, dr))
+    rr[:, 0] = 1.0
+    ext = -k[:, None, None] * dr * rr[..., None] ** (-(n + 1.0))
+    ext[:, 0] = 0.0
+    A = A + ext
+    A[:, 0, :] -= np.einsum("bi,bik->bk", mu[:, 1:], ext[:, 1:]) / mu[:, :1]
+    return A
+
+
+def _rows(params, kind):
+    G, X0, V0, K = [], [], [], []
+    for p in params:
+        a, gm, ph, k = (p[0], p[1], p[2], 0.0) if kind == "body" else (0.25 * T.ELEMENTS[0][0], 0.0, 0.0, p)
+        mu = np.array([T.GM_CENTRAL - gm] + list(T.GM_PLANETS) + [gm])
+        X = np.zeros((6, 2)); V = np.zeros((6, 2))
+        r, v = T._state_from_elements(T.GM_CENTRAL, a, 0.0, 0.0, ph)
+        f = gm / T.GM_CENTRAL
+        X[0], V[0], X[5], V[5] = -f * r, -f * v, (1 - f) * r, (1 - f) * v
+        for i in range(4):
+            X[1 + i], V[1 + i] = T._state_from_elements(T.GM_CENTRAL + T.GM_PLANETS[i], *T.ELEMENTS[i])
+        X -= (mu[:, None] * X).sum(0) / mu.sum(); V -= (mu[:, None] * V).sum(0) / mu.sum()
+        G.append(mu); X0.append(X); V0.append(V); K.append(k)
+    return np.array(G), np.stack(X0), np.stack(V0), np.array(K, float)
+
+
+def _residuals(params, kind, n, planet, times):
+    times = np.asarray(times, dtype=float)
+    steps = max(1, int(math.ceil(float(np.max(times)) / DT)))
+    G, X0, V0, K = _rows(params, kind)
+    Xs, _ = T._integrate(lambda Y: _accel(Y, G, K, n), X0, V0, DT, steps)
+    lam = np.unwrap(T._longitudes(Xs)[..., :4], axis=0)  # (S, B, 4)
+    j = T.PLANETS.index(planet)
+    grid = np.arange(steps + 1) * DT
+    t0 = T.t0_longitudes(times)[planet]
+    return np.stack([(np.interp(times, grid, lam[:, b, j]) - t0) * ARCSEC for b in range(lam.shape[1])])
+
+
+def residuals_body_batch(rows, planet, times):
+    return _residuals(list(rows), "body", 4.0, planet, times)
+
+
+def residuals_force_batch(rows, n, planet, times):
+    return _residuals(list(rows), "force", float(n), planet, times)
+
+
+def residuals_body(a, gm, phase, planet, times):
+    return residuals_body_batch([(a, gm, phase)], planet, times)[0]
+
+
+def residuals_force(n, k, planet, times):
+    return residuals_force_batch([k], n, planet, times)[0]
+'''
+
+
 def _csv(cols: dict) -> str:
     keys = list(cols)
     rows = [",".join(keys)] + [",".join(f"{v:.9g}" for v in vals) for vals in zip(*(cols[k] for k in keys))]
@@ -227,6 +310,9 @@ def write_workspace(s, ws: Path, client_text: str) -> None:
     (ws / "setup.json").write_text(json.dumps(s.meta, indent=2) + "\n")
     (ws / "t0_model.py").write_text(t0_source(s))
     (ws / "models" / "t0.py").write_text(t0_example(s))
+    if s.cfg.tools:
+        (ws / "models" / "t0_model.py").write_text(t0_source(s))
+        (ws / "models" / "hyp_tools.py").write_text(TOOLS)
     for q, obs in s.initial:
         (ws / f"data/initial_{of.TARGET}_residuals.csv").write_text(_csv({"time": obs["time"], "residual_arcsec": obs["residual_arcsec"]}))
     c = ws / CLIENT_NAME
