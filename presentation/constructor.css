@@ -1,0 +1,78 @@
+/* @theme constructor */
+/* Constructor brand palette: Navy #00204D, Mobility Blue #008CE3, Diversity Red #DB4F3D,
+   accents Confident Blue #004381 / Yellow #FFC622 / Green #00A987, Light Grey #F9F9F9 */
+@import 'default';
+
+section {
+  --navy: #00204D;
+  --blue: #008CE3;
+  --red: #DB4F3D;
+  --confident: #004381;
+  --yellow: #FFC622;
+  --grey: #F9F9F9;
+  font-family: 'ALS Hauss', 'Inter', 'Helvetica Neue', 'Liberation Sans', Arial, sans-serif;
+  background: #FFFFFF;
+  color: var(--navy);
+  font-size: 21px;
+  line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 36px 56px 50px 56px;
+  border-top: 10px solid var(--navy);
+}
+section::before {  /* brand colour strip: C (blue) + O (red) */
+  content: ''; position: absolute; top: -10px; right: 60px; width: 120px; height: 10px;
+  background: linear-gradient(90deg, var(--blue) 0 66.6%, var(--red) 66.6% 100%);
+}
+h1, h2 { color: var(--navy); font-weight: 700; margin: 0 0 14px 0; }
+h2 { font-size: 1.55em; padding-bottom: 8px; border-bottom: 3px solid var(--blue); }
+h1 { font-size: 2em; }
+strong { color: var(--navy); font-weight: 700; }
+em { color: var(--confident); }
+a { color: var(--blue); }
+ul, ol { margin: 6px 0; padding-left: 1.3em; }
+li { margin: 2px 0; }
+li::marker { color: var(--blue); font-weight: 700; }
+p { margin: 8px 0; }
+small { color: var(--confident); font-size: .75em; }
+code { background: var(--grey); color: var(--red); border-radius: 3px; padding: 0 .25em; font-size: .9em; }
+
+table { display: table; overflow: visible; border-collapse: collapse; width: 100%; font-size: .8em; margin: 6px 0; }
+th { background: var(--navy); color: #fff; text-align: left; font-weight: 700; padding: 5px 9px; border: 0; }
+td { padding: 3px 9px; border: 0; border-bottom: 1px solid #d5dbe5; background: #fff; vertical-align: top; }
+tr:nth-child(even) td { background: var(--grey); }
+
+section::after {  /* page number */
+  color: var(--confident); font-size: .6em; font-weight: 700; right: 60px; bottom: 22px;
+}
+
+/* title slide */
+section.title {
+  background: var(--navy); color: #fff; border-top: 10px solid var(--blue);
+  display: flex !important; flex-direction: column; justify-content: center; padding-left: 90px; padding-right: 90px;
+}
+section.title::before { background: linear-gradient(90deg, var(--blue) 0 66.6%, var(--red) 66.6% 100%); right: 90px; }
+section.title h1 { color: #fff; font-size: 2.3em; line-height: 1.15; border-left: 8px solid var(--red); padding-left: 24px; margin-bottom: 28px; }
+section.title p { color: #DCE6F5; font-size: 1.1em; padding-left: 32px; }
+section.title p:nth-of-type(2) { color: var(--yellow); font-size: .9em; margin-top: 40px; }
+section.title::after { display: none; }
+
+/* dense slides */
+section.tight { font-size: 18.5px; line-height: 1.25; }
+
+/* timeline slide (make_timeline.py) */
+.tl { position: relative; flex: none; width: 1168px; font-size: 15px; line-height: 1.2; margin-top: 6px; }
+.tl-svg { position: absolute; left: 0; top: 0; }
+.tl-card { position: absolute; top: 0; box-sizing: border-box; background: var(--grey); border-top: 5px solid; border-radius: 0 0 5px 5px; padding: 7px 10px; }
+.tl-ct { font-weight: 700; font-size: 17px; line-height: 1.15; color: var(--navy); }
+.tl-n { display: inline-block; width: 20px; height: 20px; border-radius: 10px; text-align: center; line-height: 20px; font-size: 12px; margin-right: 7px; }
+.tl-y { font-size: 13.5px; color: var(--confident); margin: 3px 0 5px 0; }
+.tl-ex { color: var(--confident); font-style: italic; font-size: 14.5px; }
+.tl-tag { position: absolute; font-size: 12px; letter-spacing: .05em; font-weight: 700; color: var(--confident); white-space: nowrap; }
+.tl-sys { position: absolute; box-sizing: border-box; text-align: center; padding: 0 8px; line-height: 1.2; }
+.tl-sys b { display: block; font-size: 16px; color: var(--navy); }
+.tl-sys span { font-size: 14px; color: var(--confident); }
+.tl-p { margin-top: 7px; font-size: 14px; line-height: 1.22; }
+.tl-p b { color: var(--navy); }
+.tl-foot { font-size: 19px; margin: 18px 0 0 0; }

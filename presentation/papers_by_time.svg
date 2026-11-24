@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1168" height="470" viewBox="0 0 1168 470" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fff"/><line x1="0" y1="0" x2="0" y2="6" stroke="#008CE3" stroke-width="2.5"/></pattern></defs>
+<rect width="1168" height="470" fill="#fff"/>
+<line x1="68" y1="392.0" x2="1152" y2="392.0" stroke="#004381" stroke-width="1.5"/>
+<text x="58" y="396.0" font-size="13" text-anchor="end" fill="#004381">0</text>
+<line x1="68" y1="285.3" x2="1152" y2="285.3" stroke="#E3E8F0" stroke-width="1"/>
+<text x="58" y="289.3" font-size="13" text-anchor="end" fill="#004381">5</text>
+<line x1="68" y1="178.7" x2="1152" y2="178.7" stroke="#E3E8F0" stroke-width="1"/>
+<text x="58" y="182.7" font-size="13" text-anchor="end" fill="#004381">10</text>
+<line x1="68" y1="72.0" x2="1152" y2="72.0" stroke="#E3E8F0" stroke-width="1"/>
+<text x="58" y="76.0" font-size="13" text-anchor="end" fill="#004381">15</text>
+<text x="20" y="216.0" font-size="13" fill="#004381" text-anchor="middle" transform="rotate(-90 20 216.0)">papers per month</text>
+<path d="M73.3,392.0 V332.0 Q73.3,328.0 77.3,328.0 H88.0 Q92.0,328.0 92.0,332.0 V392.0 Z" fill="#008CE3"/>
+<path d="M161.2,392.0 V374.7 Q161.2,370.7 165.2,370.7 H175.9 Q179.9,370.7 179.9,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M278.4,392.0 V374.7 Q278.4,370.7 282.4,370.7 H293.1 Q297.1,370.7 297.1,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M307.7,392.0 V374.7 Q307.7,370.7 311.7,370.7 H322.4 Q326.4,370.7 326.4,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M336.9,392.0 V374.7 Q336.9,370.7 340.9,370.7 H351.7 Q355.7,370.7 355.7,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M483.4,392.0 V353.3 Q483.4,349.3 487.4,349.3 H498.2 Q502.2,349.3 502.2,353.3 V392.0 Z" fill="#008CE3"/>
+<path d="M512.7,392.0 V374.7 Q512.7,370.7 516.7,370.7 H527.5 Q531.5,370.7 531.5,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M542.0,392.0 V374.7 Q542.0,370.7 546.0,370.7 H556.8 Q560.8,370.7 560.8,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M571.3,392.0 V353.3 Q571.3,349.3 575.3,349.3 H586.1 Q590.1,349.3 590.1,353.3 V392.0 Z" fill="#008CE3"/>
+<path d="M600.6,392.0 V353.3 Q600.6,349.3 604.6,349.3 H615.4 Q619.4,349.3 619.4,353.3 V392.0 Z" fill="#008CE3"/>
+<path d="M659.2,392.0 V353.3 Q659.2,349.3 663.2,349.3 H674.0 Q678.0,349.3 678.0,353.3 V392.0 Z" fill="#008CE3"/>
+<path d="M747.1,392.0 V310.7 Q747.1,306.7 751.1,306.7 H761.9 Q765.9,306.7 765.9,310.7 V392.0 Z" fill="#008CE3"/>
+<path d="M776.4,392.0 V374.7 Q776.4,370.7 780.4,370.7 H791.2 Q795.2,370.7 795.2,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M835.0,392.0 V374.7 Q835.0,370.7 839.0,370.7 H849.8 Q853.8,370.7 853.8,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M864.3,392.0 V374.7 Q864.3,370.7 868.3,370.7 H879.1 Q883.1,370.7 883.1,374.7 V392.0 Z" fill="#008CE3"/>
+<path d="M922.9,392.0 V332.0 Q922.9,328.0 926.9,328.0 H937.6 Q941.6,328.0 941.6,332.0 V392.0 Z" fill="#008CE3"/>
+<path d="M952.2,392.0 V310.7 Q952.2,306.7 956.2,306.7 H966.9 Q970.9,306.7 970.9,310.7 V392.0 Z" fill="#008CE3"/>
+<path d="M981.5,392.0 V289.3 Q981.5,285.3 985.5,285.3 H996.2 Q1000.2,285.3 1000.2,289.3 V392.0 Z" fill="#008CE3"/>
+<path d="M1010.8,392.0 V332.0 Q1010.8,328.0 1014.8,328.0 H1025.5 Q1029.5,328.0 1029.5,332.0 V392.0 Z" fill="#008CE3"/>
+<path d="M1040.1,392.0 V289.3 Q1040.1,285.3 1044.1,285.3 H1054.8 Q1058.8,285.3 1058.8,289.3 V392.0 Z" fill="#008CE3"/>
+<path d="M1069.4,392.0 V204.0 Q1069.4,200.0 1073.4,200.0 H1084.1 Q1088.1,200.0 1088.1,204.0 V392.0 Z" fill="#008CE3"/>
+<path d="M1098.7,392.0 V76.0 Q1098.7,72.0 1102.7,72.0 H1113.4 Q1117.4,72.0 1117.4,76.0 V392.0 Z" fill="#008CE3"/>
+<path d="M1128.0,392.0 V353.3 Q1128.0,349.3 1132.0,349.3 H1142.7 Q1146.7,349.3 1146.7,353.3 V392.0 Z" fill="url(#hatch)" stroke="#008CE3" stroke-width="1.5"/>
+<line x1="104.9" y1="398.0" x2="110.9" y2="386.0" stroke="#00204D" stroke-width="2"/>
+<line x1="112.9" y1="398.0" x2="118.9" y2="386.0" stroke="#00204D" stroke-width="2"/>
+<text x="82.6" y="412.0" font-size="12" text-anchor="middle" fill="#004381">2019–23</text>
+<line x1="141.2" y1="392.0" x2="141.2" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="141.2" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Jan</text>
+<text x="126.6" y="432.0" font-size="14" font-weight="700" text-anchor="start" fill="#00204D">2024</text>
+<line x1="229.1" y1="392.0" x2="229.1" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="229.1" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Apr</text>
+<line x1="317.0" y1="392.0" x2="317.0" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="317.0" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Jul</text>
+<line x1="404.9" y1="392.0" x2="404.9" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="404.9" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Oct</text>
+<line x1="492.8" y1="392.0" x2="492.8" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="492.8" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Jan</text>
+<text x="478.2" y="432.0" font-size="14" font-weight="700" text-anchor="start" fill="#00204D">2025</text>
+<line x1="580.7" y1="392.0" x2="580.7" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="580.7" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Apr</text>
+<line x1="668.6" y1="392.0" x2="668.6" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="668.6" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Jul</text>
+<line x1="756.5" y1="392.0" x2="756.5" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="756.5" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Oct</text>
+<line x1="844.4" y1="392.0" x2="844.4" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="844.4" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Jan</text>
+<text x="829.7" y="432.0" font-size="14" font-weight="700" text-anchor="start" fill="#00204D">2026</text>
+<line x1="932.3" y1="392.0" x2="932.3" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="932.3" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Apr</text>
+<line x1="1020.2" y1="392.0" x2="1020.2" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="1020.2" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Jul</text>
+<line x1="1108.1" y1="392.0" x2="1108.1" y2="397.0" stroke="#00204D" stroke-width="1.2"/>
+<text x="1108.1" y="412.0" font-size="12" text-anchor="middle" fill="#004381">Oct</text>
+<text x="1078.8" y="193.0" font-size="14" font-weight="700" text-anchor="middle" fill="#00204D">9</text>
+<text x="1108.1" y="65.0" font-size="14" font-weight="700" text-anchor="middle" fill="#00204D">15</text>
+<text x="1137.4" y="342.3" font-size="14" font-weight="700" text-anchor="middle" fill="#00204D">2*</text>
+<text x="82.6" y="321.0" font-size="14" font-weight="700" text-anchor="middle" fill="#00204D">3</text>
+<text x="68" y="22" font-size="17" font-weight="700" fill="#00204D">Discovery benchmark papers by arXiv month, n = 70</text>
+<text x="68" y="462" font-size="12.5" fill="#004381">* November 2026 is partial (data to 17 Nov). The two peak months hold 24 of 70 papers (34%). 1 paper without an arXiv id omitted.</text>
+</svg>
